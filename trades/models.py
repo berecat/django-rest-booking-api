@@ -24,24 +24,24 @@ class Currency(StockBase):
 
 class Item(StockBase):
     """Particular stock"""
-    price = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
-    currency = models.ForeignKey(Currency, blank=True, null=True, on_delete=models.SET_NULL)
+    price = models.DecimalField(max_digits=7, decimal_places=2)
+    currency = models.ForeignKey(Currency, default=1, on_delete=models.SET_DEFAULT)
     details = models.TextField("Details", blank=True, null=True, max_length=512)
 
 
 class Price(models.Model):
     """Item prices"""
-    currency = models.ForeignKey(Currency, blank=True, null=True, on_delete=models.SET_NULL)
-    item = models.ForeignKey(Item, blank=True, null=True, on_delete=models.CASCADE, related_name='prices',
+    currency = models.ForeignKey(Currency, default=1, on_delete=models.SET_DEFAULT)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='prices',
                              related_query_name='prices', )
-    price = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
+    price = models.DecimalField(max_digits=7, decimal_places=2)
     date = models.DateTimeField(unique=True, blank=True, null=True)
 
 
 class BaseUserItem(models.Model):
     """Base for models that have user and item attributes"""
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
-    item = models.ForeignKey(Item, blank=True, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    item = models.ForeignKey(Item, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         abstract = True
@@ -49,13 +49,14 @@ class BaseUserItem(models.Model):
 
 class WatchList(BaseUserItem):
     """Current user, favorite list of stocks"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 class Offer(BaseUserItem):
     """Request to buy or sell specific stocks"""
     entry_quantity = models.IntegerField("Requested quantity")
     quantity = models.IntegerField("Current quantity")
-    price = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
+    price = models.DecimalField(max_digits=7, decimal_places=2)
     is_active = models.BooleanField(default=True)
 
 
@@ -66,10 +67,9 @@ class Inventory(BaseUserItem):
 
 class Trade(models.Model):
     """Information about s certain transaction"""
-    item = models.ForeignKey(Item, blank=True, null=True, on_delete=models.SET_NULL)
+    item = models.ForeignKey(Item, null=True, on_delete=models.SET_NULL)
     seller = models.ForeignKey(
         User,
-        blank=True,
         null=True,
         on_delete=models.SET_NULL,
         related_name='seller_trade',
@@ -77,7 +77,6 @@ class Trade(models.Model):
     )
     buyer = models.ForeignKey(
         User,
-        blank=True,
         null=True,
         on_delete=models.SET_NULL,
         related_name='buyer_trade',
@@ -88,7 +87,6 @@ class Trade(models.Model):
     description = models.TextField(blank=True, null=True)
     buyer_offer = models.ForeignKey(
         Offer,
-        blank=True,
         null=True,
         on_delete=models.SET_NULL,
         related_name='buyer_trade',
@@ -96,7 +94,6 @@ class Trade(models.Model):
     )
     seller_offer = models.ForeignKey(
         Offer,
-        blank=True,
         null=True,
         on_delete=models.SET_NULL,
         related_name='seller_trade',
