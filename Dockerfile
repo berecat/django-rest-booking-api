@@ -8,14 +8,14 @@ ENV PYTHONUNBUFFERED 1
 RUN apk update \
     && apk add postgresql-dev gcc python3-dev musl-dev
 
-COPY ./Pipfile .
-COPY ./Pipfile.lock .
+COPY Pipfile .
+COPY Pipfile.lock .
 
 RUN pip install pipenv
 RUN pipenv install --system --deploy --ignore-pipfile
 
-COPY ./entrypoint.sh .
+COPY ./docker_files/entrypoint.sh ./docker_files/
 
 COPY . .
 
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+ENTRYPOINT ["/usr/src/app/docker_files/entrypoint.sh"]
