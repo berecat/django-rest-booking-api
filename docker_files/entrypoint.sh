@@ -11,6 +11,7 @@ then
     echo "PostgreSQL started"
 fi
 
+sleep 3
 python source/manage.py migrate
 python source/manage.py runserver 0.0.0.0:8000
 

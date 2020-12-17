@@ -28,6 +28,9 @@ class Item(StockBase):
     currency = models.ForeignKey(Currency, default=1, on_delete=models.SET_DEFAULT)
     details = models.TextField("Details", blank=True, null=True, max_length=512)
 
+    def __str__(self):
+        return f'{self.code} : {self.name}'
+
 
 class Price(models.Model):
     """Item prices"""
@@ -41,7 +44,7 @@ class Price(models.Model):
 class WatchList(models.Model):
     """Current user, favorite list of stocks"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    item = models.ManyToManyField(Item)
+    item = models.ManyToManyField(Item, blank=True, related_name='+')
 
     class Meta:
         verbose_name = "Inventory"
@@ -59,10 +62,18 @@ class BaseUserItem(models.Model):
 
 class Offer(BaseUserItem):
     """Request to buy or sell specific stocks"""
+    status_choices = (
+        ('purchase', 'purchase'),
+        ('sell', 'sell'),
+    )
+    status = models.CharField(max_length=8, choices=status_choices)
     entry_quantity = models.IntegerField("Requested quantity")
     quantity = models.IntegerField("Current quantity")
     price = models.DecimalField(max_digits=7, decimal_places=2)
     is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f'{self.status} - {self.price} - {self.user} - {self.item}'
 
 
 class Inventory(BaseUserItem):
