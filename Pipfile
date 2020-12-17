@@ -12,7 +12,6 @@ psycopg2-binary = "*"
 pytest-django = "*"
 djangorestframework-simplejwt = "*"
 pytest = "*"
-requests = "*"
 
 [requires]
 python_version = "3.8"

@@ -24,8 +24,6 @@ class Currency(StockBase):
 
 class Item(StockBase):
     """Particular stock"""
-    price = models.DecimalField(max_digits=7, decimal_places=2)
-    currency = models.ForeignKey(Currency, default=1, on_delete=models.SET_DEFAULT)
     details = models.TextField("Details", blank=True, null=True, max_length=512)
 
     def __str__(self):

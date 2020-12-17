@@ -50,9 +50,6 @@ class PriceSerializer(serializers.ModelSerializer):
 
 class ItemSerializer(StockBaseSerializer):
     """Serializer for Item model"""
-    currency = CurrencySerializer(read_only=True)
-    currency_id = serializers.PrimaryKeyRelatedField(queryset=Currency.objects.all(), source='currency',
-                                                     write_only=True)
     prices = PriceSerializer(many=True, read_only=True)
 
     class Meta:
@@ -61,10 +58,7 @@ class ItemSerializer(StockBaseSerializer):
             'id',
             'code',
             'name',
-            'price',
             'prices',
-            'currency',
-            'currency_id',
             'details',
         )
 
