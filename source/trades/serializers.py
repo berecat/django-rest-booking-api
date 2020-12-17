@@ -27,21 +27,6 @@ class CurrencySerializer(StockBaseSerializer):
         )
 
 
-class ItemSerializer(StockBaseSerializer):
-    """Serializer for Item model"""
-    currency = serializers.SlugRelatedField(queryset=Currency.objects.all(), slug_field='code')
-
-    class Meta:
-        model = Item
-        fields = (
-            'code',
-            'name',
-            'price',
-            'currency',
-            'details',
-        )
-
-
 class PriceSerializer(serializers.ModelSerializer):
     """Serializer for Price model"""
     currency = serializers.SlugRelatedField(queryset=Currency.objects.all(), slug_field='code')
@@ -54,6 +39,23 @@ class PriceSerializer(serializers.ModelSerializer):
             'item',
             'price',
             'date',
+        )
+
+
+class ItemSerializer(StockBaseSerializer):
+    """Serializer for Item model"""
+    currency = serializers.SlugRelatedField(queryset=Currency.objects.all(), slug_field='code')
+    prices = PriceSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Item
+        fields = (
+            'code',
+            'name',
+            'price',
+            'prices',
+            'currency',
+            'details',
         )
 
 
