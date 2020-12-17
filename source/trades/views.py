@@ -21,7 +21,6 @@ class CurrencyViewSet(mixins.ListModelMixin,
                       mixins.CreateModelMixin,
                       mixins.RetrieveModelMixin,
                       mixins.UpdateModelMixin,
-                      mixins.DestroyModelMixin,
                       viewsets.GenericViewSet):
     """ViewSet for Currency model"""
 
@@ -29,24 +28,14 @@ class CurrencyViewSet(mixins.ListModelMixin,
     serializer_class = CurrencySerializer
 
 
-class ItemViewSet(mixins.ListModelMixin,
-                  mixins.CreateModelMixin,
-                  mixins.RetrieveModelMixin,
-                  mixins.UpdateModelMixin,
-                  mixins.DestroyModelMixin,
-                  viewsets.GenericViewSet):
+class ItemViewSet(viewsets.ModelViewSet):
     """ViewSet for Item model"""
 
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
 
 
-class PriceViewSet(mixins.ListModelMixin,
-                   mixins.CreateModelMixin,
-                   mixins.RetrieveModelMixin,
-                   mixins.UpdateModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet):
+class PriceViewSet(viewsets.ModelViewSet):
     """ViewSet for Price model"""
 
     queryset = Price.objects.all()
@@ -57,7 +46,6 @@ class WatchListViewSet(mixins.ListModelMixin,
                        mixins.CreateModelMixin,
                        mixins.RetrieveModelMixin,
                        mixins.UpdateModelMixin,
-                       mixins.DestroyModelMixin,
                        viewsets.GenericViewSet):
     """ViewSet for WatchList model"""
 
@@ -65,12 +53,7 @@ class WatchListViewSet(mixins.ListModelMixin,
     serializer_class = WatchListSerializer
 
 
-class OfferViewSet(mixins.ListModelMixin,
-                   mixins.CreateModelMixin,
-                   mixins.RetrieveModelMixin,
-                   mixins.UpdateModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet):
+class OfferViewSet(viewsets.ModelViewSet):
     """ViewSet for Offer model"""
 
     queryset = Offer.objects.all()
@@ -81,7 +64,6 @@ class InventoryViewSet(mixins.ListModelMixin,
                        mixins.CreateModelMixin,
                        mixins.RetrieveModelMixin,
                        mixins.UpdateModelMixin,
-                       mixins.DestroyModelMixin,
                        viewsets.GenericViewSet):
     """ViewSet for Inventory model"""
 
@@ -89,12 +71,7 @@ class InventoryViewSet(mixins.ListModelMixin,
     serializer_class = InventorySerializer
 
 
-class TradeViewSet(mixins.ListModelMixin,
-                   mixins.CreateModelMixin,
-                   mixins.RetrieveModelMixin,
-                   mixins.UpdateModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet):
+class TradeViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for Trade model"""
 
     queryset = Trade.objects.all()
