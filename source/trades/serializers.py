@@ -22,6 +22,7 @@ class CurrencySerializer(StockBaseSerializer):
     class Meta:
         model = Currency
         fields = (
+            'id',
             'code',
             'name',
         )
@@ -29,13 +30,18 @@ class CurrencySerializer(StockBaseSerializer):
 
 class PriceSerializer(serializers.ModelSerializer):
     """Serializer for Price model"""
-    currency = serializers.SlugRelatedField(queryset=Currency.objects.all(), slug_field='code')
+
+    currency = CurrencySerializer(read_only=True)
+    currency_id = serializers.PrimaryKeyRelatedField(queryset=Currency.objects.all(), source='currency',
+                                                     write_only=True)
     item = serializers.SlugRelatedField(queryset=Item.objects.all(), slug_field='code')
 
     class Meta:
         model = Price
         fields = (
+            'id',
             'currency',
+            'currency_id',
             'item',
             'price',
             'date',
@@ -44,17 +50,21 @@ class PriceSerializer(serializers.ModelSerializer):
 
 class ItemSerializer(StockBaseSerializer):
     """Serializer for Item model"""
-    currency = serializers.SlugRelatedField(queryset=Currency.objects.all(), slug_field='code')
+    currency = CurrencySerializer(read_only=True)
+    currency_id = serializers.PrimaryKeyRelatedField(queryset=Currency.objects.all(), source='currency',
+                                                     write_only=True)
     prices = PriceSerializer(many=True, read_only=True)
 
     class Meta:
         model = Item
         fields = (
+            'id',
             'code',
             'name',
             'price',
             'prices',
             'currency',
+            'currency_id',
             'details',
         )
 
@@ -67,13 +77,17 @@ class BaseUserItemSerializer(serializers.ModelSerializer):
 
 class WatchListSerializer(serializers.ModelSerializer):
     """Serializer for WatchList model"""
-    item = serializers.SlugRelatedField(queryset=Item.objects.all(), many=True, slug_field='code')
+    item = ItemSerializer(many=True, read_only=True)
+    item_id = serializers.PrimaryKeyRelatedField(queryset=Item.objects.all(), many=True, source='item',
+                                                 write_only=True)
 
     class Meta:
         model = WatchList
         fields = (
+            'id',
             'user',
             'item',
+            'item_id',
         )
 
 
@@ -83,6 +97,7 @@ class OfferSerializer(BaseUserItemSerializer):
     class Meta:
         model = Offer
         fields = (
+            'id',
             'status',
             'user',
             'item',
@@ -99,6 +114,7 @@ class InventorySerializer(BaseUserItemSerializer):
     class Meta:
         model = Inventory
         fields = (
+            'id',
             'user',
             'item',
             'quantity',
@@ -107,7 +123,8 @@ class InventorySerializer(BaseUserItemSerializer):
 
 class TradeSerializer(serializers.ModelSerializer):
     """Serializer for Trade model"""
-    item = serializers.SlugRelatedField(queryset=Item.objects.all(), slug_field='code')
+    item = ItemSerializer(read_only=True)
+    item_id = serializers.PrimaryKeyRelatedField(queryset=Item.objects.all(), source='item', write_only=True)
     seller = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username')
     buyer = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username')
     buyer_offer = serializers.HyperlinkedRelatedField(queryset=Offer.objects.all(), view_name='offer-detail')
@@ -116,7 +133,9 @@ class TradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trade
         fields = (
+            'id',
             'item',
+            'item_id',
             'seller',
             'buyer',
             'quantity',
