@@ -41,7 +41,7 @@ class Price(models.Model):
 
 class WatchList(models.Model):
     """Current user, favorite list of stocks"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     item = models.ManyToManyField(Item, blank=True, related_name='+')
 
     class Meta:
