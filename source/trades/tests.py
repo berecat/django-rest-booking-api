@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.urls import reverse
 from django.contrib.auth.models import User
 from rest_framework import status
@@ -17,12 +19,14 @@ class TestCurrency(APITestCase):
     """Test class for Currency model"""
 
     def setUp(self):
-        """Initialize necessary fields for testing"""
+        """Initialize necessary fields for testing and log in user to make requests"""
 
         User.objects.create_user(username='test_user',
-                                 password='test')
+                                 password='test'
+                                 )
         self.client.login(username='test_user',
-                          password='test')
+                          password='test'
+                          )
 
     def post_currency(self, data):
         """Post currency instance into database through web-api"""
@@ -112,3 +116,111 @@ class TestCurrency(APITestCase):
         assert patch_response.status_code == status.HTTP_200_OK
         assert patch_response.data['name'] == data['name']
         assert patch_response.data['code'] == new_data['code']
+
+
+class TestTrade(APITestCase):
+    """Test class for Trade model"""
+
+    def setUp(self):
+        """Initialize necessary fields for testing"""
+
+        self.test_user_1 = User.objects.create_user(username='test_user',
+                                                    password='test'
+                                                    )
+        self.test_user_2 = User.objects.create_user(username='test_user2',
+                                                    password='test'
+                                                    )
+
+        self.client.login(username='test_user',
+                          password='test'
+                          )
+
+        self.item = Item.objects.create(name='Apple',
+                                        code='AAPL',
+                                        )
+
+        self.purchase_offer = Offer.objects.create(item=self.item,
+                                                   user=self.test_user_1,
+                                                   status='PURCHASE',
+                                                   entry_quantity=10,
+                                                   quantity=15,
+                                                   price=123.12,
+                                                   is_active=True,
+                                                   )
+        self.sell_offer_1 = Offer.objects.create(item=self.item,
+                                                 user=self.test_user_2,
+                                                 status='SELL',
+                                                 entry_quantity=10,
+                                                 quantity=40,
+                                                 price=123.12,
+                                                 is_active=True,
+                                                 )
+        self.sell_offer_2 = Offer.objects.create(item=self.item,
+                                                 user=self.test_user_2,
+                                                 status='SELL',
+                                                 entry_quantity=50,
+                                                 quantity=40,
+                                                 price=123.12,
+                                                 is_active=True,
+                                                 )
+
+    def test_trades_list(self):
+        """
+        Ensure we can retrieve the trades collection
+        """
+
+        data_trade_1 = {
+            'item': self.item,
+            'seller': self.test_user_1,
+            'buyer': self.test_user_2,
+            'quantity': 10,
+            'unit_price': Decimal('2303.00'),
+            'description': 'Trade between two users',
+            'buyer_offer': self.purchase_offer,
+            'seller_offer': self.sell_offer_1,
+        }
+        Trade.objects.create(**data_trade_1)
+
+        data_trade_2 = {
+            'item': self.item,
+            'seller': self.test_user_2,
+            'buyer': self.test_user_1,
+            'quantity': 10,
+            'unit_price': Decimal('2500.00'),
+            'description': 'AAPL trade between two users',
+            'buyer_offer': self.purchase_offer,
+            'seller_offer': self.sell_offer_2,
+        }
+        Trade.objects.create(**data_trade_2)
+
+        url = reverse('trade-list')
+        response = self.client.get(url, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+
+        assert response.data[0]['item']['id'] == data_trade_1['item'].id
+        assert response.data[0]['seller'] == data_trade_1['seller'].username
+        assert response.data[0]['buyer'] == data_trade_1['buyer'].username
+        assert response.data[0]['quantity'] == data_trade_1['quantity']
+        assert response.data[0]['unit_price'] == data_trade_1['unit_price'].__str__()
+        assert response.data[0]['description'] == data_trade_1['description']
+
+        offer_response = self.client.get(response.data[0]['buyer_offer'])
+        assert offer_response.data['id'] == data_trade_1['buyer_offer'].id
+
+        offer_response = self.client.get(response.data[0]['seller_offer'])
+        assert offer_response.data['id'] == data_trade_1['seller_offer'].id
+
+        assert response.data[1]['item']['id'] == data_trade_2['item'].id
+        assert response.data[1]['seller'] == data_trade_2['seller'].username
+        assert response.data[1]['buyer'] == data_trade_2['buyer'].username
+        assert response.data[1]['quantity'] == data_trade_2['quantity']
+        assert response.data[1]['unit_price'] == data_trade_2['unit_price'].__str__()
+        assert response.data[1]['description'] == data_trade_2['description']
+
+        offer_response = self.client.get(response.data[1]['buyer_offer'])
+        assert offer_response.data['id'] == data_trade_2['buyer_offer'].id
+
+        offer_response = self.client.get(response.data[1]['seller_offer'])
+        assert offer_response.data['id'] == data_trade_2['seller_offer'].id
