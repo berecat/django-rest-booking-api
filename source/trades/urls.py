@@ -3,7 +3,7 @@ from rest_framework import routers
 from trades import views
 
 router = routers.DefaultRouter()
-router.register('currencies', views.CurrencyViewSet, basename='currency')
+router.register('currencies', views.CurrencyViewSet)
 router.register('items', views.ItemViewSet)
 router.register('prices', views.PriceViewSet)
 router.register('watchlists', views.WatchListViewSet)

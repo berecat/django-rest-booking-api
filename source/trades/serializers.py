@@ -119,10 +119,10 @@ class TradeSerializer(serializers.ModelSerializer):
     """Serializer for Trade model"""
     item = ItemSerializer(read_only=True)
     item_id = serializers.PrimaryKeyRelatedField(queryset=Item.objects.all(), source='item', write_only=True)
-    seller = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username')
-    buyer = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username')
-    buyer_offer = serializers.HyperlinkedRelatedField(queryset=Offer.objects.all(), view_name='offer-detail')
-    seller_offer = serializers.HyperlinkedRelatedField(queryset=Offer.objects.all(), view_name='offer-detail')
+    seller = serializers.SlugRelatedField(read_only=True, slug_field='username')
+    buyer = serializers.SlugRelatedField(read_only=True, slug_field='username')
+    buyer_offer = serializers.HyperlinkedRelatedField(read_only=True, view_name='offer-detail')
+    seller_offer = serializers.HyperlinkedRelatedField(read_only=True, view_name='offer-detail')
 
     class Meta:
         model = Trade

@@ -1,9 +1,12 @@
+from enum import Enum
+
 from django.db import models
 from django.contrib.auth.models import User
 
 
 class StockBase(models.Model):
     """Base for models that have code and name attributes"""
+
     code = models.CharField("Code", max_length=8, unique=True)
     name = models.CharField("Name", max_length=24, unique=True)
 
@@ -24,6 +27,7 @@ class Currency(StockBase):
 
 class Item(StockBase):
     """Particular stock"""
+
     details = models.TextField("Details", blank=True, null=True, max_length=512)
 
     def __str__(self):
@@ -32,6 +36,7 @@ class Item(StockBase):
 
 class Price(models.Model):
     """Item prices"""
+
     currency = models.ForeignKey(Currency, default=1, on_delete=models.SET_DEFAULT)
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='prices',
                              related_query_name='prices', )
@@ -41,6 +46,7 @@ class Price(models.Model):
 
 class WatchList(models.Model):
     """Current user, favorite list of stocks"""
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     item = models.ManyToManyField(Item, blank=True, related_name='+')
 
@@ -51,6 +57,7 @@ class WatchList(models.Model):
 
 class BaseUserItem(models.Model):
     """Base for models that have user and item attributes"""
+
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     item = models.ForeignKey(Item, null=True, on_delete=models.SET_NULL)
 
@@ -58,17 +65,59 @@ class BaseUserItem(models.Model):
         abstract = True
 
 
+class StatusChoices(Enum):
+    """Enum class, which gives choices for status attribute in Offer model"""
+
+    PURCHASE = 'PURCHASE'
+    SELL = 'SELL'
+
+    @classmethod
+    def choices(cls):
+        """
+        :return: status choices as tuple of tuples
+        the first value - value of attribute, the second value - it's string representation
+        """
+
+        return tuple((i.name, i.value) for i in cls)
+
+
+class OfferManager(models.Manager):
+    """Queryset manager for Offer model"""
+
+    def active(self):
+        """
+        :return: all Offer's instance that are active
+        """
+
+        return super(OfferManager, self).get_queryset().filter(is_active=True)
+
+    def sell_offers(self):
+        """
+        :return: all Offer's instance that are active and have sell status
+        """
+
+        return super(OfferManager, self).get_queryset().filter(status='SELL',
+                                                               is_active=True)
+
+    def purchase_offers(self):
+        """
+        :return: all Offer's instance that are active and have purchase status
+        """
+
+        return super(OfferManager, self).get_queryset().filter(status='PURCHASE',
+                                                               is_active=True)
+
+
 class Offer(BaseUserItem):
     """Request to buy or sell specific stocks"""
-    status_choices = (
-        ('purchase', 'purchase'),
-        ('sell', 'sell'),
-    )
-    status = models.CharField(max_length=8, choices=status_choices)
+
+    status = models.CharField(max_length=8, choices=StatusChoices.choices())
     entry_quantity = models.IntegerField("Requested quantity")
     quantity = models.IntegerField("Current quantity")
     price = models.DecimalField(max_digits=7, decimal_places=2)
     is_active = models.BooleanField(default=True)
+
+    objects = OfferManager()
 
     def __str__(self):
         return f'{self.status} - {self.price} - {self.user} - {self.item}'
@@ -76,11 +125,13 @@ class Offer(BaseUserItem):
 
 class Inventory(BaseUserItem):
     """The number of stocks in particular user has"""
+
     quantity = models.IntegerField("Stocks quantity", default=0)
 
 
 class Trade(models.Model):
     """Information about s certain transaction"""
+
     item = models.ForeignKey(Item, null=True, on_delete=models.SET_NULL)
     seller = models.ForeignKey(
         User,
