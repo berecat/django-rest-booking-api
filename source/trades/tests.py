@@ -637,6 +637,233 @@ class TestWatchlist(APITestCase):
         assert put_response.data['item'][1]['code'] == self.item_2.code
 
 
+class TestOffer(APITestCase):
+    """Test class for Offer model"""
+
+    def setUp(self):
+        """Initialize necessary fields for testing and log in user to make requests"""
+
+        self.user_1 = User.objects.create_user(username='test_user1',
+                                               password='test1'
+                                               )
+        self.user_2 = User.objects.create_user(username='test_user2',
+                                               password='test2'
+                                               )
+        self.client.login(username='test_user1',
+                          password='test1'
+                          )
+
+        self.item_1 = Item.objects.create(code='AAPL',
+                                          name='Apple',
+                                          details='Stocks of Apple Inc.')
+        self.item_2 = Item.objects.create(code='AMZN',
+                                          name='Amazon',
+                                          details='Stocks of Amazon')
+
+    def post_offer(self, data):
+        """Post price instance into database through web-api"""
+
+        url = reverse('offer-list')
+        response = self.client.post(url, data, format='json')
+        return response
+
+    def test_offer_post(self):
+        """
+        Ensure we can post offer instance
+        """
+
+        data = {
+            'user': self.user_1.username,
+            'item': self.item_1.code,
+            'status': 'PURCHASE',
+            'entry_quantity': 2131,
+            'quantity': 2400,
+            'price': Decimal('32212.23'),
+            'is_active': True,
+        }
+        response = self.post_offer(data)
+        print(response.data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Offer.objects.count() == 1
+        assert Offer.objects.get().user == self.user_1
+        assert Offer.objects.get().item == self.item_1
+        assert Offer.objects.get().status == data['status']
+        assert Offer.objects.get().entry_quantity == data['entry_quantity']
+        assert Offer.objects.get().price == data['price']
+        assert Offer.objects.get().is_active == data['is_active']
+
+    def test_offers_list(self):
+        """
+        Ensure we can retrieve the offers collection
+        """
+
+        data_offer_1 = {
+            'user': self.user_1.username,
+            'item': self.item_1.code,
+            'status': 'PURCHASE',
+            'entry_quantity': 2131,
+            'quantity': 2400,
+            'price': Decimal('32212.23'),
+            'is_active': True,
+        }
+        self.post_offer(data_offer_1)
+
+        data_offer_2 = {
+            'user': self.user_2.username,
+            'item': self.item_2.code,
+            'status': 'SELL',
+            'entry_quantity': 700,
+            'quantity': 800,
+            'price': Decimal('3222.23'),
+            'is_active': True,
+        }
+        self.post_offer(data_offer_2)
+
+        url = reverse('offer-list')
+        response = self.client.get(url, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+
+        assert response.data[0]['user'] == data_offer_1['user']
+        assert response.data[0]['item'] == data_offer_1['item']
+        assert response.data[0]['status'] == data_offer_1['status']
+        assert response.data[0]['entry_quantity'] == data_offer_1['entry_quantity']
+        assert response.data[0]['quantity'] == data_offer_1['quantity']
+        assert response.data[0]['price'] == data_offer_1['price'].__str__()
+        assert response.data[0]['is_active'] == data_offer_1['is_active']
+
+        assert response.data[1]['user'] == data_offer_2['user']
+        assert response.data[1]['item'] == data_offer_2['item']
+        assert response.data[1]['status'] == data_offer_2['status']
+        assert response.data[1]['entry_quantity'] == data_offer_2['entry_quantity']
+        assert response.data[1]['quantity'] == data_offer_2['quantity']
+        assert response.data[1]['price'] == data_offer_2['price'].__str__()
+        assert response.data[1]['is_active'] == data_offer_2['is_active']
+
+    def test_offer_get(self):
+        """
+        Ensure we can get a single offer by id
+        """
+
+        data = {
+            'user': self.user_2.username,
+            'item': self.item_2.code,
+            'status': 'SELL',
+            'entry_quantity': 700,
+            'quantity': 800,
+            'price': Decimal('3222.23'),
+            'is_active': True,
+        }
+        response = self.post_offer(data)
+
+        url = reverse('offer-detail', None, {response.data['id']})
+        get_response = self.client.get(url, format='json')
+
+        assert get_response.status_code == status.HTTP_200_OK
+        assert get_response.data['user'] == data['user']
+        assert get_response.data['item'] == data['item']
+        assert get_response.data['status'] == data['status']
+        assert get_response.data['entry_quantity'] == data['entry_quantity']
+        assert get_response.data['quantity'] == data['quantity']
+        assert get_response.data['price'] == data['price'].__str__()
+        assert get_response.data['is_active'] == data['is_active']
+
+    def test_offer_patch_update(self):
+        """
+        Ensure we can update fields for a offer by patch method
+        """
+
+        data = {
+            'user': self.user_2.username,
+            'item': self.item_2.code,
+            'status': 'SELL',
+            'entry_quantity': 700,
+            'quantity': 800,
+            'price': Decimal('3222.23'),
+            'is_active': True,
+        }
+        response = self.post_offer(data)
+
+        url = reverse('offer-detail', None, {response.data['id']})
+        new_data = {
+            'user': self.user_1.username,
+            'item': self.item_1.code,
+            'quantity': 900,
+            'price': Decimal('3243.23'),
+        }
+        patch_response = self.client.patch(url, new_data, format='json')
+
+        assert patch_response.status_code == status.HTTP_200_OK
+        assert patch_response.data['user'] == new_data['user']
+        assert patch_response.data['item'] == new_data['item']
+        assert patch_response.data['status'] == data['status']
+        assert patch_response.data['entry_quantity'] == data['entry_quantity']
+        assert patch_response.data['quantity'] == new_data['quantity']
+        assert patch_response.data['price'] == new_data['price'].__str__()
+        assert patch_response.data['is_active'] == data['is_active']
+
+    def test_offer_put_update(self):
+        """
+        Ensure we can update fields for a offer by put method
+        """
+
+        data = {
+            'user': self.user_2.username,
+            'item': self.item_2.code,
+            'status': 'SELL',
+            'entry_quantity': 700,
+            'quantity': 800,
+            'price': Decimal('3222.23'),
+            'is_active': True,
+        }
+        response = self.post_offer(data)
+
+        url = reverse('offer-detail', None, {response.data['id']})
+        new_data = {
+            'user': self.user_1.username,
+            'item': self.item_1.code,
+            'status': 'PURCHASE',
+            'entry_quantity': 2131,
+            'quantity': 2400,
+            'price': Decimal('32212.23'),
+            'is_active': True,
+        }
+        put_response = self.client.patch(url, new_data, format='json')
+
+        assert put_response.status_code == status.HTTP_200_OK
+        assert put_response.data['user'] == new_data['user']
+        assert put_response.data['item'] == new_data['item']
+        assert put_response.data['status'] == new_data['status']
+        assert put_response.data['entry_quantity'] == new_data['entry_quantity']
+        assert put_response.data['quantity'] == new_data['quantity']
+        assert put_response.data['price'] == new_data['price'].__str__()
+        assert put_response.data['is_active'] == new_data['is_active']
+
+    def test_offer_delete(self):
+        """
+        Ensure we can delete a single offer instance
+        """
+
+        data = {
+            'user': self.user_2.username,
+            'item': self.item_2.code,
+            'status': 'SELL',
+            'entry_quantity': 700,
+            'quantity': 800,
+            'price': Decimal('3222.23'),
+            'is_active': True,
+        }
+        response = self.post_offer(data)
+
+        url = reverse('offer-detail', None, {response.data['id']})
+        delete_response = self.client.delete(url, format='json')
+
+        assert delete_response.status_code == status.HTTP_204_NO_CONTENT
+        assert Offer.objects.count() == 0
+
+
 class TestInventory(APITestCase):
     """Test class for Inventory model"""
 
