@@ -403,3 +403,38 @@ class TestTrade(APITestCase):
 
         offer_response = self.client.get(response.data[1]['seller_offer'])
         assert offer_response.data['id'] == data_trade_2['seller_offer'].id
+
+    def test_trade_get(self):
+        """
+        Ensure we can get a single item by id
+        """
+
+        data = {
+            'item': self.item,
+            'seller': self.test_user_1,
+            'buyer': self.test_user_2,
+            'quantity': 10,
+            'unit_price': Decimal('2303.00'),
+            'description': 'Trade between two users',
+            'buyer_offer': self.purchase_offer,
+            'seller_offer': self.sell_offer_1,
+        }
+        trade = Trade.objects.create(**data)
+
+        url = reverse('trade-detail', None, {trade.id})
+        response = self.client.get(url, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+
+        assert response.data['item']['id'] == data['item'].id
+        assert response.data['seller'] == data['seller'].username
+        assert response.data['buyer'] == data['buyer'].username
+        assert response.data['quantity'] == data['quantity']
+        assert response.data['unit_price'] == data['unit_price'].__str__()
+        assert response.data['description'] == data['description']
+
+        offer_response = self.client.get(response.data['buyer_offer'])
+        assert offer_response.data['id'] == data['buyer_offer'].id
+
+        offer_response = self.client.get(response.data['seller_offer'])
+        assert offer_response.data['id'] == data['seller_offer'].id
