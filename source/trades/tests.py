@@ -297,6 +297,175 @@ class TestItem(APITestCase):
         assert Item.objects.count() == 0
 
 
+class TestPrice(APITestCase):
+    """Test class for Price model"""
+
+    def setUp(self):
+        """Initialize necessary fields for testing and log in user to make requests"""
+
+        User.objects.create_user(username='test_user',
+                                 password='test'
+                                 )
+        self.client.login(username='test_user',
+                          password='test'
+                          )
+
+        self.currency_1 = Currency.objects.create(code='USD',
+                                                  name='American Dollar')
+        self.currency_2 = Currency.objects.create(code='EUR',
+                                                  name='Euro')
+
+        self.item_1 = Item.objects.create(code='AAPL',
+                                          name='Apple',
+                                          details='Stocks of Apple Inc.')
+        self.item_2 = Item.objects.create(code='AMZN',
+                                          name='Amazon',
+                                          details='Stocks of Amazon')
+
+    def post_price(self, data):
+        """Post price instance into database through web-api"""
+
+        url = reverse('price-list')
+        response = self.client.post(url, data, format='json')
+        return response
+
+    def test_price_post(self):
+        """
+        Ensure we can post price instance
+        """
+
+        data = {
+            'currency_id': self.currency_1.id,
+            'item': self.item_1.code,
+            'price': 1242,
+        }
+        response = self.post_price(data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Price.objects.count() == 1
+        assert Price.objects.get().currency == self.currency_1
+        assert Price.objects.get().item == self.item_1
+        assert Price.objects.get().price == data['price']
+
+    def test_prices_list(self):
+        """
+        Ensure we can retrieve the prices collection
+        """
+
+        data_price_1 = {
+            'currency_id': self.currency_1.id,
+            'item': self.item_1.code,
+            'price': Decimal('12.04'),
+        }
+        self.post_price(data_price_1)
+
+        data_price_2 = {
+            'currency_id': self.currency_2.id,
+            'item': self.item_2.code,
+            'price': Decimal('2123.01'),
+        }
+        self.post_price(data_price_2)
+
+        url = reverse('price-list')
+        response = self.client.get(url, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+        assert response.data[0]['currency']['id'] == data_price_1['currency_id']
+        assert response.data[0]['item'] == data_price_1['item']
+        assert response.data[0]['price'] == data_price_1['price'].__str__()
+        assert response.data[1]['currency']['id'] == data_price_2['currency_id']
+        assert response.data[1]['item'] == data_price_2['item']
+        assert response.data[1]['price'] == data_price_2['price'].__str__()
+
+    def test_price_get(self):
+        """
+        Ensure we can get a single price by id
+        """
+
+        data = {
+            'currency_id': self.currency_2.id,
+            'item': self.item_2.code,
+            'price': Decimal('2123.01'),
+        }
+        response = self.post_price(data)
+
+        url = reverse('price-detail', None, {response.data['id']})
+        get_response = self.client.get(url, format='json')
+
+        assert get_response.status_code == status.HTTP_200_OK
+        assert get_response.data['currency']['id'] == data['currency_id']
+        assert get_response.data['item'] == data['item']
+        assert get_response.data['price'] == data['price'].__str__()
+
+    def test_price_patch_update(self):
+        """
+        Ensure we can update fields for a price by patch method
+        """
+
+        data = {
+            'currency_id': self.currency_2.id,
+            'item': self.item_2.code,
+            'price': Decimal('2123.01'),
+        }
+        response = self.post_price(data)
+
+        url = reverse('price-detail', None, {response.data['id']})
+        new_data = {
+            'currency_id': self.currency_1.id,
+            'item': self.item_1.code,
+        }
+        patch_response = self.client.patch(url, new_data, format='json')
+
+        assert patch_response.status_code == status.HTTP_200_OK
+        assert patch_response.data['currency']['id'] == new_data['currency_id']
+        assert patch_response.data['item'] == new_data['item']
+        assert patch_response.data['price'] == data['price'].__str__()
+
+    def test_price_put_update(self):
+        """
+        Ensure we can update fields for a price by put method
+        """
+
+        data = {
+            'currency_id': self.currency_2.id,
+            'item': self.item_2.code,
+            'price': Decimal('2123.01'),
+        }
+        response = self.post_price(data)
+
+        url = reverse('price-detail', None, {response.data['id']})
+        new_data = {
+            'currency_id': self.currency_1.id,
+            'item': self.item_1.code,
+            'price': Decimal('4234.01'),
+        }
+        put_response = self.client.put(url, new_data, format='json')
+
+        assert put_response.status_code == status.HTTP_200_OK
+        assert put_response.data['currency']['id'] == new_data['currency_id']
+        assert put_response.data['item'] == new_data['item']
+        assert put_response.data['price'] == new_data['price'].__str__()
+
+    def test_price_delete(self):
+        """
+        Ensure we can delete a single price instance
+        """
+
+        data = {
+            'currency_id': self.currency_2.id,
+            'item': self.item_2.code,
+            'price': Decimal('2123.01'),
+        }
+        response = self.post_price(data)
+
+        url = reverse('price-detail', None, {response.data['id']})
+        delete_response = self.client.delete(url, format='json')
+
+        assert delete_response.status_code == status.HTTP_204_NO_CONTENT
+        assert Price.objects.count() == 0
+
+
 class TestWatchlist(APITestCase):
     """Test class for Watchlist model"""
 
