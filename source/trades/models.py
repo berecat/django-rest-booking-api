@@ -37,9 +37,16 @@ class Item(StockBase):
 class Price(models.Model):
     """Item prices"""
 
-    currency = models.ForeignKey(Currency, default=1, on_delete=models.SET_DEFAULT)
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='prices',
-                             related_query_name='prices', )
+    currency = models.ForeignKey(Currency,
+                                 default=1,
+                                 on_delete=models.SET_DEFAULT,
+                                 related_name='+',
+                                 )
+    item = models.ForeignKey(Item,
+                             on_delete=models.CASCADE,
+                             related_name='price',
+                             related_query_name='price',
+                             )
     price = models.DecimalField(max_digits=7, decimal_places=2)
     date = models.DateTimeField(unique=True, blank=True, null=True)
 
@@ -47,18 +54,16 @@ class Price(models.Model):
 class WatchList(models.Model):
     """Current user, favorite list of stocks"""
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User,
+                                on_delete=models.CASCADE,
+                                related_name='watchlist',
+                                )
     item = models.ManyToManyField(Item, blank=True, related_name='+')
-
-    class Meta:
-        verbose_name = "Inventory"
-        verbose_name_plural = "Inventories"
 
 
 class BaseUserItem(models.Model):
     """Base for models that have user and item attributes"""
 
-    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     item = models.ForeignKey(Item, null=True, on_delete=models.SET_NULL)
 
     class Meta:
@@ -111,6 +116,11 @@ class OfferManager(models.Manager):
 class Offer(BaseUserItem):
     """Request to buy or sell specific stocks"""
 
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             related_name='offer',
+                             related_query_name='offer',
+                             )
     status = models.CharField(max_length=8, choices=StatusChoices.choices())
     entry_quantity = models.IntegerField("Requested quantity")
     quantity = models.IntegerField("Current quantity")
@@ -126,7 +136,17 @@ class Offer(BaseUserItem):
 class Inventory(BaseUserItem):
     """The number of stocks in particular user has"""
 
+    user = models.ForeignKey(User,
+                             null=True,
+                             on_delete=models.SET_NULL,
+                             related_name='inventory',
+                             related_query_name='inventory',
+                             )
     quantity = models.IntegerField("Stocks quantity", default=0)
+
+    class Meta:
+        verbose_name = "Inventory"
+        verbose_name_plural = "Inventories"
 
 
 class Trade(models.Model):

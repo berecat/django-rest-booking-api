@@ -60,11 +60,7 @@ class OfferViewSet(viewsets.ModelViewSet):
     serializer_class = OfferSerializer
 
 
-class InventoryViewSet(mixins.ListModelMixin,
-                       mixins.CreateModelMixin,
-                       mixins.RetrieveModelMixin,
-                       mixins.UpdateModelMixin,
-                       viewsets.GenericViewSet):
+class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for Inventory model"""
 
     queryset = Inventory.objects.all()

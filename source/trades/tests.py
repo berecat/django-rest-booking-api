@@ -297,6 +297,155 @@ class TestItem(APITestCase):
         assert Item.objects.count() == 0
 
 
+class TestInventory(APITestCase):
+    """Test class for Inventory model"""
+
+    def setUp(self):
+        """Initialize necessary fields for testing and log in user to make requests"""
+
+        self.user = User.objects.create_user(username='test_user',
+                                             password='test'
+                                             )
+        self.user_2 = User.objects.create_user(username='test_user2',
+                                               password='test'
+                                               )
+        self.client.login(username='test_user',
+                          password='test'
+                          )
+
+        self.item_1 = Item.objects.create(name='Apple',
+                                          code='AAPL',
+                                          )
+        self.item_2 = Item.objects.create(name='Tesla',
+                                          code='TSLA',
+                                          )
+
+    def post_inventory(self, data):
+        """Post item instance into database through web-api"""
+
+        url = reverse('inventory-list')
+        response = self.client.post(url, data, format='json')
+        return response
+
+    def test_inventory_post(self):
+        """
+        Ensure we can post inventory instance
+        """
+
+        data = {
+            'user': self.user.username,
+            'item': self.item_1.code,
+            'quantity': 80,
+        }
+        response = self.post_inventory(data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Inventory.objects.count() == 1
+        assert Inventory.objects.get().user == self.user
+        assert Inventory.objects.get().item == self.item_1
+        assert Inventory.objects.get().quantity == data['quantity']
+
+    def test_inventories_list(self):
+        """
+        Ensure we can retrieve the inventories collection
+        """
+
+        data_inventory_1 = {
+            'user': self.user.username,
+            'item': self.item_1.code,
+            'quantity': 80,
+        }
+        self.post_inventory(data_inventory_1)
+
+        data_inventory_2 = {
+            'user': self.user.username,
+            'item': self.item_2.code,
+            'quantity': 170,
+        }
+        self.post_inventory(data_inventory_2)
+
+        url = reverse('inventory-list')
+        response = self.client.get(url, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+        assert response.data[0]['user'] == data_inventory_1['user']
+        assert response.data[0]['item'] == data_inventory_1['item']
+        assert response.data[0]['quantity'] == data_inventory_1['quantity']
+        assert response.data[1]['user'] == data_inventory_2['user']
+        assert response.data[1]['item'] == data_inventory_2['item']
+        assert response.data[1]['quantity'] == data_inventory_2['quantity']
+
+    def test_inventory_get(self):
+        """
+        Ensure we can get a single inventory by id
+        """
+
+        data = {
+            'user': self.user.username,
+            'item': self.item_2.code,
+            'quantity': 170,
+        }
+        response = self.post_inventory(data)
+
+        url = reverse('inventory-detail', None, {response.data['id']})
+        get_response = self.client.get(url, format='json')
+
+        assert get_response.status_code == status.HTTP_200_OK
+        assert get_response.data['user'] == data['user']
+        assert get_response.data['item'] == data['item']
+        assert get_response.data['quantity'] == data['quantity']
+
+    def test_inventory_patch_update(self):
+        """
+        Ensure we can update fields for a inventory by patch method
+        """
+
+        data = {
+            'user': self.user.username,
+            'item': self.item_2.code,
+            'quantity': 170,
+        }
+        response = self.post_inventory(data)
+
+        url = reverse('inventory-detail', None, {response.data['id']})
+        new_data = {
+            'item': self.item_1.code,
+            'quantity': 130,
+        }
+        patch_response = self.client.patch(url, new_data, format='json')
+
+        assert patch_response.status_code == status.HTTP_200_OK
+        assert patch_response.data['user'] == data['user']
+        assert patch_response.data['item'] == new_data['item']
+        assert patch_response.data['quantity'] == new_data['quantity']
+
+    def test_inventory_put_update(self):
+        """
+        Ensure we can update fields for a inventory by put method
+        """
+
+        data = {
+            'user': self.user.username,
+            'item': self.item_2.code,
+            'quantity': 170,
+        }
+        response = self.post_inventory(data)
+
+        url = reverse('inventory-detail', None, {response.data['id']})
+        new_data = {
+            'user': self.user_2.username,
+            'item': self.item_1.code,
+            'quantity': 190,
+        }
+        put_response = self.client.put(url, new_data, format='json')
+
+        assert put_response.status_code == status.HTTP_200_OK
+        assert put_response.data['user'] == new_data['user']
+        assert put_response.data['item'] == new_data['item']
+        assert put_response.data['quantity'] == new_data['quantity']
+
+
 class TestTrade(APITestCase):
     """Test class for Trade model"""
 
@@ -406,7 +555,7 @@ class TestTrade(APITestCase):
 
     def test_trade_get(self):
         """
-        Ensure we can get a single item by id
+        Ensure we can get a single trade by id
         """
 
         data = {
