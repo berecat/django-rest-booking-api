@@ -96,9 +96,9 @@ class TestCurrency(APITestCase):
         assert get_response.data['name'] == data['name']
         assert get_response.data['code'] == data['code']
 
-    def test_currency_update(self):
+    def test_currency_patch_update(self):
         """
-        Ensure we can update fields for a currency
+        Ensure we can update fields for a currency by patch method
         """
 
         data = {
@@ -116,6 +116,185 @@ class TestCurrency(APITestCase):
         assert patch_response.status_code == status.HTTP_200_OK
         assert patch_response.data['name'] == data['name']
         assert patch_response.data['code'] == new_data['code']
+
+    def test_currency_put_update(self):
+        """
+        Ensure we can update fields for a currency by put method
+        """
+
+        data = {
+            'code': 'USD',
+            'name': 'American Dollar'
+        }
+        response = self.post_currency(data)
+
+        url = reverse('currency-detail', None, {response.data['id']})
+        new_data = {
+            'code': 'EUR',
+            'name': 'EURO',
+        }
+        put_response = self.client.put(url, new_data, format='json')
+
+        assert put_response.status_code == status.HTTP_200_OK
+        assert put_response.data['name'] == new_data['name']
+        assert put_response.data['code'] == new_data['code']
+
+
+class TestItem(APITestCase):
+    """Test class for Item model"""
+
+    def setUp(self):
+        """Initialize necessary fields for testing and log in user to make requests"""
+
+        User.objects.create_user(username='test_user',
+                                 password='test'
+                                 )
+        self.client.login(username='test_user',
+                          password='test'
+                          )
+
+    def post_item(self, data):
+        """Post item instance into database through web-api"""
+
+        url = reverse('item-list')
+        response = self.client.post(url, data, format='json')
+        return response
+
+    def test_item_post(self):
+        """
+        Ensure we can post item instance
+        """
+
+        data = {
+            'code': 'AAPL',
+            'name': 'Apple',
+            'details': 'Stocks of Apple Inc.'
+        }
+        response = self.post_item(data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Item.objects.count() == 1
+        assert Item.objects.get().name == data['name']
+        assert Item.objects.get().code == data['code']
+        assert Item.objects.get().details == data['details']
+
+    def test_items_list(self):
+        """
+        Ensure we can retrieve the items collection
+        """
+
+        data_item_1 = {
+            'code': 'AAPL',
+            'name': 'Apple',
+            'details': 'Stocks of Apple Inc.',
+        }
+        self.post_item(data_item_1)
+
+        data_item_2 = {
+            'code': 'TSLA',
+            'name': 'Tesla',
+            'details': 'Stocks of Tesla Inc.',
+        }
+        self.post_item(data_item_2)
+
+        url = reverse('item-list')
+        response = self.client.get(url, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+        assert response.data[0]['name'] == data_item_1['name']
+        assert response.data[0]['code'] == data_item_1['code']
+        assert response.data[0]['details'] == data_item_1['details']
+        assert response.data[1]['name'] == data_item_2['name']
+        assert response.data[1]['code'] == data_item_2['code']
+        assert response.data[1]['details'] == data_item_2['details']
+
+    def test_item_get(self):
+        """
+        Ensure we can get a single item by id
+        """
+
+        data = {
+            'code': 'TSLA',
+            'name': 'Tesla',
+            'details': 'Stocks of Tesla Inc.',
+        }
+        response = self.post_item(data)
+
+        url = reverse('item-detail', None, {response.data['id']})
+        get_response = self.client.get(url, format='json')
+
+        assert get_response.status_code == status.HTTP_200_OK
+        assert get_response.data['name'] == data['name']
+        assert get_response.data['code'] == data['code']
+        assert get_response.data['details'] == data['details']
+
+    def test_item_patch_update(self):
+        """
+        Ensure we can update fields for a item by patch method
+        """
+
+        data = {
+            'code': 'TSLA',
+            'name': 'Tesla',
+            'details': 'Stocks of Tesla Inc.',
+        }
+        response = self.post_item(data)
+
+        url = reverse('item-detail', None, {response.data['id']})
+        new_data = {
+            'code': 'AAPL',
+            'details': 'Stocks of Apple Inc.',
+        }
+        patch_response = self.client.patch(url, new_data, format='json')
+
+        assert patch_response.status_code == status.HTTP_200_OK
+        assert patch_response.data['name'] == data['name']
+        assert patch_response.data['code'] == new_data['code']
+        assert patch_response.data['details'] == new_data['details']
+
+    def test_item_put_update(self):
+        """
+        Ensure we can update fields for a item by put method
+        """
+
+        data = {
+            'code': 'TSLA',
+            'name': 'Tesla',
+            'details': 'Stocks of Tesla Inc.',
+        }
+        response = self.post_item(data)
+
+        url = reverse('item-detail', None, {response.data['id']})
+        new_data = {
+            'code': 'AAPL',
+            'name': 'Apple',
+            'details': 'Stocks of Apple Inc.',
+        }
+        put_response = self.client.put(url, new_data, format='json')
+
+        assert put_response.status_code == status.HTTP_200_OK
+        assert put_response.data['name'] == new_data['name']
+        assert put_response.data['code'] == new_data['code']
+        assert put_response.data['details'] == new_data['details']
+
+    def test_item_delete(self):
+        """
+        Ensure we can delete a single item instance
+        """
+
+        data = {
+            'code': 'TSLA',
+            'name': 'Tesla',
+            'details': 'Stocks of Tesla Inc.',
+        }
+        response = self.post_item(data)
+
+        url = reverse('item-detail', None, {response.data['id']})
+        delete_response = self.client.delete(url, format='json')
+
+        assert delete_response.status_code == status.HTTP_204_NO_CONTENT
+        assert Item.objects.count() == 0
 
 
 class TestTrade(APITestCase):
