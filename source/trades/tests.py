@@ -297,6 +297,177 @@ class TestItem(APITestCase):
         assert Item.objects.count() == 0
 
 
+class TestWatchlist(APITestCase):
+    """Test class for Watchlist model"""
+
+    def setUp(self):
+        """Initialize necessary fields for testing and log in user to make requests"""
+
+        self.user_1 = User.objects.create_user(username='test_user',
+                                               password='test'
+                                               )
+        self.user_2 = User.objects.create_user(username='test_user2',
+                                               password='test'
+                                               )
+        self.client.login(username='test_user',
+                          password='test'
+                          )
+
+        self.item_1 = Item.objects.create(name='Apple',
+                                          code='AAPL',
+                                          )
+        self.item_2 = Item.objects.create(name='Tesla',
+                                          code='TSLA',
+                                          )
+        self.item_3 = Item.objects.create(name='Amazon',
+                                          code='AMZN',
+                                          )
+
+    def post_watchlist(self, data):
+        """Post watchlist instance into database through web-api"""
+
+        url = reverse('watchlist-list')
+        response = self.client.post(url, data, format='json')
+        return response
+
+    def test_watchlist_post(self):
+        """
+        Ensure we can post watchlist instance
+        """
+
+        data = {
+            'user': self.user_1.id,
+            'item_id': [self.item_1.id,
+                        self.item_2.id
+                        ]
+        }
+        response = self.post_watchlist(data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert WatchList.objects.count() == 1
+        assert WatchList.objects.get().user == self.user_1
+        assert len(WatchList.objects.get().item.all()) == 2
+        assert WatchList.objects.get().item.all()[0] == self.item_1
+        assert WatchList.objects.get().item.all()[1] == self.item_2
+
+    def test_watchlists_list(self):
+        """
+        Ensure we can retrieve the watchlists collection
+        """
+
+        data_watchlist_1 = {
+            'user': self.user_1.id,
+            'item_id': [self.item_1.id,
+                        self.item_2.id,
+                        ]
+        }
+        self.post_watchlist(data_watchlist_1)
+
+        data_watchlist_2 = {
+            'user': self.user_2.id,
+            'item_id': [self.item_1.id,
+                        self.item_3.id,
+                        ]
+        }
+        self.post_watchlist(data_watchlist_2)
+
+        url = reverse('watchlist-list')
+        response = self.client.get(url, format='json')
+
+        print(response.data)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+
+        assert response.data[0]['user'] == data_watchlist_1['user']
+        assert len(response.data[0]['item']) == 2
+        assert response.data[0]['item'][0]['code'] == self.item_1.code
+        assert response.data[0]['item'][1]['code'] == self.item_2.code
+
+        assert response.data[1]['user'] == data_watchlist_2['user']
+        assert len(response.data[1]['item']) == 2
+        assert response.data[1]['item'][0]['code'] == self.item_1.code
+        assert response.data[1]['item'][1]['code'] == self.item_3.code
+
+    def test_watchlist_get(self):
+        """
+        Ensure we can get a single watchlist by id
+        """
+
+        data = {
+            'user': self.user_2.id,
+            'item_id': [self.item_1.id,
+                        self.item_2.id,
+                        self.item_3.id,
+                        ]
+        }
+        response = self.post_watchlist(data)
+
+        url = reverse('watchlist-detail', None, {response.data['id']})
+        get_response = self.client.get(url, format='json')
+        print(get_response.data)
+
+        assert get_response.status_code == status.HTTP_200_OK
+        assert get_response.data['user'] == data['user']
+        assert len(get_response.data['item']) == 3
+        assert get_response.data['item'][0]['code'] == self.item_1.code
+        assert get_response.data['item'][1]['code'] == self.item_2.code
+        assert get_response.data['item'][2]['code'] == self.item_3.code
+
+    def test_watchlist_patch_update(self):
+        """
+        Ensure we can update fields for a watchlist by patch method
+        """
+
+        data = {
+            'user': self.user_2.id,
+            'item_id': [self.item_1.id,
+                        self.item_2.id,
+                        self.item_3.id,
+                        ]
+        }
+        response = self.post_watchlist(data)
+
+        url = reverse('watchlist-detail', None, {response.data['id']})
+        new_data = {
+            'item_id': [self.item_2.id,]
+        }
+        patch_response = self.client.patch(url, new_data, format='json')
+
+        assert patch_response.status_code == status.HTTP_200_OK
+        assert patch_response.data['user'] == data['user']
+        assert len(patch_response.data['item']) == 1
+        assert patch_response.data['item'][0]['code'] == self.item_2.code
+
+    def test_watchlist_put_update(self):
+        """
+        Ensure we can update fields for a watchlist by put method
+        """
+
+        data = {
+            'user': self.user_2.id,
+            'item_id': [self.item_1.id,
+                        self.item_2.id,
+                        self.item_3.id,
+                        ]
+        }
+        response = self.post_watchlist(data)
+
+        url = reverse('watchlist-detail', None, {response.data['id']})
+        new_data = {
+            'user': self.user_1.id,
+            'item_id': [self.item_1.id,
+                        self.item_2.id,
+                        ]
+        }
+        put_response = self.client.put(url, new_data, format='json')
+
+        assert put_response.status_code == status.HTTP_200_OK
+        assert put_response.data['user'] == new_data['user']
+        assert len(put_response.data['item']) == 2
+        assert put_response.data['item'][0]['code'] == self.item_1.code
+        assert put_response.data['item'][1]['code'] == self.item_2.code
+
+
 class TestInventory(APITestCase):
     """Test class for Inventory model"""
 
@@ -304,8 +475,8 @@ class TestInventory(APITestCase):
         """Initialize necessary fields for testing and log in user to make requests"""
 
         self.user_1 = User.objects.create_user(username='test_user',
-                                             password='test'
-                                             )
+                                               password='test'
+                                               )
         self.user_2 = User.objects.create_user(username='test_user2',
                                                password='test'
                                                )

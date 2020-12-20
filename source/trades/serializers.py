@@ -50,7 +50,7 @@ class PriceSerializer(serializers.ModelSerializer):
 
 class ItemSerializer(StockBaseSerializer):
     """Serializer for Item model"""
-    prices = PriceSerializer(many=True, read_only=True)
+    price = PriceSerializer(many=True, read_only=True)
 
     class Meta:
         model = Item
@@ -58,7 +58,7 @@ class ItemSerializer(StockBaseSerializer):
             'id',
             'code',
             'name',
-            'prices',
+            'price',
             'details',
         )
 
