@@ -11,7 +11,9 @@ from trades.models import (Currency,
                            WatchList,
                            Offer,
                            Inventory,
-                           Trade)
+                           Balance,
+                           Trade,
+                           )
 from trades import views
 
 
@@ -862,6 +864,84 @@ class TestOffer(APITestCase):
 
         assert delete_response.status_code == status.HTTP_204_NO_CONTENT
         assert Offer.objects.count() == 0
+
+
+class TestBalance(APITestCase):
+    """Test class for Balance model"""
+
+    def setUp(self):
+        """Initialize necessary fields for testing and log in user to make requests"""
+
+        self.user_1 = User.objects.create_user(username='test_user',
+                                               password='test'
+                                               )
+        self.user_2 = User.objects.create_user(username='test_user2',
+                                               password='test'
+                                               )
+        self.client.login(username='test_user',
+                          password='test'
+                          )
+
+        self.currency_1 = Currency.objects.create(name='American Dollar',
+                                                  code='USD',
+                                                  )
+        self.currency_2 = Currency.objects.create(name='Euro',
+                                                  code='EUR',
+                                                  )
+
+    def test_balance_list(self):
+        """
+        Ensure we can retrieve the balances collection
+        """
+
+        data_balance_1 = {
+            'user': self.user_1,
+            'currency': self.currency_1,
+            'quantity': 200,
+        }
+        Balance.objects.create(**data_balance_1)
+
+        data_balance_2 = {
+            'user': self.user_2,
+            'currency': self.currency_2,
+            'quantity': 500,
+        }
+        Balance.objects.create(**data_balance_2)
+
+        url = reverse('balance-list')
+        response = self.client.get(url, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+
+        assert response.data[0]['user'] == data_balance_1['user'].username
+        assert response.data[0]['currency'] == data_balance_1['currency'].code
+        assert response.data[0]['quantity'] == data_balance_1['quantity']
+
+        assert response.data[1]['user'] == data_balance_2['user'].username
+        assert response.data[1]['currency'] == data_balance_2['currency'].code
+        assert response.data[1]['quantity'] == data_balance_2['quantity']
+
+    def test_balance_get(self):
+        """
+        Ensure we can get a single balance by id
+        """
+
+        data = {
+            'user': self.user_2,
+            'currency': self.currency_2,
+            'quantity': 500,
+        }
+        balance = Balance.objects.create(**data)
+
+        url = reverse('balance-detail', None, {balance.id})
+        response = self.client.get(url, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+
+        assert response.data['user'] == data['user'].username
+        assert response.data['currency'] == data['currency'].code
+        assert response.data['quantity'] == data['quantity']
 
 
 class TestInventory(APITestCase):

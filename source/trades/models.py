@@ -149,6 +149,22 @@ class Inventory(BaseUserItem):
         verbose_name_plural = "Inventories"
 
 
+class Balance(models.Model):
+    """The number of money in particular user has"""
+
+    user = models.OneToOneField(User,
+                                null=True,
+                                on_delete=models.SET_NULL,
+                                related_name='balance',
+                                )
+    currency = models.ForeignKey(Currency,
+                                 null=True,
+                                 on_delete=models.SET_NULL,
+                                 related_name='+',
+                                 )
+    quantity = models.PositiveIntegerField("Money quantity", default=0)
+
+
 class Trade(models.Model):
     """Information about s certain transaction"""
 

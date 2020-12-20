@@ -7,14 +7,18 @@ from trades.models import (Currency,
                            WatchList,
                            Offer,
                            Inventory,
-                           Trade)
+                           Balance,
+                           Trade,
+                           )
 from trades.serializers import (CurrencySerializer,
                                 ItemSerializer,
                                 PriceSerializer,
                                 WatchListSerializer,
                                 OfferSerializer,
                                 InventorySerializer,
-                                TradeSerializer)
+                                BalanceSerializer,
+                                TradeSerializer,
+                                )
 
 
 class CurrencyViewSet(mixins.ListModelMixin,
@@ -65,6 +69,13 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
+
+
+class BalanceViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for Balance model"""
+
+    queryset = Balance.objects.all()
+    serializer_class = BalanceSerializer
 
 
 class TradeViewSet(viewsets.ReadOnlyModelViewSet):

@@ -7,7 +7,9 @@ from trades.models import (Currency,
                            WatchList,
                            Offer,
                            Inventory,
-                           Trade)
+                           Balance,
+                           Trade,
+                           )
 
 
 class StockBaseSerializer(serializers.ModelSerializer):
@@ -111,6 +113,21 @@ class InventorySerializer(BaseUserItemSerializer):
             'id',
             'user',
             'item',
+            'quantity',
+        )
+
+
+class BalanceSerializer(serializers.ModelSerializer):
+    """Serializer for Balance model"""
+    user = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username')
+    currency = serializers.SlugRelatedField(queryset=Currency.objects.all(), slug_field='code')
+
+    class Meta:
+        model = Balance
+        fields = (
+            'id',
+            'user',
+            'currency',
             'quantity',
         )
 
