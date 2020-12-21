@@ -1,4 +1,5 @@
 from decimal import Decimal
+import datetime
 
 from django.urls import reverse
 from django.contrib.auth.models import User
@@ -340,14 +341,17 @@ class TestPrice(APITestCase):
             'currency_id': self.currency_1.id,
             'item': self.item_1.code,
             'price': 1242,
+            'date': '2020-12-23 10:05:00+00:00'
         }
         response = self.post_price(data)
+        print(response)
 
         assert response.status_code == status.HTTP_201_CREATED
         assert Price.objects.count() == 1
         assert Price.objects.get().currency == self.currency_1
         assert Price.objects.get().item == self.item_1
         assert Price.objects.get().price == data['price']
+        assert Price.objects.get().date.__str__() == data['date']
 
     def test_prices_list(self):
         """
@@ -358,6 +362,7 @@ class TestPrice(APITestCase):
             'currency_id': self.currency_1.id,
             'item': self.item_1.code,
             'price': Decimal('12.04'),
+            'date': '2020-12-23T10:05:00Z',
         }
         self.post_price(data_price_1)
 
@@ -365,6 +370,7 @@ class TestPrice(APITestCase):
             'currency_id': self.currency_2.id,
             'item': self.item_2.code,
             'price': Decimal('2123.01'),
+            'date': '2020-10-14T13:05:00Z',
         }
         self.post_price(data_price_2)
 
@@ -376,9 +382,12 @@ class TestPrice(APITestCase):
         assert response.data[0]['currency']['id'] == data_price_1['currency_id']
         assert response.data[0]['item'] == data_price_1['item']
         assert response.data[0]['price'] == data_price_1['price'].__str__()
+        assert response.data[0]['date'].__str__() == data_price_1['date']
+
         assert response.data[1]['currency']['id'] == data_price_2['currency_id']
         assert response.data[1]['item'] == data_price_2['item']
         assert response.data[1]['price'] == data_price_2['price'].__str__()
+        assert response.data[1]['date'].__str__() == data_price_2['date']
 
     def test_price_get(self):
         """
@@ -389,6 +398,7 @@ class TestPrice(APITestCase):
             'currency_id': self.currency_2.id,
             'item': self.item_2.code,
             'price': Decimal('2123.01'),
+            'date': '2020-10-14T13:05:00Z',
         }
         response = self.post_price(data)
 
@@ -399,6 +409,7 @@ class TestPrice(APITestCase):
         assert get_response.data['currency']['id'] == data['currency_id']
         assert get_response.data['item'] == data['item']
         assert get_response.data['price'] == data['price'].__str__()
+        assert get_response.data['date'].__str__() == data['date']
 
     def test_price_patch_update(self):
         """
@@ -409,6 +420,7 @@ class TestPrice(APITestCase):
             'currency_id': self.currency_2.id,
             'item': self.item_2.code,
             'price': Decimal('2123.01'),
+            'date': '2020-10-14T13:05:00Z',
         }
         response = self.post_price(data)
 
@@ -423,6 +435,7 @@ class TestPrice(APITestCase):
         assert patch_response.data['currency']['id'] == new_data['currency_id']
         assert patch_response.data['item'] == new_data['item']
         assert patch_response.data['price'] == data['price'].__str__()
+        assert patch_response.data['date'].__str__() == data['date']
 
     def test_price_put_update(self):
         """
@@ -433,6 +446,7 @@ class TestPrice(APITestCase):
             'currency_id': self.currency_2.id,
             'item': self.item_2.code,
             'price': Decimal('2123.01'),
+            'date': '2020-12-23T10:05:00Z',
         }
         response = self.post_price(data)
 
@@ -441,6 +455,7 @@ class TestPrice(APITestCase):
             'currency_id': self.currency_1.id,
             'item': self.item_1.code,
             'price': Decimal('4234.01'),
+            'date': '2020-10-14T13:05:00Z',
         }
         put_response = self.client.put(url, new_data, format='json')
 
@@ -448,6 +463,7 @@ class TestPrice(APITestCase):
         assert put_response.data['currency']['id'] == new_data['currency_id']
         assert put_response.data['item'] == new_data['item']
         assert put_response.data['price'] == new_data['price'].__str__()
+        assert put_response.data['date'].__str__() == new_data['date']
 
     def test_price_delete(self):
         """
@@ -458,6 +474,7 @@ class TestPrice(APITestCase):
             'currency_id': self.currency_2.id,
             'item': self.item_2.code,
             'price': Decimal('2123.01'),
+            'date': '2020-12-23T10:05:00Z',
         }
         response = self.post_price(data)
 
@@ -466,6 +483,34 @@ class TestPrice(APITestCase):
 
         assert delete_response.status_code == status.HTTP_204_NO_CONTENT
         assert Price.objects.count() == 0
+
+    def test_price_representation_item(self):
+        """
+        Ensure price's representation in related item model is correct
+        """
+
+        data_price_1 = {
+            'currency_id': self.currency_2.id,
+            'item': self.item_2.code,
+            'price': Decimal('2123.01'),
+            'date': '2020-12-23T10:05:00Z',
+        }
+        price_1 = self.post_price(data_price_1).data
+
+        data_price_2 = {
+            'currency_id': self.currency_1.id,
+            'item': self.item_2.code,
+            'price': Decimal('2123.01'),
+            'date': '2020-12-23T13:05:00Z',
+        }
+        price_2 = self.post_price(data_price_2).data
+
+        url = reverse('item-detail', None, {self.item_2.id})
+        response = self.client.get(url, format='json')
+        print(response.data)
+
+        assert response.data['price'][0] == price_1
+        assert response.data['price'][1] == price_2
 
 
 class TestWatchlist(APITestCase):

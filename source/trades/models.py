@@ -48,7 +48,7 @@ class Price(models.Model):
                              related_query_name='price',
                              )
     price = models.DecimalField(max_digits=7, decimal_places=2)
-    date = models.DateTimeField(unique=True, blank=True, null=True)
+    date = models.DateTimeField(blank=True, null=True)
 
 
 class WatchList(models.Model):
