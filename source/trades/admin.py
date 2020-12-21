@@ -30,8 +30,8 @@ class ItemAdmin(admin.ModelAdmin):
 @admin.register(Price)
 class PriceAdmin(admin.ModelAdmin):
     list_display = ('currency', 'item', 'price', 'date')
-    list_filter = ('price', 'date', 'item__code')
-    search_fields = ('item__code',)
+    list_filter = ('price', 'date', 'item__code',)
+    search_fields = ('item__code', 'price',)
     ordering = ('-price', 'item__code')
 
 
