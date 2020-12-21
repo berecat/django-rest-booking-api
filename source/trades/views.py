@@ -1,31 +1,34 @@
-from rest_framework import (mixins,
-                            viewsets)
+from rest_framework import mixins, viewsets
 
-from trades.models import (Currency,
-                           Item,
-                           Price,
-                           WatchList,
-                           Offer,
-                           Inventory,
-                           Balance,
-                           Trade,
-                           )
-from trades.serializers import (CurrencySerializer,
-                                ItemSerializer,
-                                PriceSerializer,
-                                WatchListSerializer,
-                                OfferSerializer,
-                                InventorySerializer,
-                                BalanceSerializer,
-                                TradeSerializer,
-                                )
+from trades.models import (
+    Currency,
+    Item,
+    Price,
+    WatchList,
+    Offer,
+    Inventory,
+    Balance,
+    Trade,
+)
+from trades.serializers import (
+    CurrencySerializer,
+    ItemSerializer,
+    PriceSerializer,
+    WatchListSerializer,
+    OfferSerializer,
+    InventorySerializer,
+    BalanceSerializer,
+    TradeSerializer,
+)
 
 
-class CurrencyViewSet(mixins.ListModelMixin,
-                      mixins.CreateModelMixin,
-                      mixins.RetrieveModelMixin,
-                      mixins.UpdateModelMixin,
-                      viewsets.GenericViewSet):
+class CurrencyViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     """ViewSet for Currency model"""
 
     queryset = Currency.objects.all()
@@ -46,11 +49,13 @@ class PriceViewSet(viewsets.ModelViewSet):
     serializer_class = PriceSerializer
 
 
-class WatchListViewSet(mixins.ListModelMixin,
-                       mixins.CreateModelMixin,
-                       mixins.RetrieveModelMixin,
-                       mixins.UpdateModelMixin,
-                       viewsets.GenericViewSet):
+class WatchListViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     """ViewSet for WatchList model"""
 
     queryset = WatchList.objects.all()

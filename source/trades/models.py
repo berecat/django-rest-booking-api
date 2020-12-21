@@ -31,22 +31,24 @@ class Item(StockBase):
     details = models.TextField("Details", blank=True, null=True, max_length=512)
 
     def __str__(self):
-        return f'{self.code} : {self.name}'
+        return f"{self.code} : {self.name}"
 
 
 class Price(models.Model):
     """Item prices"""
 
-    currency = models.ForeignKey(Currency,
-                                 default=1,
-                                 on_delete=models.SET_DEFAULT,
-                                 related_name='+',
-                                 )
-    item = models.ForeignKey(Item,
-                             on_delete=models.CASCADE,
-                             related_name='price',
-                             related_query_name='price',
-                             )
+    currency = models.ForeignKey(
+        Currency,
+        default=1,
+        on_delete=models.SET_DEFAULT,
+        related_name="+",
+    )
+    item = models.ForeignKey(
+        Item,
+        on_delete=models.CASCADE,
+        related_name="price",
+        related_query_name="price",
+    )
     price = models.DecimalField(max_digits=7, decimal_places=2)
     date = models.DateTimeField(blank=True, null=True)
 
@@ -54,11 +56,12 @@ class Price(models.Model):
 class WatchList(models.Model):
     """Current user, favorite list of stocks"""
 
-    user = models.OneToOneField(User,
-                                on_delete=models.CASCADE,
-                                related_name='watchlist',
-                                )
-    item = models.ManyToManyField(Item, blank=True, related_name='+')
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="watchlist",
+    )
+    item = models.ManyToManyField(Item, blank=True, related_name="+")
 
 
 class BaseUserItem(models.Model):
@@ -73,8 +76,8 @@ class BaseUserItem(models.Model):
 class StatusChoices(Enum):
     """Enum class, which gives choices for status attribute in Offer model"""
 
-    PURCHASE = 'PURCHASE'
-    SELL = 'SELL'
+    PURCHASE = "PURCHASE"
+    SELL = "SELL"
 
     @classmethod
     def choices(cls):
@@ -101,26 +104,33 @@ class OfferManager(models.Manager):
         :return: all Offer's instance that are active and have sell status
         """
 
-        return super(OfferManager, self).get_queryset().filter(status='SELL',
-                                                               is_active=True)
+        return (
+            super(OfferManager, self)
+            .get_queryset()
+            .filter(status="SELL", is_active=True)
+        )
 
     def purchase_offers(self):
         """
         :return: all Offer's instance that are active and have purchase status
         """
 
-        return super(OfferManager, self).get_queryset().filter(status='PURCHASE',
-                                                               is_active=True)
+        return (
+            super(OfferManager, self)
+            .get_queryset()
+            .filter(status="PURCHASE", is_active=True)
+        )
 
 
 class Offer(BaseUserItem):
     """Request to buy or sell specific stocks"""
 
-    user = models.ForeignKey(User,
-                             on_delete=models.CASCADE,
-                             related_name='offer',
-                             related_query_name='offer',
-                             )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="offer",
+        related_query_name="offer",
+    )
     status = models.CharField(max_length=8, choices=StatusChoices.choices())
     entry_quantity = models.IntegerField("Requested quantity")
     quantity = models.IntegerField("Current quantity")
@@ -130,18 +140,19 @@ class Offer(BaseUserItem):
     objects = OfferManager()
 
     def __str__(self):
-        return f'{self.status} - {self.price} - {self.user} - {self.item}'
+        return f"{self.status} - {self.price} - {self.user} - {self.item}"
 
 
 class Inventory(BaseUserItem):
     """The number of stocks in particular user has"""
 
-    user = models.ForeignKey(User,
-                             null=True,
-                             on_delete=models.SET_NULL,
-                             related_name='inventory',
-                             related_query_name='inventory',
-                             )
+    user = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="inventory",
+        related_query_name="inventory",
+    )
     quantity = models.IntegerField("Stocks quantity", default=0)
 
     class Meta:
@@ -152,16 +163,18 @@ class Inventory(BaseUserItem):
 class Balance(models.Model):
     """The number of money in particular user has"""
 
-    user = models.OneToOneField(User,
-                                null=True,
-                                on_delete=models.SET_NULL,
-                                related_name='balance',
-                                )
-    currency = models.ForeignKey(Currency,
-                                 null=True,
-                                 on_delete=models.SET_NULL,
-                                 related_name='+',
-                                 )
+    user = models.OneToOneField(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="balance",
+    )
+    currency = models.ForeignKey(
+        Currency,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
     quantity = models.PositiveIntegerField("Money quantity", default=0)
 
 
@@ -173,15 +186,15 @@ class Trade(models.Model):
         User,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='seller_trade',
-        related_query_name='seller_trade',
+        related_name="seller_trade",
+        related_query_name="seller_trade",
     )
     buyer = models.ForeignKey(
         User,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='buyer_trade',
-        related_query_name='buyer_trade',
+        related_name="buyer_trade",
+        related_query_name="buyer_trade",
     )
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=7, decimal_places=2)
@@ -190,13 +203,13 @@ class Trade(models.Model):
         Offer,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='buyer_trade',
-        related_query_name='buyer_trade',
+        related_name="buyer_trade",
+        related_query_name="buyer_trade",
     )
     seller_offer = models.ForeignKey(
         Offer,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='seller_trade',
-        related_query_name='seller_trade',
+        related_name="seller_trade",
+        related_query_name="seller_trade",
     )
