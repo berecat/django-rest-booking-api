@@ -1,16 +1,7 @@
-from rest_framework import serializers
 from django.contrib.auth.models import User
-
-from trades.models import (
-    Currency,
-    Item,
-    Price,
-    WatchList,
-    Offer,
-    Inventory,
-    Balance,
-    Trade,
-)
+from rest_framework import serializers
+from trades.models import (Balance, Currency, Inventory, Item, Offer, Price,
+                           Trade, WatchList)
 
 
 class StockBaseSerializer(serializers.ModelSerializer):

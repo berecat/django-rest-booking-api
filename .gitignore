@@ -3,4 +3,3 @@ migrations
 __pycache__
 .pytest_cache
 pg_data
-source/.pre-commit-config.yaml

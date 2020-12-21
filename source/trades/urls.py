@@ -1,5 +1,4 @@
 from rest_framework import routers
-
 from trades import views
 
 router = routers.DefaultRouter()

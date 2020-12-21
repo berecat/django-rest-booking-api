@@ -1,7 +1,7 @@
 from enum import Enum
 
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
 
 class StockBase(models.Model):
@@ -97,29 +97,21 @@ class OfferManager(models.Manager):
         :return: all Offer's instance that are active
         """
 
-        return super(OfferManager, self).get_queryset().filter(is_active=True)
+        return self.get_queryset().filter(is_active=True)
 
     def sell_offers(self):
         """
         :return: all Offer's instance that are active and have sell status
         """
 
-        return (
-            super(OfferManager, self)
-            .get_queryset()
-            .filter(status="SELL", is_active=True)
-        )
+        return self.get_queryset().filter(status="SELL", is_active=True)
 
     def purchase_offers(self):
         """
         :return: all Offer's instance that are active and have purchase status
         """
 
-        return (
-            super(OfferManager, self)
-            .get_queryset()
-            .filter(status="PURCHASE", is_active=True)
-        )
+        return self.get_queryset().filter(status="PURCHASE", is_active=True)
 
 
 class Offer(BaseUserItem):

@@ -1,25 +1,10 @@
 from rest_framework import mixins, viewsets
-
-from trades.models import (
-    Currency,
-    Item,
-    Price,
-    WatchList,
-    Offer,
-    Inventory,
-    Balance,
-    Trade,
-)
-from trades.serializers import (
-    CurrencySerializer,
-    ItemSerializer,
-    PriceSerializer,
-    WatchListSerializer,
-    OfferSerializer,
-    InventorySerializer,
-    BalanceSerializer,
-    TradeSerializer,
-)
+from trades.models import (Balance, Currency, Inventory, Item, Offer, Price,
+                           Trade, WatchList)
+from trades.serializers import (BalanceSerializer, CurrencySerializer,
+                                InventorySerializer, ItemSerializer,
+                                OfferSerializer, PriceSerializer,
+                                TradeSerializer, WatchListSerializer)
 
 
 class CurrencyViewSet(
