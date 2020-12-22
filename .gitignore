@@ -3,3 +3,4 @@ migrations
 __pycache__
 .pytest_cache
 pg_data
+celerybeat-schedule
