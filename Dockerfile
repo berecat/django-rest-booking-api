@@ -18,5 +18,3 @@ COPY ./docker_files/entrypoint.sh ./docker_files/
 RUN chmod +x ./docker_files/entrypoint.sh
 
 COPY . .
-
-ENTRYPOINT ["/usr/src/app/docker_files/entrypoint.sh"]

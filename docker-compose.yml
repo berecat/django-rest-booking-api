@@ -2,15 +2,36 @@ version: '3.7'
 services:
   web:
     build: .
+    entrypoint: "/usr/src/app/docker_files/entrypoint.sh"
     volumes:
       - .:/usr/src/app/
     ports:
       - 8000:8000
     env_file:
       - ./docker_files/env.dev
+    depends_on:
+      - db
+      - redis
+
   db:
     image: postgres:13.1-alpine
     volumes:
       - ./pg_data:/var/lib/postgresql/data/
     env_file:
       - ./docker_files/env.dev
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+
+  celery-beat:
+    build: .
+    volumes:
+      - .:/usr/src/app/
+    command: celery -A source.tradeplatform beat -l info
+    env_file:
+      - ./docker_files/env.dev
+    depends_on:
+      - db
+      - redis
