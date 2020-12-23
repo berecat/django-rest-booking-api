@@ -5,6 +5,7 @@ from trades.serializers import (BalanceSerializer, CurrencySerializer,
                                 InventorySerializer, ItemSerializer,
                                 OfferSerializer, PriceSerializer,
                                 TradeSerializer, WatchListSerializer)
+
 from .tasks import create_trade
 
 
@@ -53,6 +54,9 @@ class OfferViewSet(viewsets.ModelViewSet):
 
     queryset = Offer.objects.all()
     serializer_class = OfferSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class InventoryViewSet(viewsets.ReadOnlyModelViewSet):

@@ -125,7 +125,7 @@ class Offer(BaseUserItem):
     )
     status = models.CharField(max_length=8, choices=StatusChoices.choices())
     entry_quantity = models.IntegerField("Requested quantity")
-    quantity = models.IntegerField("Current quantity")
+    quantity = models.IntegerField("Current quantity", default=0)
     price = models.DecimalField(max_digits=7, decimal_places=2)
     is_active = models.BooleanField(default=True)
 
