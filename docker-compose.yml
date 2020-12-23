@@ -12,6 +12,7 @@ services:
     depends_on:
       - db
       - redis
+    restart: on-failure
 
   db:
     image: postgres:13.1-alpine
@@ -25,13 +26,14 @@ services:
     ports:
       - 6379:6379
 
-  celery-beat:
+  celery:
     build: .
     volumes:
       - .:/usr/src/app/
-    command: celery -A source.tradeplatform beat -l info
+    command: celery --workdir=source/ -A tradeplatform worker --loglevel=info
     env_file:
       - ./docker_files/env.dev
     depends_on:
       - db
       - redis
+    restart: on-failure

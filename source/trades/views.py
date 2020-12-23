@@ -5,6 +5,7 @@ from trades.serializers import (BalanceSerializer, CurrencySerializer,
                                 InventorySerializer, ItemSerializer,
                                 OfferSerializer, PriceSerializer,
                                 TradeSerializer, WatchListSerializer)
+from .tasks import create_trade
 
 
 class CurrencyViewSet(
