@@ -6,8 +6,6 @@ from trades.serializers import (BalanceSerializer, CurrencySerializer,
                                 OfferSerializer, PriceSerializer,
                                 TradeSerializer, WatchListSerializer)
 
-from .tasks import create_trade
-
 
 class CurrencyViewSet(
     mixins.ListModelMixin,
@@ -56,7 +54,24 @@ class OfferViewSet(viewsets.ModelViewSet):
     serializer_class = OfferSerializer
 
     def perform_create(self, serializer):
+        """
+        When receive post method, connect offer instance with current user.
+        Also will create balance for the user, if it doesn't exist
+        """
+
+        user = self.request.user
+        Balance.objects.get_or_create(user=user)
+
         serializer.save(user=self.request.user)
+
+    def perform_destroy(self, instance):
+        """
+        When receive delete method, instance won't be deleted from the database.
+        Only change is_active field to False
+        """
+
+        instance.is_active = False
+        instance.save()
 
 
 class InventoryViewSet(viewsets.ReadOnlyModelViewSet):

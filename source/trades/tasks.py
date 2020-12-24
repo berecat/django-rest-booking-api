@@ -1,6 +1,9 @@
 from celery import shared_task
+from trades.services.trader_logic import create_trades_between_users
 
 
 @shared_task()
-def create_trade():
-    print("Hello world!")
+def start_trade():
+    """Start creating trades between users"""
+
+    create_trades_between_users()

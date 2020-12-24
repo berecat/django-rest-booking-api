@@ -13,6 +13,7 @@ pytest-django = "*"
 djangorestframework-simplejwt = "*"
 celery = "*"
 redis = "*"
+mixer = "*"
 
 [requires]
 python_version = "3.8"

@@ -160,14 +160,16 @@ class Balance(models.Model):
         null=True,
         on_delete=models.SET_NULL,
         related_name="balance",
+        related_query_name="balance",
     )
     currency = models.ForeignKey(
         Currency,
         null=True,
-        on_delete=models.SET_NULL,
+        default=1,
+        on_delete=models.SET_DEFAULT,
         related_name="+",
     )
-    quantity = models.PositiveIntegerField("Money quantity", default=0)
+    quantity = models.PositiveIntegerField("Money quantity", default=1000)
 
 
 class Trade(models.Model):
