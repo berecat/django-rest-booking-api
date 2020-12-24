@@ -1,10 +1,9 @@
+from apps.trades.models import Offer
+from apps.trades.services.db_interaction import (
+    delete_offer_by_id, get_all_purchase_active_offers,
+    get_item_id_related_to_offer, get_offer_by_id, get_user_by_id,
+    get_user_id_related_to_offer)
 from django.contrib.auth.models import User
-from trades.models import Offer
-from trades.services.db_interaction import (delete_offer_by_id,
-                                            get_all_purchase_active_offers,
-                                            get_item_id_related_to_offer,
-                                            get_offer_by_id, get_user_by_id,
-                                            get_user_id_related_to_offer)
 
 
 def test_get_all_purchase_active_offers(offer_purchase_instance, offer_sell_instance):

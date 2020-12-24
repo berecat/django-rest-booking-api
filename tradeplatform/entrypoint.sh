@@ -12,7 +12,7 @@ then
 fi
 
 sleep 7
-python source/manage.py migrate
-python source/manage.py runserver 0.0.0.0:8000
+python manage.py migrate
+python manage.py runserver 0.0.0.0:8000
 
 exec "$@"

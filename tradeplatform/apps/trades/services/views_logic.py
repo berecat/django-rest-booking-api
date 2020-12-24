@@ -1,5 +1,6 @@
-from trades.models import Balance, Currency
-from trades.services.db_interaction import get_currency_by_id, get_user_by_id
+from apps.trades.models import Balance, Currency
+from apps.trades.services.db_interaction import (get_currency_by_id,
+                                                 get_user_by_id)
 
 
 def setup_user_attributes(user_id: int) -> None:
@@ -14,6 +15,6 @@ def _return_id_default_currency() -> int:
 
     currency = Currency.objects.get_or_create(
         code="USD",
-        name="American dollar",
+        defaults={"name": "American dollar"},
     )
     return currency[0].id

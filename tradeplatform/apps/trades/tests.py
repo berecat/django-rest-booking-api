@@ -1,11 +1,11 @@
 from decimal import Decimal
 
+from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
+                                Price, Trade, WatchList)
 from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from trades.models import (Balance, Currency, Inventory, Item, Offer, Price,
-                           Trade, WatchList)
 
 
 class TestCurrency(APITestCase):
@@ -657,8 +657,7 @@ class TestOffer(APITestCase):
         self.client.login(username="test_user1", password="test1")
 
         self.currency = Currency.objects.get_or_create(
-            code="USD",
-            defaults={'name': 'American dollar'}
+            code="USD", defaults={"name": "American dollar"}
         )
 
         self.item_1 = Item.objects.create(

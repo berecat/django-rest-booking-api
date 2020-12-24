@@ -1,5 +1,5 @@
+from apps.trades import views
 from rest_framework import routers
-from trades import views
 
 router = routers.DefaultRouter()
 router.register("currencies", views.CurrencyViewSet)

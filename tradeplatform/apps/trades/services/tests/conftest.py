@@ -1,7 +1,7 @@
 import pytest
+from apps.trades.models import Currency, Item, Offer
 from django.contrib.auth.models import User
 from mixer.backend.django import mixer
-from trades.models import Currency, Item, Offer
 
 
 @pytest.fixture(autouse=True)

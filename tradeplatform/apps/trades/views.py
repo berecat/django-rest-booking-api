@@ -1,12 +1,12 @@
+from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
+                                Price, Trade, WatchList)
+from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
+                                     InventorySerializer, ItemSerializer,
+                                     OfferSerializer, PriceSerializer,
+                                     TradeSerializer, WatchListSerializer)
+from apps.trades.services.db_interaction import delete_offer_by_id
+from apps.trades.services.views_logic import setup_user_attributes
 from rest_framework import mixins, viewsets
-from trades.models import (Balance, Currency, Inventory, Item, Offer, Price,
-                           Trade, WatchList)
-from trades.serializers import (BalanceSerializer, CurrencySerializer,
-                                InventorySerializer, ItemSerializer,
-                                OfferSerializer, PriceSerializer,
-                                TradeSerializer, WatchListSerializer)
-from trades.services.db_interaction import delete_offer_by_id
-from trades.services.views_logic import setup_user_attributes
 
 
 class CurrencyViewSet(
