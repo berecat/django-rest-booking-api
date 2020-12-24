@@ -155,7 +155,7 @@ class Inventory(BaseUserItem):
 class Balance(models.Model):
     """The number of money in particular user has"""
 
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User,
         null=True,
         on_delete=models.SET_NULL,
@@ -165,8 +165,7 @@ class Balance(models.Model):
     currency = models.ForeignKey(
         Currency,
         null=True,
-        default=1,
-        on_delete=models.SET_DEFAULT,
+        on_delete=models.SET_NULL,
         related_name="+",
     )
     quantity = models.PositiveIntegerField("Money quantity", default=1000)

@@ -5,6 +5,8 @@ from trades.serializers import (BalanceSerializer, CurrencySerializer,
                                 InventorySerializer, ItemSerializer,
                                 OfferSerializer, PriceSerializer,
                                 TradeSerializer, WatchListSerializer)
+from trades.services.db_interaction import delete_offer_by_id
+from trades.services.views_logic import setup_user_attributes
 
 
 class CurrencyViewSet(
@@ -60,9 +62,9 @@ class OfferViewSet(viewsets.ModelViewSet):
         """
 
         user = self.request.user
-        Balance.objects.get_or_create(user=user)
+        setup_user_attributes(user_id=user.id)
 
-        serializer.save(user=self.request.user)
+        serializer.save(user=user)
 
     def perform_destroy(self, instance):
         """
@@ -70,8 +72,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         Only change is_active field to False
         """
 
-        instance.is_active = False
-        instance.save()
+        delete_offer_by_id(offer_id=instance.id)
 
 
 class InventoryViewSet(viewsets.ReadOnlyModelViewSet):

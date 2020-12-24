@@ -2,7 +2,7 @@ from typing import Optional
 
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
-from trades.models import Balance, Inventory, Offer, Trade
+from trades.models import Balance, Currency, Inventory, Offer, Trade
 
 
 def get_all_purchase_active_offers() -> QuerySet:
@@ -21,6 +21,12 @@ def get_user_by_id(user_id: int) -> Optional[User]:
     """Return user by id"""
 
     return User.objects.get(id=user_id)
+
+
+def get_currency_by_id(currency_id: int) -> Optional[Currency]:
+    """Return user by currency"""
+
+    return Currency.objects.get(id=currency_id)
 
 
 def delete_offer_by_id(offer_id: int) -> None:

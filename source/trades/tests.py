@@ -656,6 +656,11 @@ class TestOffer(APITestCase):
         self.user_1 = User.objects.create_user(username="test_user1", password="test1")
         self.client.login(username="test_user1", password="test1")
 
+        self.currency = Currency.objects.get_or_create(
+            code="USD",
+            defaults={'name': 'American dollar'}
+        )
+
         self.item_1 = Item.objects.create(
             code="AAPL", name="Apple", details="Stocks of Apple Inc."
         )
@@ -846,7 +851,8 @@ class TestOffer(APITestCase):
         delete_response = self.client.delete(url, format="json")
 
         assert delete_response.status_code == status.HTTP_204_NO_CONTENT
-        assert Offer.objects.count() == 0
+        assert Offer.objects.get().is_active == False
+        assert response.data["id"] == Offer.objects.get().id
 
 
 class TestBalance(APITestCase):
