@@ -32,7 +32,7 @@ def test_return_id_default_with_not_exist_currency():
 
 
 def test_setup_user_with_exist_attributes_with_default_currency(
-    user_instance, default_currency_instance
+    default_user_instance, default_currency_instance
 ):
     """
     Ensure that function correctly set user's attributes, which exists before testing
@@ -40,13 +40,13 @@ def test_setup_user_with_exist_attributes_with_default_currency(
     """
 
     Balance.objects.create(
-        user=user_instance,
+        user=default_user_instance,
         currency=default_currency_instance,
         quantity=1432,
     )
-    setup_user_attributes(user_id=user_instance.id)
+    setup_user_attributes(user_id=default_user_instance.id)
 
-    user_balance = user_instance.balance.get(currency__code="USD")
+    user_balance = default_user_instance.balance.get(currency__code="USD")
 
     assert user_balance.quantity == 1432
     assert user_balance.currency.code == default_currency_instance.code
@@ -54,7 +54,7 @@ def test_setup_user_with_exist_attributes_with_default_currency(
 
 
 def test_setup_user_with_exist_attributes_with_different_currency(
-    user_instance, currency_instance
+    default_user_instance, currency_instance
 ):
     """
     Ensure that function correctly set user's attributes, which exists before testing
@@ -62,25 +62,25 @@ def test_setup_user_with_exist_attributes_with_different_currency(
     """
 
     Balance.objects.create(
-        user=user_instance,
+        user=default_user_instance,
         currency=currency_instance,
         quantity=1432,
     )
-    setup_user_attributes(user_id=user_instance.id)
+    setup_user_attributes(user_id=default_user_instance.id)
 
-    user_balance = user_instance.balance.get(currency__code="USD")
+    user_balance = default_user_instance.balance.get(currency__code="USD")
 
     assert user_balance.quantity == 1000
     assert user_balance.currency.code == "USD"
     assert user_balance.currency.name == "American dollar"
 
 
-def test_setup_user_with_not_exist_attributes(user_instance):
+def test_setup_user_with_not_exist_attributes(default_user_instance):
     """Ensure that function correctly set user's attributes which doesn't exist before testing"""
 
-    setup_user_attributes(user_id=user_instance.id)
+    setup_user_attributes(user_id=default_user_instance.id)
 
-    user_balance = user_instance.balance.get(currency__code="USD")
+    user_balance = default_user_instance.balance.get(currency__code="USD")
 
     assert user_balance.quantity == 1000
     assert user_balance.currency.code == "USD"

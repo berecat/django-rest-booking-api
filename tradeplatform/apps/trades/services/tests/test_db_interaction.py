@@ -2,7 +2,8 @@ from apps.trades.models import Offer
 from apps.trades.services.db_interaction import (
     delete_offer_by_id, get_all_purchase_active_offers,
     get_item_id_related_to_offer, get_offer_by_id, get_user_by_id,
-    get_user_id_related_to_offer)
+    get_user_id_related_to_offer, get_active_sell_offer_with_suitable_item,
+    get_available_quantity_stocks, check_purchase_offer_user_balance)
 from django.contrib.auth.models import User
 
 
@@ -58,3 +59,44 @@ def test_get_user_id_related_to_offer(offer_sell_instance):
     user_id = get_user_id_related_to_offer(offer_id=offer_id)
 
     assert user_id == Offer.objects.first().user.id
+
+
+def test_get_active_sell_offer_with_suitable_item(offer_instances):
+    """Ensure that function return correct sell offers for purchase"""
+
+    offers = get_active_sell_offer_with_suitable_item(offer_id=offer_instances[0].id,
+                                                      item_id=offer_instances[0].item.id)
+
+    assert offers.count() == 2
+    assert offers.first() == offer_instances[5]
+    assert offers.last() == offer_instances[3]
+
+
+def test_get_available_quantity_stocks(offer_purchase_instance):
+    """
+    Ensure that function return correct quantity of available stocks for now
+    In purchase offer instance without current quantity
+    """
+
+    available_stocks = get_available_quantity_stocks(offer_id=offer_purchase_instance.id)
+
+    assert available_stocks == 60
+
+
+def test_get_available_quantity_stocks_with_current_quantity(offer_sell_instance):
+    """
+    Ensure that function return correct quantity of available stocks for now
+    In sell offer instance with current quantity
+    """
+
+    available_stocks = get_available_quantity_stocks(offer_id=offer_sell_instance.id)
+
+    assert available_stocks == 36
+
+
+def test_check_purchase_offer_user_balance(offer_purchase_instance):
+    """"""
+
+    quantity = check_purchase_offer_user_balance(offer_id=offer_purchase_instance.id)
+
+    assert quantity == 230

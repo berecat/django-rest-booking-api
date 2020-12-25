@@ -79,8 +79,9 @@ def check_purchase_offer_user_balance(offer_id: int) -> int:
 
     offer = get_offer_by_id(offer_id=offer_id)
     user = offer.user
+    user_balance = user.balance.get(currency__code='USD')
 
-    return user.balance.quantity
+    return user_balance.quantity
 
 
 def get_full_price_of_trade(sell_offer_id: int, purchase_offer_id: int) -> int:
