@@ -79,7 +79,7 @@ def check_purchase_offer_user_balance(offer_id: int) -> int:
 
     offer = get_offer_by_id(offer_id=offer_id)
     user = offer.user
-    user_balance = user.balance.get(currency__code='USD')
+    user_balance = user.balance.get(currency__code="USD")
 
     return user_balance.quantity
 

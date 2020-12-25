@@ -1,5 +1,5 @@
 import pytest
-from apps.trades.models import Currency, Item, Offer, Balance
+from apps.trades.models import Balance, Currency, Item, Offer
 from django.contrib.auth.models import User
 from mixer.backend.django import mixer
 
@@ -52,14 +52,28 @@ def currency_instance():
 def offer_purchase_instance(user_instance, item_instance):
     """Purchase offer instance without entry_quantity"""
 
-    return mixer.blend(Offer, status="PURCHASE", user=user_instance, item=item_instance, entry_quantity=60, quantity=0)
+    return mixer.blend(
+        Offer,
+        status="PURCHASE",
+        user=user_instance,
+        item=item_instance,
+        entry_quantity=60,
+        quantity=0,
+    )
 
 
 @pytest.fixture()
 def offer_sell_instance(user_instance, item_instance):
     """Sell offer instance with entry_quantity"""
 
-    return mixer.blend(Offer, status="SELL", user=user_instance, item=item_instance, entry_quantity=70, quantity=34)
+    return mixer.blend(
+        Offer,
+        status="SELL",
+        user=user_instance,
+        item=item_instance,
+        entry_quantity=70,
+        quantity=34,
+    )
 
 
 @pytest.fixture()
@@ -86,10 +100,23 @@ def offer_instances(user_instances, item_instances):
     item_1 = item_instances[0]
     item_2 = item_instances[1]
 
-    return [mixer.blend(Offer, status='PURCHASE', user=buyer, item=item_1, price=100, is_active=True),
-            mixer.blend(Offer, status='SELL', user=seller, item=item_2, price=50, is_active=True),
-            mixer.blend(Offer, status='SELL', user=seller, item=item_1, price=150, is_active=True),
-            mixer.blend(Offer, status='SELL', user=seller, item=item_1, price=100, is_active=True),
-            mixer.blend(Offer, status='SELL', user=seller, item=item_1, price=99, is_active=False),
-            mixer.blend(Offer, status='SELL', user=seller, item=item_1, price=80, is_active=True),
-            ]
+    return [
+        mixer.blend(
+            Offer, status="PURCHASE", user=buyer, item=item_1, price=100, is_active=True
+        ),
+        mixer.blend(
+            Offer, status="SELL", user=seller, item=item_2, price=50, is_active=True
+        ),
+        mixer.blend(
+            Offer, status="SELL", user=seller, item=item_1, price=150, is_active=True
+        ),
+        mixer.blend(
+            Offer, status="SELL", user=seller, item=item_1, price=100, is_active=True
+        ),
+        mixer.blend(
+            Offer, status="SELL", user=seller, item=item_1, price=99, is_active=False
+        ),
+        mixer.blend(
+            Offer, status="SELL", user=seller, item=item_1, price=80, is_active=True
+        ),
+    ]
