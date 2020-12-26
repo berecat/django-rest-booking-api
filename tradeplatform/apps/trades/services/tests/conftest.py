@@ -20,7 +20,7 @@ def default_user_instance():
 
 @pytest.fixture()
 def user_instance(default_currency_instance):
-    """User instance with not default balance"""
+    """User instance with balance"""
 
     user = mixer.blend(User)
     mixer.blend(Balance, user=user, currency=default_currency_instance, quantity=230)
@@ -71,6 +71,7 @@ def offer_sell_instance(user_instance, item_instance):
         status="SELL",
         user=user_instance,
         item=item_instance,
+        price=100,
         entry_quantity=70,
         quantity=34,
     )
@@ -102,7 +103,7 @@ def offer_instances(user_instances, item_instances):
 
     return [
         mixer.blend(
-            Offer, status="PURCHASE", user=buyer, item=item_1, price=100, is_active=True
+            Offer, status="PURCHASE", user=buyer, item=item_1, price=100, quantity=60, is_active=True
         ),
         mixer.blend(
             Offer, status="SELL", user=seller, item=item_2, price=50, is_active=True
@@ -114,9 +115,9 @@ def offer_instances(user_instances, item_instances):
             Offer, status="SELL", user=seller, item=item_1, price=100, is_active=True
         ),
         mixer.blend(
-            Offer, status="SELL", user=seller, item=item_1, price=99, is_active=False
+            Offer, status="SELL", user=seller, item=item_1, price=99, quantity=50, is_active=False
         ),
         mixer.blend(
-            Offer, status="SELL", user=seller, item=item_1, price=80, is_active=True
+            Offer, status="SELL", user=seller, item=item_1, price=80, quantity=70, is_active=True
         ),
     ]

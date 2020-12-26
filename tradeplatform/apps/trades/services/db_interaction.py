@@ -84,13 +84,12 @@ def check_purchase_offer_user_balance(offer_id: int) -> int:
     return user_balance.quantity
 
 
-def get_full_price_of_trade(sell_offer_id: int, purchase_offer_id: int) -> int:
+def get_full_price_of_trade(sell_offer_id: int, quantity: int) -> int:
     """Return full price for creating Trade and correctly changing user's balances"""
 
     sell_offer = get_offer_by_id(offer_id=sell_offer_id)
-    purchase_offer = get_offer_by_id(offer_id=purchase_offer_id)
 
-    return sell_offer.price * purchase_offer.quantity
+    return sell_offer.price * quantity
 
 
 def change_user_balance_by_id(user_id: int, money_quantity: int) -> None:
@@ -107,7 +106,7 @@ def get_or_create_user_inventory(user_id: int, item_id: int) -> Optional[Invento
     If it doesn't exist create new inventory instance
     """
 
-    inventory = Inventory.objects.get_or_create(user_id=user_id, item_id=item_id)
+    inventory = Inventory.objects.get_or_create(user_id=user_id, item_id=item_id)[0]
     return inventory
 
 
@@ -128,12 +127,25 @@ def change_offer_current_quantity(offer_id: int, quantity: int) -> None:
 
 
 def create_trade(
-    item_id: int,
     sell_offer_id: int,
     purchase_offer_id: int,
-    seller_id: int,
-    buyer_id: int,
     quantity: int,
-    unit_price: int,
 ):
     """Create Trade instance with given parameters"""
+
+    sell_offer = get_offer_by_id(offer_id=sell_offer_id)
+    purchase_offer = get_offer_by_id(offer_id=purchase_offer_id)
+    seller = sell_offer.user
+    buyer = purchase_offer.user
+    item = sell_offer.item
+    description = f'Trade between {seller.username} and {buyer.username}'
+
+    Trade.objects.create(item=item,
+                         seller=seller,
+                         buyer=buyer,
+                         quantity=quantity,
+                         unit_price=sell_offer.price,
+                         description=description,
+                         seller_offer=sell_offer,
+                         buyer_offer=purchase_offer,
+                         )
