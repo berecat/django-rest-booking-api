@@ -1,11 +1,11 @@
-from apps.trades.models import Offer, Inventory, Trade
+from apps.trades.models import Inventory, Offer, Trade
 from apps.trades.services.db_interaction import (
-    check_purchase_offer_user_balance, delete_offer_by_id,
-    get_active_sell_offer_with_suitable_item, get_all_purchase_active_offers,
-    get_available_quantity_stocks, get_item_id_related_to_offer,
-    get_offer_by_id, get_user_by_id, get_user_id_related_to_offer,
-    get_full_price_of_trade, change_user_balance_by_id, get_or_create_user_inventory,
-    change_user_inventory, change_offer_current_quantity, create_trade)
+    change_offer_current_quantity, change_user_balance_by_id,
+    change_user_inventory, check_purchase_offer_user_balance, create_trade,
+    delete_offer_by_id, get_active_sell_offer_with_suitable_item,
+    get_all_purchase_active_offers, get_available_quantity_stocks,
+    get_full_price_of_trade, get_item_id_related_to_offer, get_offer_by_id,
+    get_or_create_user_inventory, get_user_by_id, get_user_id_related_to_offer)
 from django.contrib.auth.models import User
 
 
@@ -110,7 +110,9 @@ def test_check_purchase_offer_user_balance(offer_purchase_instance):
 def test_get_full_price_of_trade(offer_sell_instance):
     """Ensure that function return correct full price of trade"""
 
-    full_price = get_full_price_of_trade(sell_offer_id=offer_sell_instance.id, quantity=80)
+    full_price = get_full_price_of_trade(
+        sell_offer_id=offer_sell_instance.id, quantity=80
+    )
 
     assert full_price == 8000
 
@@ -124,25 +126,37 @@ def test_change_user_balance_by_id(user_instance):
     assert user_balance.quantity == 310
 
 
-def test_get_or_create_user_inventory_with_not_exist_inventory(default_user_instance, item_instance):
+def test_get_or_create_user_inventory_with_not_exist_inventory(
+    default_user_instance, item_instance
+):
     """
     Ensure that function return correct inventory instance, which belong to request user
     With not existing inventory for received item
     """
 
-    inventory = get_or_create_user_inventory(user_id=default_user_instance.id, item_id=item_instance.id)
+    inventory = get_or_create_user_inventory(
+        user_id=default_user_instance.id, item_id=item_instance.id
+    )
 
-    assert inventory == Inventory.objects.get(user_id=default_user_instance.id, item_id=item_instance.id)
+    assert inventory == Inventory.objects.get(
+        user_id=default_user_instance.id, item_id=item_instance.id
+    )
 
 
-def test_get_or_create_user_inventory_with_exist_inventory(default_user_instance, item_instance):
+def test_get_or_create_user_inventory_with_exist_inventory(
+    default_user_instance, item_instance
+):
     """
     Ensure that function return correct inventory instance, which belong to request user
     With existing inventory for received item
     """
 
-    correct_inventory = Inventory.objects.create(user=default_user_instance, item=item_instance, quantity=100)
-    inventory = get_or_create_user_inventory(user_id=default_user_instance.id, item_id=item_instance.id)
+    correct_inventory = Inventory.objects.create(
+        user=default_user_instance, item=item_instance, quantity=100
+    )
+    inventory = get_or_create_user_inventory(
+        user_id=default_user_instance.id, item_id=item_instance.id
+    )
 
     assert inventory == correct_inventory
 
@@ -151,7 +165,11 @@ def test_change_user_inventory(default_user_instance, item_instance):
     """Ensure that function correctly change user's inventory"""
 
     change_quantity = 120
-    change_user_inventory(user_id=default_user_instance.id, item_id=item_instance.id, quantity=change_quantity)
+    change_user_inventory(
+        user_id=default_user_instance.id,
+        item_id=item_instance.id,
+        quantity=change_quantity,
+    )
 
     user_balance = default_user_instance.inventory.get()
 
@@ -163,7 +181,9 @@ def test_change_offer_current_quantity(offer_sell_instance):
 
     current_quantity = offer_sell_instance.quantity
     change_quantity = 76
-    change_offer_current_quantity(offer_id=offer_sell_instance.id, quantity=change_quantity)
+    change_offer_current_quantity(
+        offer_id=offer_sell_instance.id, quantity=change_quantity
+    )
 
     assert Offer.objects.first().quantity == current_quantity + change_quantity
 
@@ -177,8 +197,11 @@ def test_create_trade_with_greatest_quantity_in_sell_offer(offer_instances):
     purchase_offer = offer_instances[0]
     sell_offer = offer_instances[5]
 
-    create_trade(sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id,
-                 quantity=purchase_offer.quantity)
+    create_trade(
+        sell_offer_id=sell_offer.id,
+        purchase_offer_id=purchase_offer.id,
+        quantity=purchase_offer.quantity,
+    )
 
     trade = Trade.objects.get()
 
@@ -187,7 +210,10 @@ def test_create_trade_with_greatest_quantity_in_sell_offer(offer_instances):
     assert trade.buyer == purchase_offer.user
     assert trade.quantity == purchase_offer.quantity
     assert trade.unit_price == sell_offer.price
-    assert trade.description == f'Trade between {sell_offer.user.username} and {purchase_offer.user.username}'
+    assert (
+        trade.description
+        == f"Trade between {sell_offer.user.username} and {purchase_offer.user.username}"
+    )
     assert trade.seller_offer == sell_offer
     assert trade.buyer_offer == purchase_offer
 
@@ -201,8 +227,11 @@ def test_create_trade_with_greatest_quantity_in_purchase_offer(offer_instances):
     purchase_offer = offer_instances[0]
     sell_offer = offer_instances[4]
 
-    create_trade(sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id,
-                 quantity=sell_offer.quantity)
+    create_trade(
+        sell_offer_id=sell_offer.id,
+        purchase_offer_id=purchase_offer.id,
+        quantity=sell_offer.quantity,
+    )
 
     trade = Trade.objects.get()
 
@@ -211,6 +240,9 @@ def test_create_trade_with_greatest_quantity_in_purchase_offer(offer_instances):
     assert trade.buyer == purchase_offer.user
     assert trade.quantity == sell_offer.quantity
     assert trade.unit_price == sell_offer.price
-    assert trade.description == f'Trade between {sell_offer.user.username} and {purchase_offer.user.username}'
+    assert (
+        trade.description
+        == f"Trade between {sell_offer.user.username} and {purchase_offer.user.username}"
+    )
     assert trade.seller_offer == sell_offer
     assert trade.buyer_offer == purchase_offer

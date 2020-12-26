@@ -64,7 +64,9 @@ def _create_trade(sell_offer_id: int, purchase_offer_id: int) -> None:
     final_quantity = _validate_stocks_quantity_for_trade(
         sell_offer_id=sell_offer_id, purchase_offer_id=purchase_offer_id
     )
-    full_price = get_full_price_of_trade(sell_offer_id=sell_offer_id, quantity=final_quantity)
+    full_price = get_full_price_of_trade(
+        sell_offer_id=sell_offer_id, quantity=final_quantity
+    )
 
     _prepare_for_trade(
         offer_id=sell_offer_id, money_quantity=full_price, quantity=final_quantity

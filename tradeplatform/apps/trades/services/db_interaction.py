@@ -138,14 +138,15 @@ def create_trade(
     seller = sell_offer.user
     buyer = purchase_offer.user
     item = sell_offer.item
-    description = f'Trade between {seller.username} and {buyer.username}'
+    description = f"Trade between {seller.username} and {buyer.username}"
 
-    Trade.objects.create(item=item,
-                         seller=seller,
-                         buyer=buyer,
-                         quantity=quantity,
-                         unit_price=sell_offer.price,
-                         description=description,
-                         seller_offer=sell_offer,
-                         buyer_offer=purchase_offer,
-                         )
+    Trade.objects.create(
+        item=item,
+        seller=seller,
+        buyer=buyer,
+        quantity=quantity,
+        unit_price=sell_offer.price,
+        description=description,
+        seller_offer=sell_offer,
+        buyer_offer=purchase_offer,
+    )
