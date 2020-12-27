@@ -67,7 +67,7 @@ def _prepare_for_trade(offer_id: int, money_quantity: int, quantity: int) -> Non
 
     _change_user_balance_by_offer_id(offer_id=offer_id, money_quantity=money_quantity)
     _change_user_inventory_by_offer_id(offer_id=offer_id, quantity=quantity)
-    change_offer_current_quantity(offer_id=offer_id, quantity=quantity)
+    change_offer_current_quantity(offer_id=offer_id, quantity=abs(quantity))
 
 
 def _create_trade(sell_offer_id: int, purchase_offer_id: int) -> None:
@@ -84,7 +84,7 @@ def _create_trade(sell_offer_id: int, purchase_offer_id: int) -> None:
         offer_id=sell_offer_id, money_quantity=full_price, quantity=final_quantity
     )
     _prepare_for_trade(
-        offer_id=purchase_offer_id, money_quantity=-full_price, quantity=final_quantity
+        offer_id=purchase_offer_id, money_quantity=-full_price, quantity=-final_quantity
     )
 
     create_trade(

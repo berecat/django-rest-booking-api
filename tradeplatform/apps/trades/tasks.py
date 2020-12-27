@@ -6,4 +6,4 @@ from celery import shared_task
 def start_trade():
     """Start creating trades between users"""
 
-    create_trades_between_users()
+    print("Hello world!")

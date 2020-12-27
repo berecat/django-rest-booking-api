@@ -30,7 +30,19 @@ services:
     build: .
     volumes:
       - .:/usr/src/app/
-    command: celery -A core worker --loglevel=info
+    command: celery -A core worker -l info
+    env_file:
+      - ./env.dev
+    depends_on:
+      - db
+      - redis
+    restart: on-failure
+
+  celery-beat:
+    build: .
+    volumes:
+      - .:/usr/src/app/
+    command: celery -A core beat -l info
     env_file:
       - ./env.dev
     depends_on:
