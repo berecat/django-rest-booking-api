@@ -51,7 +51,7 @@ def get_user_id_related_to_offer(offer_id: int) -> int:
     return offer.user.id
 
 
-def get_active_sell_offer_with_suitable_item(offer_id: int, item_id: int) -> QuerySet:
+def get_active_sell_offer_with_suitable_item(offer_id: int) -> QuerySet:
     """
     Return all active offer with SELL status and current item,
     ordering by price in ascending order. The best offers come first in QuerySet
@@ -60,7 +60,7 @@ def get_active_sell_offer_with_suitable_item(offer_id: int, item_id: int) -> Que
     offer = get_offer_by_id(offer_id=offer_id)
     sell_offers = (
         Offer.objects.sell_offers()
-        .filter(item__id=item_id, price__lte=offer.price)
+        .filter(item__id=offer.item.id, price__lte=offer.price)
         .order_by("price")
     )
 
