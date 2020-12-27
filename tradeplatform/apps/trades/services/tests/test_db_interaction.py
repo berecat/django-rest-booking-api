@@ -5,7 +5,8 @@ from apps.trades.services.db_interaction import (
     delete_offer_by_id, get_active_sell_offer_with_suitable_item,
     get_all_purchase_active_offers, get_available_quantity_stocks,
     get_currency_by_id, get_full_price_of_trade, get_item_id_related_to_offer,
-    get_offer_by_id, get_or_create_user_inventory, get_user_by_id,
+    get_offer_by_id, get_offer_price_by_id, get_or_create_user_inventory,
+    get_user_balance_quantity_by_offer_id, get_user_by_id,
     get_user_id_related_to_offer)
 
 
@@ -45,6 +46,24 @@ def test_get_currency_by_id(default_currency_instance):
     assert currency == default_currency_instance
 
 
+def test_get_offer_price_by_id(offer_sell_instance):
+    """Ensure that function return right offer's price"""
+
+    offer_id = offer_sell_instance.id
+    price = get_offer_price_by_id(offer_id=offer_id)
+
+    assert price == offer_sell_instance.price
+
+
+def test_get_user_balance_quantity_by_offer_id(offer_purchase_instance):
+    """Ensure that function return correct user's quantity of money from his balance"""
+
+    offer_id = offer_purchase_instance.id
+    quantity = get_user_balance_quantity_by_offer_id(offer_id=offer_id)
+
+    assert quantity == offer_purchase_instance.user.balance.get().quantity
+
+
 def test_delete_offer_by_id(offer_purchase_instance):
     """Ensure that function correctly delete offer instance"""
 
@@ -77,7 +96,7 @@ def test_get_active_sell_offer_with_suitable_item(offer_instances):
 
     offers = get_active_sell_offer_with_suitable_item(offer_id=offer_instances[0].id)
 
-    assert offers.count() == 2
+    assert offers.count() == 3
     assert offers.first() == offer_instances[5]
     assert offers.last() == offer_instances[3]
 

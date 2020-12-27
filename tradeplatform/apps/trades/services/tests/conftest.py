@@ -78,10 +78,21 @@ def offer_sell_instance(user_instance, item_instance):
 
 
 @pytest.fixture()
-def user_instances():
+def user_instances(default_currency_instance):
     """Return two users instances for making trade between them"""
 
-    return [mixer.blend(User), mixer.blend(User)]
+    user_1 = mixer.blend(User)
+    mixer.blend(Balance, user=user_1, currency=default_currency_instance, quantity=230)
+
+    user_2 = mixer.blend(User)
+    mixer.blend(Balance, user=user_2, currency=default_currency_instance, quantity=433)
+
+    user_3 = mixer.blend(User)
+    mixer.blend(
+        Balance, user=user_3, currency=default_currency_instance, quantity=10000000
+    )
+
+    return [user_1, user_2, user_3]
 
 
 @pytest.fixture()
@@ -108,6 +119,7 @@ def offer_instances(user_instances, item_instances):
             user=buyer,
             item=item_1,
             price=100,
+            entry_quantity=1434,
             quantity=60,
             is_active=True,
         ),
@@ -126,6 +138,7 @@ def offer_instances(user_instances, item_instances):
             user=seller,
             item=item_1,
             price=99,
+            entry_quantity=1254,
             quantity=50,
             is_active=False,
         ),
@@ -135,7 +148,28 @@ def offer_instances(user_instances, item_instances):
             user=seller,
             item=item_1,
             price=80,
+            entry_quantity=1600,
             quantity=70,
+            is_active=True,
+        ),
+        mixer.blend(
+            Offer,
+            status="SELL",
+            user=seller,
+            item=item_1,
+            price=80,
+            entry_quantity=1444,
+            quantity=70,
+            is_active=True,
+        ),
+        mixer.blend(
+            Offer,
+            status="PURCHASE",
+            user=user_instances[2],
+            item=item_1,
+            price=100,
+            entry_quantity=1434,
+            quantity=60,
             is_active=True,
         ),
     ]
