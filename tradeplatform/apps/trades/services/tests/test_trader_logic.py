@@ -299,3 +299,55 @@ def test_create_trade_with_equal_quantity_stocks(offer_instances):
     )
     assert buyer_inventory == 1000 - trade.quantity
     assert seller_inventory == 1000 + trade.quantity
+
+
+def test_confirm_trade_with_greatest_sell_stocks(offer_instances):
+    """Ensure that function correctly create trade instance and correctly delete offer"""
+
+    purchase_offer = offer_instances[7]
+    sell_offer = offer_instances[5]
+
+    buyer = purchase_offer.user
+    seller = sell_offer.user
+
+    original_buyer_balance = buyer.balance.get().quantity
+    original_seller_balance = seller.balance.get().quantity
+
+    correct_quantity = get_available_quantity_stocks(offer_id=purchase_offer.id)
+
+    result = _confirm_trade(
+        sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id
+    )
+
+    trade = Trade.objects.get()
+
+    buyer_balance = buyer.balance.get().quantity
+    buyer_inventory = buyer.inventory.get(item_id=purchase_offer.item).quantity
+
+    seller_balance = seller.balance.get().quantity
+    seller_inventory = seller.inventory.get(item_id=purchase_offer.item).quantity
+
+    assert result == True
+    assert Offer.objects.all()[5].is_active == True
+    assert Offer.objects.all()[7].is_active == False
+
+    assert trade.item == purchase_offer.item
+    assert trade.item == sell_offer.item
+    assert trade.seller == sell_offer.user
+    assert trade.buyer == purchase_offer.user
+    assert trade.quantity == correct_quantity
+    assert trade.unit_price == sell_offer.price
+    assert (
+        trade.description
+        == f"Trade between {sell_offer.user.username} and {purchase_offer.user.username}"
+    )
+    assert trade.seller_offer == sell_offer
+    assert trade.buyer_offer == purchase_offer
+
+    assert buyer_balance == original_buyer_balance - (trade.unit_price * trade.quantity)
+    assert seller_balance == original_seller_balance + (
+        trade.unit_price * trade.quantity
+    )
+
+    assert buyer_inventory == -trade.quantity
+    assert seller_inventory == trade.quantity
