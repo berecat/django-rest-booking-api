@@ -1,4 +1,5 @@
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, status, viewsets
+from rest_framework.response import Response
 
 from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
                                 Price, Trade, WatchList)
@@ -7,7 +8,8 @@ from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      OfferSerializer, PriceSerializer,
                                      TradeSerializer, WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
-from apps.trades.services.views_logic import setup_user_attributes
+from apps.trades.services.views_logic import (
+    check_user_quantity_stocks_for_given_item, setup_user_attributes)
 
 
 class CurrencyViewSet(
@@ -55,6 +57,28 @@ class OfferViewSet(viewsets.ModelViewSet):
 
     queryset = Offer.objects.all()
     serializer_class = OfferSerializer
+
+    def create(self, request, *args, **kwargs):
+        """
+        Check that user has enough quantity of stocks and then create offer instance
+        """
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if self.request.data[
+            "status"
+        ] == "SELL" and check_user_quantity_stocks_for_given_item(
+            user_id=self.request.user.id,
+            item_code=self.request.data["item"],
+            quantity=self.request.data["entry_quantity"],
+        ):
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            )
+        else:
+            return Response("You don't have enough quantity of stocks to sell")
 
     def perform_create(self, serializer):
         """
