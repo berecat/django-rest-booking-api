@@ -4,7 +4,7 @@ from apps.trades.services.db_interaction import (get_available_quantity_stocks,
 from apps.trades.services.trader_logic import (
     _change_user_balance_by_offer_id, _change_user_inventory_by_offer_id,
     _check_offer_quantity, _confirm_trade, _create_trade, _delete_empty_offer,
-    _final_stocks_quantity_by_user_balance, _make_trades, _prepare_for_trade,
+    _make_trades, _prepare_for_trade,
     _stocks_quantity_for_trade_by_given_offers)
 
 
@@ -124,61 +124,6 @@ def test_stocks_quantity_for_trade_by_given_offers_with_greatest_sell_quantity(
     assert final_quantity == get_available_quantity_stocks(offer_id=purchase_offer_id)
 
 
-def test_final_stocks_quantity_by_user_balance_with_not_enough_money(offer_instances):
-    """
-    Ensure that function return correct quantity of stocks in the relation to user's balance
-    Since user has not enough money, function has to return quantity of stocks that user can buy
-    """
-
-    purchase_offer = offer_instances[0]
-    sell_offer = offer_instances[6]
-
-    correct_quantity = purchase_offer.user.balance.get().quantity // sell_offer.price
-    final_quantity = _final_stocks_quantity_by_user_balance(
-        sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id
-    )
-
-    assert final_quantity == correct_quantity
-
-
-def test_final_stocks_quantity_by_user_balance_with_enough_money_sell_offer_more_quantity(
-    offer_instances,
-):
-    """
-    Ensure that function return correct quantity of stocks in the relation to user's balance
-    Since user has enough money and sell offer has more quantity of stocks than purchase offer,
-    function has to return purchase offer's quantity of stocks
-    """
-
-    purchase_offer = offer_instances[7]
-    sell_offer = offer_instances[5]
-
-    final_quantity = _final_stocks_quantity_by_user_balance(
-        sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id
-    )
-
-    assert final_quantity == get_available_quantity_stocks(offer_id=purchase_offer.id)
-
-
-def test_final_stocks_quantity_by_user_balance_with_enough_money_purchase_offer_more_quantity(
-    offer_instances,
-):
-    """
-    Ensure that function return correct quantity of stocks in the relation to user's balance
-    Since user has enough money and purchase offer has more quantity of stocks than sell offer,
-    function has to return sell offer's quantity of stocks
-    """
-
-    purchase_offer = offer_instances[7]
-    sell_offer = offer_instances[4]
-
-    final_quantity = _final_stocks_quantity_by_user_balance(
-        sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id
-    )
-
-    assert final_quantity == get_available_quantity_stocks(offer_id=sell_offer.id)
-
-
 def test_prepare_for_trade(offer_purchase_instance):
     """Ensure that function correctly change user's and offer's attributes"""
 
@@ -253,49 +198,3 @@ def test_delete_empty_offer_without_remaining_stocks(offer_purchase_instance):
 
     assert result == True
     assert Offer.objects.get().is_active == False
-
-
-def test_create_trade_with_equal_quantity_stocks(offer_instances):
-    """
-    Ensure that function correctly crate Trade instance by the given offers
-    """
-
-    purchase_offer = offer_instances[0]
-    sell_offer = offer_instances[6]
-
-    buyer = purchase_offer.user
-    seller = sell_offer.user
-
-    original_buyer_balance = buyer.balance.get().quantity
-    original_seller_balance = seller.balance.get().quantity
-
-    correct_quantity = original_buyer_balance // sell_offer.price
-
-    _create_trade(sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id)
-
-    trade = Trade.objects.get()
-
-    buyer_balance = buyer.balance.get().quantity
-    buyer_inventory = buyer.inventory.get(item_id=purchase_offer.item).quantity
-
-    seller_balance = seller.balance.get().quantity
-    seller_inventory = seller.inventory.get(item_id=purchase_offer.item).quantity
-
-    assert trade.item == purchase_offer.item
-    assert trade.item == sell_offer.item
-    assert trade.seller == sell_offer.user
-    assert trade.buyer == purchase_offer.user
-    assert trade.quantity == correct_quantity
-    assert trade.unit_price == sell_offer.price
-    assert (
-        trade.description
-        == f"Trade between {sell_offer.user.username} and {purchase_offer.user.username}"
-    )
-    assert trade.seller_offer == sell_offer
-    assert trade.buyer_offer == purchase_offer
-    assert buyer_balance == original_buyer_balance - (trade.unit_price * trade.quantity)
-    assert seller_balance == original_seller_balance + (
-        trade.unit_price * trade.quantity
-    )
-    assert buyer_inventory == 1000 - trade.quantity
-    assert seller_inventory == 1000 + trade.quantity

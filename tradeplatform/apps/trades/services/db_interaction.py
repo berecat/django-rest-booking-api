@@ -30,23 +30,6 @@ def get_currency_by_id(currency_id: int) -> Optional[Currency]:
     return Currency.objects.get(id=currency_id)
 
 
-def get_offer_price_by_id(offer_id: int) -> int:
-    """Return offer's price by the given offer's id"""
-
-    offer = get_offer_by_id(offer_id=offer_id)
-
-    return offer.price
-
-
-def get_user_balance_quantity_by_offer_id(offer_id: int) -> int:
-    """Return user's quantity of money in his balance"""
-
-    offer = get_offer_by_id(offer_id=offer_id)
-    user_balance = offer.user.balance.get(currency__code="USD")
-
-    return user_balance.quantity
-
-
 def delete_offer_by_id(offer_id: int) -> None:
     """Delete a offer by it's id"""
 
