@@ -61,13 +61,20 @@ class ItemSerializer(StockBaseSerializer):
         )
 
 
-class WatchListSerializer(serializers.ModelSerializer):
-    """Serializer for WatchList model"""
+class BaseUserItemSerializer(serializers.ModelSerializer):
+    """Serializer for BaseUserItem base model"""
 
-    item = ItemSerializer(many=True, read_only=True)
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field="username"
+    )
+    item = ItemSerializer(read_only=True)
     item_id = serializers.PrimaryKeyRelatedField(
         queryset=Item.objects.all(), many=True, source="item", write_only=True
     )
+
+
+class WatchListSerializer(BaseUserItemSerializer):
+    """Serializer for WatchList model"""
 
     class Meta:
         model = WatchList
@@ -77,15 +84,6 @@ class WatchListSerializer(serializers.ModelSerializer):
             "item",
             "item_id",
         )
-
-
-class BaseUserItemSerializer(serializers.ModelSerializer):
-    """Serializer for BaseUserItem base model"""
-
-    user = serializers.SlugRelatedField(
-        queryset=User.objects.all(), slug_field="username"
-    )
-    item = serializers.SlugRelatedField(queryset=Item.objects.all(), slug_field="code")
 
 
 class OfferSerializer(BaseUserItemSerializer):
@@ -99,6 +97,7 @@ class OfferSerializer(BaseUserItemSerializer):
             "id",
             "status",
             "user",
+            "item_id",
             "item",
             "entry_quantity",
             "quantity",
@@ -116,6 +115,7 @@ class InventorySerializer(BaseUserItemSerializer):
         fields = (
             "id",
             "user",
+            "item_id",
             "item",
             "quantity",
         )
