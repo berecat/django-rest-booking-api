@@ -131,15 +131,13 @@ def test_check_purchase_offer_user_balance(offer_purchase_instance):
 
     quantity = check_purchase_offer_user_balance(offer_id=offer_purchase_instance.id)
 
-    assert quantity == 230
+    assert quantity == 1000
 
 
 def test_get_full_price_of_trade(offer_sell_instance):
     """Ensure that function return correct full price of trade"""
 
-    full_price = get_full_price(
-        sell_offer_id=offer_sell_instance.id, quantity=80
-    )
+    full_price = get_full_price(sell_offer_id=offer_sell_instance.id, quantity=80)
 
     assert full_price == 8000
 
@@ -150,7 +148,7 @@ def test_change_user_balance_by_id(user_instance):
     change_user_balance_by_id(user_id=user_instance.id, money_quantity=80)
     user_balance = user_instance.balance.get()
 
-    assert user_balance.quantity == 310
+    assert user_balance.quantity == 1080
 
 
 def test_get_or_create_user_inventory_with_not_exist_inventory(

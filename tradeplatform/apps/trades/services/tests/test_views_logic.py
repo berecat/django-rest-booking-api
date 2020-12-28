@@ -1,9 +1,10 @@
 from apps.trades.models import Balance, Currency
+from apps.trades.services.db_interaction import (get_available_quantity_stocks,
+                                                 get_full_price)
 from apps.trades.services.views_logic import (
-    _count_current_quantity_in_offers, _return_id_default_currency,
-    check_user_quantity_stocks_for_given_item, setup_user_attributes, _count_current_money_quantity_in_offers,
-    check_user_balance,)
-from apps.trades.services.db_interaction import get_full_price, get_available_quantity_stocks
+    _count_current_money_quantity_in_offers, _count_current_quantity_in_offers,
+    _return_id_default_currency, check_user_balance,
+    check_user_quantity_stocks_for_given_item, setup_user_attributes)
 
 
 def test_return_id_default_with_exist_currency(default_currency_instance):
@@ -143,12 +144,13 @@ def test_count_current_money_quantity_in_offers(offer_instances):
         user_id=offer.user.id,
     )
 
-    assert quantity == get_full_price(sell_offer_id=offer.id, quantity=get_available_quantity_stocks(offer_id=offer.id))
+    assert quantity == get_full_price(
+        sell_offer_id=offer.id,
+        quantity=get_available_quantity_stocks(offer_id=offer.id),
+    )
 
 
-def test_count_current_money_quantity_in_offers_with_greater_quantity(
-    offer_instances
-):
+def test_count_current_money_quantity_in_offers_with_greater_quantity(offer_instances):
     """Ensure that function return correct boolean value if user hasn't enough quantity of stocks"""
 
     offer_purchase_instance = offer_instances[0]

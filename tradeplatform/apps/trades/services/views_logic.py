@@ -38,7 +38,9 @@ def check_user_balance(user_id: int, quantity: str, price: str) -> bool:
     full_price = int(quantity) * int(price)
 
     default_currency_id = _return_id_default_currency()
-    balance = get_or_create_user_balance(user_id=user_id, currency_id=default_currency_id)
+    balance = get_or_create_user_balance(
+        user_id=user_id, currency_id=default_currency_id
+    )
 
     money_quantity = _count_current_money_quantity_in_offers(user_id=user_id)
 
