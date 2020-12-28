@@ -125,10 +125,24 @@ def offer_instances(user_instances, item_instances):
             is_active=True,
         ),
         mixer.blend(
-            Offer, status="SELL", user=seller, item=item_2, price=50, is_active=True
+            Offer,
+            status="SELL",
+            user=seller,
+            item=item_2,
+            entry_quantity=1,
+            quantity=0,
+            price=50,
+            is_active=True,
         ),
         mixer.blend(
-            Offer, status="SELL", user=seller, item=item_1, price=150, is_active=True
+            Offer,
+            status="SELL",
+            user=seller,
+            item=item_1,
+            price=150,
+            entry_quantity=560,
+            quantity=60,
+            is_active=True,
         ),
         mixer.blend(
             Offer,

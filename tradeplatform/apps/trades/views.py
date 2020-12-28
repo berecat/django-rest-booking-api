@@ -87,8 +87,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         """
 
         user = self.request.user
-        item_code = self.request.data["item"]
-        setup_user_attributes(user_id=user.id, item_code=item_code)
+        setup_user_attributes(user_id=user.id)
 
         serializer.save(user=user)
 
