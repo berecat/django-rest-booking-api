@@ -97,8 +97,8 @@ def test_get_active_sell_offer_with_suitable_item(offer_instances):
     offers = get_active_sell_offer_with_suitable_item(offer_id=offer_instances[0].id)
 
     assert offers.count() == 3
-    assert offers.first() == offer_instances[5]
-    assert offers.last() == offer_instances[3]
+    assert offers.first() == offer_instances[3]
+    assert offers.last() == offer_instances[5]
 
 
 def test_get_available_quantity_stocks(offer_purchase_instance):

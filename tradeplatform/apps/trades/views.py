@@ -1,3 +1,5 @@
+from rest_framework import mixins, viewsets
+
 from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
                                 Price, Trade, WatchList)
 from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
@@ -6,7 +8,6 @@ from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      TradeSerializer, WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
 from apps.trades.services.views_logic import setup_user_attributes
-from rest_framework import mixins, viewsets
 
 
 class CurrencyViewSet(
@@ -62,7 +63,8 @@ class OfferViewSet(viewsets.ModelViewSet):
         """
 
         user = self.request.user
-        setup_user_attributes(user_id=user.id)
+        item_code = self.request.data["item"]
+        setup_user_attributes(user_id=user.id, item_code=item_code)
 
         serializer.save(user=user)
 

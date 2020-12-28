@@ -1,8 +1,9 @@
 from typing import Optional
 
-from apps.trades.models import Balance, Currency, Inventory, Offer, Trade
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
+
+from apps.trades.models import Balance, Currency, Inventory, Item, Offer, Trade
 
 
 def get_all_purchase_active_offers() -> QuerySet:
@@ -79,6 +80,7 @@ def get_active_sell_offer_with_suitable_item(offer_id: int) -> QuerySet:
         Offer.objects.sell_offers()
         .filter(item__id=offer.item.id, price__lte=offer.price)
         .order_by("price")
+        .exclude(user__id=offer.user.id)
     )
 
     return sell_offers
@@ -125,6 +127,23 @@ def get_or_create_user_inventory(user_id: int, item_id: int) -> Optional[Invento
 
     inventory = Inventory.objects.get_or_create(user_id=user_id, item_id=item_id)[0]
     return inventory
+
+
+def get_item_id_by_code(item_code: str) -> int:
+    """Return item instance by the given code"""
+
+    item = Item.objects.get(code=item_code)
+    return item.id
+
+
+def get_or_create_user_balance(user_id: int, currency_id: int) -> Optional[Balance]:
+    """
+    Return balance instance, which belongs to the user
+    If it doesn't exist create new balance instance
+    """
+
+    balance = Balance.objects.get_or_create(user_id=user_id, currency_id=currency_id)[0]
+    return balance
 
 
 def change_user_inventory(user_id: int, item_id: int, quantity: int) -> None:

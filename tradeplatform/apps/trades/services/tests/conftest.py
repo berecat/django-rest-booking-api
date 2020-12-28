@@ -1,7 +1,8 @@
 import pytest
-from apps.trades.models import Balance, Currency, Item, Offer
 from django.contrib.auth.models import User
 from mixer.backend.django import mixer
+
+from apps.trades.models import Balance, Currency, Item, Offer
 
 
 @pytest.fixture(autouse=True)
@@ -130,7 +131,14 @@ def offer_instances(user_instances, item_instances):
             Offer, status="SELL", user=seller, item=item_1, price=150, is_active=True
         ),
         mixer.blend(
-            Offer, status="SELL", user=seller, item=item_1, price=100, is_active=True
+            Offer,
+            status="SELL",
+            user=seller,
+            item=item_1,
+            price=70,
+            entry_quantity=1000,
+            quantity=30,
+            is_active=True,
         ),
         mixer.blend(
             Offer,
@@ -168,6 +176,16 @@ def offer_instances(user_instances, item_instances):
             user=user_instances[2],
             item=item_1,
             price=100,
+            entry_quantity=1434,
+            quantity=60,
+            is_active=True,
+        ),
+        mixer.blend(
+            Offer,
+            status="SELL",
+            user=buyer,
+            item=item_1,
+            price=50,
             entry_quantity=1434,
             quantity=60,
             is_active=True,

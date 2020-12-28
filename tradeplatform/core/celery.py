@@ -8,5 +8,5 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
-    "hello": {"task": "apps.trades.tasks.start_trade", "schedule": crontab()}
+    "make_trades": {"task": "apps.trades.tasks.start_trade", "schedule": crontab()}
 }

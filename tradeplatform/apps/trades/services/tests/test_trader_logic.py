@@ -3,8 +3,8 @@ from apps.trades.services.db_interaction import (get_available_quantity_stocks,
                                                  get_offer_by_id)
 from apps.trades.services.trader_logic import (
     _change_user_balance_by_offer_id, _change_user_inventory_by_offer_id,
-    _check_offer_quantity, _create_trade, _delete_empty_offer,
-    _final_stocks_quantity_by_user_balance, _prepare_for_trade,
+    _check_offer_quantity, _confirm_trade, _create_trade, _delete_empty_offer,
+    _final_stocks_quantity_by_user_balance, _make_trades, _prepare_for_trade,
     _stocks_quantity_for_trade_by_given_offers)
 
 
@@ -299,3 +299,183 @@ def test_create_trade_with_equal_quantity_stocks(offer_instances):
     )
     assert buyer_inventory == -trade.quantity
     assert seller_inventory == trade.quantity
+
+
+def test_confirm_trade_with_greatest_sell_stocks(offer_instances):
+    """Ensure that function correctly create trade instance and correctly delete offer"""
+
+    purchase_offer = offer_instances[7]
+    sell_offer = offer_instances[5]
+
+    buyer = purchase_offer.user
+    seller = sell_offer.user
+
+    original_buyer_balance = buyer.balance.get().quantity
+    original_seller_balance = seller.balance.get().quantity
+
+    correct_quantity = get_available_quantity_stocks(offer_id=purchase_offer.id)
+
+    result = _confirm_trade(
+        sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id
+    )
+
+    trade = Trade.objects.get()
+
+    buyer_balance = buyer.balance.get().quantity
+    buyer_inventory = buyer.inventory.get(item_id=purchase_offer.item).quantity
+
+    seller_balance = seller.balance.get().quantity
+    seller_inventory = seller.inventory.get(item_id=purchase_offer.item).quantity
+
+    assert result == True
+    assert Offer.objects.all()[5].is_active == True
+    assert Offer.objects.all()[7].is_active == False
+
+    assert trade.item == purchase_offer.item
+    assert trade.item == sell_offer.item
+    assert trade.seller == sell_offer.user
+    assert trade.buyer == purchase_offer.user
+    assert trade.quantity == correct_quantity
+    assert trade.unit_price == sell_offer.price
+    assert (
+        trade.description
+        == f"Trade between {sell_offer.user.username} and {purchase_offer.user.username}"
+    )
+    assert trade.seller_offer == sell_offer
+    assert trade.buyer_offer == purchase_offer
+
+    assert buyer_balance == original_buyer_balance - (trade.unit_price * trade.quantity)
+    assert seller_balance == original_seller_balance + (
+        trade.unit_price * trade.quantity
+    )
+
+    assert buyer_inventory == -trade.quantity
+    assert seller_inventory == trade.quantity
+
+
+def test_confirm_trade_with_equal_stocks(offer_instances):
+    """Ensure that function correctly create trade instance and correctly delete offer"""
+
+    purchase_offer = offer_instances[7]
+    sell_offer = offer_instances[6]
+
+    buyer = purchase_offer.user
+    seller = sell_offer.user
+
+    original_buyer_balance = buyer.balance.get().quantity
+    original_seller_balance = seller.balance.get().quantity
+
+    correct_quantity = get_available_quantity_stocks(offer_id=purchase_offer.id)
+
+    result = _confirm_trade(
+        sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id
+    )
+
+    trade = Trade.objects.get()
+
+    buyer_balance = buyer.balance.get().quantity
+    buyer_inventory = buyer.inventory.get(item_id=purchase_offer.item).quantity
+
+    seller_balance = seller.balance.get().quantity
+    seller_inventory = seller.inventory.get(item_id=purchase_offer.item).quantity
+
+    assert result == True
+    assert Offer.objects.all()[6].is_active == False
+    assert Offer.objects.all()[7].is_active == False
+
+    assert trade.item == purchase_offer.item
+    assert trade.item == sell_offer.item
+    assert trade.seller == sell_offer.user
+    assert trade.buyer == purchase_offer.user
+    assert trade.quantity == correct_quantity
+    assert trade.unit_price == sell_offer.price
+    assert (
+        trade.description
+        == f"Trade between {sell_offer.user.username} and {purchase_offer.user.username}"
+    )
+    assert trade.seller_offer == sell_offer
+    assert trade.buyer_offer == purchase_offer
+
+    assert buyer_balance == original_buyer_balance - (trade.unit_price * trade.quantity)
+    assert seller_balance == original_seller_balance + (
+        trade.unit_price * trade.quantity
+    )
+
+    assert buyer_inventory == -trade.quantity
+    assert seller_inventory == trade.quantity
+
+
+def test_confirm_trade_with_greatest_purchase_stocks(offer_instances):
+    """Ensure that function correctly create trade instance and correctly delete offer"""
+
+    purchase_offer = offer_instances[7]
+    sell_offer = offer_instances[5]
+
+    purchase_offer.entry_quantity += 1000
+    purchase_offer.save()
+
+    buyer = purchase_offer.user
+    seller = sell_offer.user
+
+    original_buyer_balance = buyer.balance.get().quantity
+    original_seller_balance = seller.balance.get().quantity
+
+    correct_quantity = get_available_quantity_stocks(offer_id=sell_offer.id)
+
+    result = _confirm_trade(
+        sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id
+    )
+
+    trade = Trade.objects.get()
+
+    buyer_balance = buyer.balance.get().quantity
+    buyer_inventory = buyer.inventory.get(item_id=purchase_offer.item).quantity
+
+    seller_balance = seller.balance.get().quantity
+    seller_inventory = seller.inventory.get(item_id=purchase_offer.item).quantity
+
+    assert result == True
+    assert Offer.objects.all()[5].is_active == True
+    assert Offer.objects.all()[7].is_active == False
+
+    assert trade.item == purchase_offer.item
+    assert trade.item == sell_offer.item
+    assert trade.seller == sell_offer.user
+    assert trade.buyer == purchase_offer.user
+    assert trade.quantity == correct_quantity
+    assert trade.unit_price == sell_offer.price
+    assert (
+        trade.description
+        == f"Trade between {sell_offer.user.username} and {purchase_offer.user.username}"
+    )
+    assert trade.seller_offer == sell_offer
+    assert trade.buyer_offer == purchase_offer
+
+    assert buyer_balance == original_buyer_balance - (trade.unit_price * trade.quantity)
+    assert seller_balance == original_seller_balance + (
+        trade.unit_price * trade.quantity
+    )
+
+    assert buyer_inventory == -trade.quantity
+    assert seller_inventory == trade.quantity
+
+
+def test_make_trades(offer_instances):
+    """Ensure that function correctly find suitable offers and make trades between them"""
+
+    purchase_offer = offer_instances[7]
+
+    _make_trades(offer_id=purchase_offer.id)
+
+    trade_1 = Trade.objects.first()
+    trade_2 = Trade.objects.last()
+
+    assert len(Trade.objects.all()) == 2
+    assert Offer.objects.all()[3].is_active == False
+    assert Offer.objects.all()[5].is_active == True
+    assert Offer.objects.all()[6].is_active == True
+    assert Offer.objects.all()[7].is_active == False
+    assert trade_1.buyer_offer == purchase_offer
+    assert trade_1.seller_offer == offer_instances[3]
+    assert trade_2.buyer_offer == purchase_offer
+    assert trade_2.seller_offer == offer_instances[5]
