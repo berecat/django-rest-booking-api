@@ -1,4 +1,4 @@
-from apps.trades.models import Inventory, Offer, Trade
+from apps.trades.models import Inventory, Offer, Trade, Balance
 from apps.trades.services.db_interaction import (
     change_offer_current_quantity, change_user_balance_by_id,
     change_user_inventory, check_purchase_offer_user_balance, create_trade,
@@ -7,7 +7,7 @@ from apps.trades.services.db_interaction import (
     get_currency_by_id, get_full_price_of_trade, get_item_id_by_code,
     get_item_id_related_to_offer, get_offer_by_id, get_offer_price_by_id,
     get_or_create_user_inventory, get_user_balance_quantity_by_offer_id,
-    get_user_by_id, get_user_id_related_to_offer)
+    get_user_by_id, get_user_id_related_to_offer, get_or_create_user_balance)
 
 
 def test_get_all_purchase_active_offers(offer_purchase_instance, offer_sell_instance):
@@ -195,6 +195,38 @@ def test_get_item_id_by_code(item_instance):
     assert item_id == item_instance.id
 
 
+def test_get_or_create_user_balance_with_not_exist_balance(
+    default_user_instance, default_currency_instance
+):
+    """
+    Ensure that function return correct balance instance, which belong to request user
+    With not existing balance for received currency
+    """
+
+    balance = get_or_create_user_balance(
+        user_id=default_user_instance.id, currency_id=default_currency_instance.id
+    )
+
+    assert balance == Balance.objects.get(
+        user_id=default_user_instance.id, currency_id=default_currency_instance.id
+    )
+
+
+def test_get_or_create_user_balance_with_exist_balance(
+    user_instance, default_currency_instance
+):
+    """
+    Ensure that function return correct balance instance, which belong to request user
+    With existing balance for received currency
+    """
+
+    balance = get_or_create_user_balance(
+        user_id=user_instance.id, currency_id=default_currency_instance.id
+    )
+
+    assert balance == user_instance.balance.get(currency=default_currency_instance)
+
+
 def test_change_user_inventory(default_user_instance, item_instance):
     """Ensure that function correctly change user's inventory"""
 
@@ -207,7 +239,7 @@ def test_change_user_inventory(default_user_instance, item_instance):
 
     user_balance = default_user_instance.inventory.get()
 
-    assert user_balance.quantity == change_quantity
+    assert user_balance.quantity == 1000 + change_quantity
 
 
 def test_change_offer_current_quantity(offer_sell_instance):
