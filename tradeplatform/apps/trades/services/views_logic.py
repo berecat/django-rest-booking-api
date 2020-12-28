@@ -14,11 +14,9 @@ def setup_user_attributes(user_id: int) -> None:
 
 
 def check_user_quantity_stocks_for_given_item(
-    user_id: int, item_code: str, quantity: str
+    user_id: int, item_id: int, quantity: str
 ) -> bool:
     """Check that user have enough quantity of stocks to sell"""
-
-    item_id = get_item_id_by_code(item_code=item_code)
 
     inventory = get_or_create_user_inventory(user_id=user_id, item_id=item_id)
 

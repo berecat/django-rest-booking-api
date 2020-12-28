@@ -114,7 +114,7 @@ def test_check_user_quantity_stocks_for_given_item_with_greater_quantity(
 
     result = check_user_quantity_stocks_for_given_item(
         user_id=offer_sell_instance.user.id,
-        item_code=offer_sell_instance.item.code,
+        item_id=offer_sell_instance.item.id,
         quantity="970",
     )
 
@@ -128,7 +128,7 @@ def test_check_user_quantity_stocks_for_given_item_with_smaller_quantity(
 
     result = check_user_quantity_stocks_for_given_item(
         user_id=offer_sell_instance.user.id,
-        item_code=offer_sell_instance.item.code,
+        item_id=offer_sell_instance.item.id,
         quantity="900",
     )
 

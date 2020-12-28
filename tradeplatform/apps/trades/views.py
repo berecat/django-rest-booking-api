@@ -72,7 +72,7 @@ class OfferViewSet(viewsets.ModelViewSet):
 
             if check_user_quantity_stocks_for_given_item(
                 user_id=self.request.user.id,
-                item_code=self.request.data["item"],
+                item_id=self.request.data["item_id"],
                 quantity=self.request.data["entry_quantity"],
             ):
 
