@@ -112,13 +112,6 @@ def get_or_create_user_inventory(user_id: int, item_id: int) -> Optional[Invento
     return inventory
 
 
-def get_item_id_by_code(item_code: str) -> int:
-    """Return item instance by the given code"""
-
-    item = Item.objects.get(code=item_code)
-    return item.id
-
-
 def get_or_create_user_balance(user_id: int, currency_id: int) -> Optional[Balance]:
     """
     Return balance instance, which belongs to the user

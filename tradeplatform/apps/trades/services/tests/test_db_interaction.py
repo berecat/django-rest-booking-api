@@ -4,9 +4,9 @@ from apps.trades.services.db_interaction import (
     change_user_inventory, check_purchase_offer_user_balance, create_trade,
     delete_offer_by_id, get_active_sell_offer_with_suitable_item,
     get_all_purchase_active_offers, get_available_quantity_stocks,
-    get_currency_by_id, get_full_price, get_item_id_by_code,
-    get_item_id_related_to_offer, get_offer_by_id, get_or_create_user_balance,
-    get_or_create_user_inventory, get_user_by_id, get_user_id_related_to_offer)
+    get_currency_by_id, get_full_price, get_item_id_related_to_offer,
+    get_offer_by_id, get_or_create_user_balance, get_or_create_user_inventory,
+    get_user_by_id, get_user_id_related_to_offer)
 
 
 def test_get_all_purchase_active_offers(offer_purchase_instance, offer_sell_instance):
@@ -164,14 +164,6 @@ def test_get_or_create_user_inventory_with_exist_inventory(
     )
 
     assert inventory == correct_inventory
-
-
-def test_get_item_id_by_code(item_instance):
-    """Ensure that function return correct item id by the given code."""
-
-    item_id = get_item_id_by_code(item_code=item_instance.code)
-
-    assert item_id == item_instance.id
 
 
 def test_get_or_create_user_balance_with_not_exist_balance(

@@ -1,7 +1,6 @@
 from apps.trades.models import Currency, Offer
 from apps.trades.services.db_interaction import (get_available_quantity_stocks,
                                                  get_full_price,
-                                                 get_item_id_by_code,
                                                  get_or_create_user_balance,
                                                  get_or_create_user_inventory)
 
