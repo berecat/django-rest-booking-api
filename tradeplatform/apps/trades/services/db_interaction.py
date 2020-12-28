@@ -103,7 +103,7 @@ def check_purchase_offer_user_balance(offer_id: int) -> int:
     return user_balance.quantity
 
 
-def get_full_price_of_trade(sell_offer_id: int, quantity: int) -> int:
+def get_full_price(sell_offer_id: int, quantity: int) -> int:
     """Return full price for creating Trade and correctly changing user's balances"""
 
     sell_offer = get_offer_by_id(offer_id=sell_offer_id)

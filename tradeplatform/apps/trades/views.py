@@ -9,7 +9,8 @@ from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      TradeSerializer, WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
 from apps.trades.services.views_logic import (
-    check_user_quantity_stocks_for_given_item, setup_user_attributes)
+    check_user_balance, check_user_quantity_stocks_for_given_item,
+    setup_user_attributes)
 
 
 class CurrencyViewSet(
@@ -60,27 +61,44 @@ class OfferViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """
-        Check that user has enough quantity of stocks and then create offer instance
+        If the offer has SELL status, check that user have enough quantity of stocks to sell them
+        If the offer has PURCHASE status, check that user have enough money to buy that many stocks
         """
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if (
-            self.request.data["status"] == "SELL"
-            and check_user_quantity_stocks_for_given_item(
+
+        if self.request.data["status"] == "SELL":
+
+            if check_user_quantity_stocks_for_given_item(
                 user_id=self.request.user.id,
                 item_code=self.request.data["item"],
                 quantity=self.request.data["entry_quantity"],
-            )
-            or self.request.data["status"] == "PURCHASE"
-        ):
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED, headers=headers
-            )
-        else:
-            return Response("You don't have enough quantity of stocks to sell")
+            ):
+
+                self.perform_create(serializer)
+                headers = self.get_success_headers(serializer.data)
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED, headers=headers
+                )
+            else:
+                return Response("You don't have enough quantity of stocks to sell")
+
+        elif self.request.data["status"] == "PURCHASE":
+
+            if check_user_balance(
+                user_id=self.request.user.id,
+                quantity=self.request.data["entry_quantity"],
+                price=self.request.data["price"],
+            ):
+
+                self.perform_create(serializer)
+                headers = self.get_success_headers(serializer.data)
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED, headers=headers
+                )
+            else:
+                return Response("You don't have enough money to buy that many stocks")
 
     def perform_create(self, serializer):
         """
