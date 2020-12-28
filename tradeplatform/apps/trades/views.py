@@ -65,12 +65,14 @@ class OfferViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if self.request.data[
-            "status"
-        ] == "SELL" and check_user_quantity_stocks_for_given_item(
-            user_id=self.request.user.id,
-            item_code=self.request.data["item"],
-            quantity=self.request.data["entry_quantity"],
+        if (
+            self.request.data["status"] == "SELL"
+            and check_user_quantity_stocks_for_given_item(
+                user_id=self.request.user.id,
+                item_code=self.request.data["item"],
+                quantity=self.request.data["entry_quantity"],
+            )
+            or self.request.data["status"] == "PURCHASE"
         ):
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)

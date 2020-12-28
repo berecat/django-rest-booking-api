@@ -724,6 +724,7 @@ class TestOffer(APITestCase):
 
         url = reverse("offer-list")
         response = self.client.get(url, format="json")
+        print(response.data)
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 2
