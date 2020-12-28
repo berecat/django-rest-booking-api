@@ -145,7 +145,7 @@ class Inventory(BaseUserItem):
         related_name="inventory",
         related_query_name="inventory",
     )
-    quantity = models.IntegerField("Stocks quantity", default=0)
+    quantity = models.IntegerField("Stocks quantity", default=1000)
 
     class Meta:
         verbose_name = "Inventory"
