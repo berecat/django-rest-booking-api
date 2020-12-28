@@ -24,7 +24,7 @@ def user_instance(default_currency_instance):
     """User instance with balance"""
 
     user = mixer.blend(User)
-    mixer.blend(Balance, user=user, currency=default_currency_instance, quantity=230)
+    mixer.blend(Balance, user=user, currency=default_currency_instance, quantity=1000)
     return user
 
 
@@ -58,6 +58,7 @@ def offer_purchase_instance(user_instance, item_instance):
         status="PURCHASE",
         user=user_instance,
         item=item_instance,
+        price=10,
         entry_quantity=60,
         quantity=0,
     )

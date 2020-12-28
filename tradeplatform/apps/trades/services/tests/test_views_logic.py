@@ -1,7 +1,9 @@
-from apps.trades.models import Balance, Currency, Inventory, Item
+from apps.trades.models import Balance, Currency
 from apps.trades.services.views_logic import (
     _count_current_quantity_in_offers, _return_id_default_currency,
-    check_user_quantity_stocks_for_given_item, setup_user_attributes)
+    check_user_quantity_stocks_for_given_item, setup_user_attributes, _count_current_money_quantity_in_offers,
+    check_user_balance,)
+from apps.trades.services.db_interaction import get_full_price, get_available_quantity_stocks
 
 
 def test_return_id_default_with_exist_currency(default_currency_instance):
@@ -127,6 +129,48 @@ def test_check_user_quantity_stocks_for_given_item_with_smaller_quantity(
         user_id=offer_sell_instance.user.id,
         item_code=offer_sell_instance.item.code,
         quantity="900",
+    )
+
+    assert result == True
+
+
+def test_count_current_money_quantity_in_offers(offer_instances):
+    """Ensure that function return right quantity of stocks that are used in offers"""
+
+    offer = offer_instances[0]
+
+    quantity = _count_current_money_quantity_in_offers(
+        user_id=offer.user.id,
+    )
+
+    assert quantity == get_full_price(sell_offer_id=offer.id, quantity=get_available_quantity_stocks(offer_id=offer.id))
+
+
+def test_count_current_money_quantity_in_offers_with_greater_quantity(
+    offer_instances
+):
+    """Ensure that function return correct boolean value if user hasn't enough quantity of stocks"""
+
+    offer_purchase_instance = offer_instances[0]
+
+    result = check_user_balance(
+        user_id=offer_purchase_instance.user.id,
+        quantity=get_available_quantity_stocks(offer_id=offer_purchase_instance.id),
+        price=offer_purchase_instance.price,
+    )
+
+    assert result == False
+
+
+def test_count_current_money_quantity_in_offers_with_smaller_quantity(
+    offer_purchase_instance,
+):
+    """Ensure that function return correct boolean value if user has enough quantity of stocks"""
+
+    result = check_user_balance(
+        user_id=offer_purchase_instance.user.id,
+        quantity=get_available_quantity_stocks(offer_id=offer_purchase_instance.id),
+        price=5,
     )
 
     assert result == True

@@ -32,12 +32,14 @@ def check_user_quantity_stocks_for_given_item(
     return False
 
 
-def check_user_balance(user_id: int, quantity: int, price: int) -> bool:
+def check_user_balance(user_id: int, quantity: str, price: str) -> bool:
     """Check that user have enough money to buy certain quantity of stocks"""
 
-    full_price = quantity * price
+    full_price = int(quantity) * int(price)
 
-    balance = get_or_create_user_balance(user_id=user_id)
+    default_currency_id = _return_id_default_currency()
+    balance = get_or_create_user_balance(user_id=user_id, currency_id=default_currency_id)
+
     money_quantity = _count_current_money_quantity_in_offers(user_id=user_id)
 
     if (balance.quantity - money_quantity) < full_price:
@@ -59,7 +61,7 @@ def _count_current_money_quantity_in_offers(user_id: int) -> int:
 
         money_in_offers += quantity
 
-    return quantity
+    return money_in_offers
 
 
 def _count_current_quantity_in_offers(user_id: int, item_id: int) -> int:

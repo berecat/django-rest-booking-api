@@ -4,7 +4,7 @@ from apps.trades.services.db_interaction import (
     change_user_inventory, check_purchase_offer_user_balance, create_trade,
     delete_offer_by_id, get_active_sell_offer_with_suitable_item,
     get_all_purchase_active_offers, get_available_quantity_stocks,
-    get_currency_by_id, get_full_price_of_trade, get_item_id_by_code,
+    get_currency_by_id, get_full_price, get_item_id_by_code,
     get_item_id_related_to_offer, get_offer_by_id, get_offer_price_by_id,
     get_or_create_user_balance, get_or_create_user_inventory,
     get_user_balance_quantity_by_offer_id, get_user_by_id,
@@ -137,7 +137,7 @@ def test_check_purchase_offer_user_balance(offer_purchase_instance):
 def test_get_full_price_of_trade(offer_sell_instance):
     """Ensure that function return correct full price of trade"""
 
-    full_price = get_full_price_of_trade(
+    full_price = get_full_price(
         sell_offer_id=offer_sell_instance.id, quantity=80
     )
 

@@ -2,7 +2,7 @@ from apps.trades.services.db_interaction import (
     change_offer_current_quantity, change_user_balance_by_id,
     change_user_inventory, create_trade, delete_offer_by_id,
     get_active_sell_offer_with_suitable_item, get_all_purchase_active_offers,
-    get_available_quantity_stocks, get_full_price_of_trade,
+    get_available_quantity_stocks, get_full_price,
     get_item_id_related_to_offer, get_offer_price_by_id,
     get_user_balance_quantity_by_offer_id, get_user_id_related_to_offer)
 
@@ -76,7 +76,7 @@ def _create_trade(sell_offer_id: int, purchase_offer_id: int) -> None:
     final_quantity = _final_stocks_quantity_by_user_balance(
         sell_offer_id=sell_offer_id, purchase_offer_id=purchase_offer_id
     )
-    full_price = get_full_price_of_trade(
+    full_price = get_full_price(
         sell_offer_id=sell_offer_id, quantity=final_quantity
     )
 
