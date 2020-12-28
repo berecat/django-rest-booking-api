@@ -687,8 +687,8 @@ class TestOffer(APITestCase):
         data = {
             "item": self.item_1.code,
             "status": "PURCHASE",
-            "entry_quantity": 2131,
-            "price": Decimal("32212.23"),
+            "entry_quantity": 10,
+            "price": Decimal("100"),
             "is_active": True,
         }
         response = self.post_offer(data)
@@ -711,8 +711,8 @@ class TestOffer(APITestCase):
         data_offer_1 = {
             "item": self.item_1.code,
             "status": "PURCHASE",
-            "entry_quantity": 2131,
-            "price": Decimal("32212.23"),
+            "entry_quantity": 6,
+            "price": Decimal("100.00"),
             "is_active": True,
         }
         self.post_offer(data_offer_1)
@@ -720,8 +720,8 @@ class TestOffer(APITestCase):
         data_offer_2 = {
             "item": self.item_2.code,
             "status": "SELL",
-            "entry_quantity": 700,
-            "price": Decimal("3222.23"),
+            "entry_quantity": 7,
+            "price": Decimal("40.00"),
             "is_active": True,
         }
         self.post_offer(data_offer_2)
