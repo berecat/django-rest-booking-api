@@ -38,7 +38,7 @@ def test_change_user_inventory_by_offer_id_with_not_exist_inventory(
     offer = get_offer_by_id(offer_id=offer_id)
     user_inventory = offer.user.inventory.get(item_id=offer.item.id)
 
-    assert user_inventory.quantity == change_quantity
+    assert user_inventory.quantity == 1000 + change_quantity
 
 
 def test_change_user_inventory_by_offer_id_with_exist_inventory(
@@ -199,7 +199,7 @@ def test_prepare_for_trade(offer_purchase_instance):
     user_inventory = user.inventory.get(item_id=offer_purchase_instance.item)
 
     assert user_balance.quantity == current_money_quantity + money_quantity
-    assert user_inventory.quantity == quantity
+    assert user_inventory.quantity == 1000 + quantity
     assert Offer.objects.get().quantity == current_offer_quantity + quantity
 
 
@@ -297,8 +297,8 @@ def test_create_trade_with_equal_quantity_stocks(offer_instances):
     assert seller_balance == original_seller_balance + (
         trade.unit_price * trade.quantity
     )
-    assert buyer_inventory == -trade.quantity
-    assert seller_inventory == trade.quantity
+    assert buyer_inventory == 1000 - trade.quantity
+    assert seller_inventory == 1000 + trade.quantity
 
 
 def test_confirm_trade_with_greatest_sell_stocks(offer_instances):

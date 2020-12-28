@@ -1,4 +1,4 @@
-from apps.trades.models import Inventory, Offer, Trade, Balance
+from apps.trades.models import Balance, Inventory, Offer, Trade
 from apps.trades.services.db_interaction import (
     change_offer_current_quantity, change_user_balance_by_id,
     change_user_inventory, check_purchase_offer_user_balance, create_trade,
@@ -6,8 +6,9 @@ from apps.trades.services.db_interaction import (
     get_all_purchase_active_offers, get_available_quantity_stocks,
     get_currency_by_id, get_full_price_of_trade, get_item_id_by_code,
     get_item_id_related_to_offer, get_offer_by_id, get_offer_price_by_id,
-    get_or_create_user_inventory, get_user_balance_quantity_by_offer_id,
-    get_user_by_id, get_user_id_related_to_offer, get_or_create_user_balance)
+    get_or_create_user_balance, get_or_create_user_inventory,
+    get_user_balance_quantity_by_offer_id, get_user_by_id,
+    get_user_id_related_to_offer)
 
 
 def test_get_all_purchase_active_offers(offer_purchase_instance, offer_sell_instance):
