@@ -105,7 +105,7 @@ class OfferSerializer(BaseUserItemSerializer):
             "price",
             "is_active",
         )
-        read_only_fields = ("quantity",)
+        read_only_fields = ("quantity", "is_active")
 
 
 class InventorySerializer(BaseUserItemSerializer):
