@@ -198,3 +198,320 @@ def test_delete_empty_offer_without_remaining_stocks(offer_purchase_instance):
 
     assert result == True
     assert Offer.objects.get().is_active == False
+
+
+def test_create_trade_with_equal_quantity_stocks(offer_instances):
+    """
+    Ensure that function correctly create Trade instance by the given offers
+    """
+
+    purchase_offer = offer_instances[0]
+    sell_offer = offer_instances[6]
+
+    buyer = purchase_offer.user
+    seller = sell_offer.user
+
+    original_buyer_balance = buyer.balance.get().quantity
+    original_seller_balance = seller.balance.get().quantity
+
+    correct_quantity = get_available_quantity_stocks(offer_id=sell_offer.id)
+
+    _create_trade(sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id)
+
+    trade = Trade.objects.get()
+
+    buyer_balance = buyer.balance.get().quantity
+    buyer_inventory = buyer.inventory.get(item_id=purchase_offer.item).quantity
+
+    seller_balance = seller.balance.get().quantity
+    seller_inventory = seller.inventory.get(item_id=purchase_offer.item).quantity
+
+    assert trade.item == purchase_offer.item
+    assert trade.item == sell_offer.item
+    assert trade.seller == sell_offer.user
+    assert trade.buyer == purchase_offer.user
+    assert trade.quantity == correct_quantity
+    assert trade.unit_price == sell_offer.price
+    assert (
+        trade.description
+        == f"Trade between {sell_offer.user.username} and {purchase_offer.user.username}"
+    )
+    assert trade.seller_offer == sell_offer
+    assert trade.buyer_offer == purchase_offer
+    assert buyer_balance == original_buyer_balance - (trade.unit_price * trade.quantity)
+    assert seller_balance == original_seller_balance + (
+        trade.unit_price * trade.quantity
+    )
+    assert buyer_inventory == 1000 - trade.quantity
+    assert seller_inventory == 1000 + trade.quantity
+
+
+def test_confirm_trade_with_equal_stocks_quantity(offer_instances):
+    """
+    Ensure that function create correct trade instance and delete right offer instances
+    Since offers has equal quantity of stocks, function has to delete both offers
+    """
+
+    purchase_offer = offer_instances[0]
+    sell_offer = offer_instances[6]
+
+    buyer = purchase_offer.user
+    seller = sell_offer.user
+
+    correct_quantity = get_available_quantity_stocks(offer_id=sell_offer.id)
+
+    original_buyer_balance = buyer.balance.get().quantity
+    original_seller_balance = seller.balance.get().quantity
+
+    _confirm_trade(sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id)
+
+    buyer_balance = buyer.balance.get().quantity
+    buyer_inventory = buyer.inventory.get(item_id=purchase_offer.item).quantity
+
+    seller_balance = seller.balance.get().quantity
+    seller_inventory = seller.inventory.get(item_id=purchase_offer.item).quantity
+
+    trade = Trade.objects.get()
+
+    assert Trade.objects.count() == 1
+    assert Offer.objects.get(id=purchase_offer.id).is_active == False
+    assert Offer.objects.get(id=sell_offer.id).is_active == False
+
+    assert trade.item == purchase_offer.item
+    assert trade.item == sell_offer.item
+    assert trade.seller == sell_offer.user
+    assert trade.buyer == purchase_offer.user
+    assert trade.quantity == correct_quantity
+    assert trade.unit_price == sell_offer.price
+    assert (
+        trade.description
+        == f"Trade between {sell_offer.user.username} and {purchase_offer.user.username}"
+    )
+    assert trade.seller_offer == sell_offer
+    assert trade.buyer_offer == purchase_offer
+    assert buyer_balance == original_buyer_balance - (trade.unit_price * trade.quantity)
+    assert seller_balance == original_seller_balance + (
+        trade.unit_price * trade.quantity
+    )
+    assert buyer_inventory == 1000 - trade.quantity
+    assert seller_inventory == 1000 + trade.quantity
+
+
+def test_confirm_trade_with_greatest_sell_stocks_quantity(offer_instances):
+    """
+    Ensure that function create correct trade instance and delete right offer instances
+    Since sell offer has more quantity of stocks than purchase offer, function has to delete purchase offer
+    """
+
+    purchase_offer = offer_instances[0]
+    sell_offer = offer_instances[5]
+
+    buyer = purchase_offer.user
+    seller = sell_offer.user
+
+    correct_quantity = get_available_quantity_stocks(offer_id=purchase_offer.id)
+
+    original_buyer_balance = buyer.balance.get().quantity
+    original_seller_balance = seller.balance.get().quantity
+
+    _confirm_trade(sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id)
+
+    buyer_balance = buyer.balance.get().quantity
+    buyer_inventory = buyer.inventory.get(item_id=purchase_offer.item).quantity
+
+    seller_balance = seller.balance.get().quantity
+    seller_inventory = seller.inventory.get(item_id=purchase_offer.item).quantity
+
+    trade = Trade.objects.get()
+
+    assert Trade.objects.count() == 1
+    assert Offer.objects.get(id=purchase_offer.id).is_active == False
+    assert Offer.objects.get(id=sell_offer.id).is_active == True
+
+    assert trade.item == purchase_offer.item
+    assert trade.item == sell_offer.item
+    assert trade.seller == sell_offer.user
+    assert trade.buyer == purchase_offer.user
+    assert trade.quantity == correct_quantity
+    assert trade.unit_price == sell_offer.price
+    assert (
+        trade.description
+        == f"Trade between {sell_offer.user.username} and {purchase_offer.user.username}"
+    )
+    assert trade.seller_offer == sell_offer
+    assert trade.buyer_offer == purchase_offer
+    assert buyer_balance == original_buyer_balance - (trade.unit_price * trade.quantity)
+    assert seller_balance == original_seller_balance + (
+        trade.unit_price * trade.quantity
+    )
+    assert buyer_inventory == 1000 - trade.quantity
+    assert seller_inventory == 1000 + trade.quantity
+
+
+def test_confirm_trade_with_greatest_purchase_stocks_quantity(offer_instances):
+    """
+    Ensure that function create correct trade instance and delete right offer instances
+    Since purchase offer has more quantity of stocks than sell offer, function has to delete sell offer
+    """
+
+    purchase_offer = offer_instances[0]
+    sell_offer = offer_instances[3]
+
+    buyer = purchase_offer.user
+    seller = sell_offer.user
+
+    correct_quantity = get_available_quantity_stocks(offer_id=sell_offer.id)
+
+    original_buyer_balance = buyer.balance.get().quantity
+    original_seller_balance = seller.balance.get().quantity
+
+    _confirm_trade(sell_offer_id=sell_offer.id, purchase_offer_id=purchase_offer.id)
+
+    buyer_balance = buyer.balance.get().quantity
+    buyer_inventory = buyer.inventory.get(item_id=purchase_offer.item).quantity
+
+    seller_balance = seller.balance.get().quantity
+    seller_inventory = seller.inventory.get(item_id=purchase_offer.item).quantity
+
+    trade = Trade.objects.get()
+
+    assert Trade.objects.count() == 1
+    assert Offer.objects.get(id=purchase_offer.id).is_active == True
+    assert Offer.objects.get(id=sell_offer.id).is_active == False
+
+    assert trade.item == purchase_offer.item
+    assert trade.item == sell_offer.item
+    assert trade.seller == sell_offer.user
+    assert trade.buyer == purchase_offer.user
+    assert trade.quantity == correct_quantity
+    assert trade.unit_price == sell_offer.price
+    assert (
+        trade.description
+        == f"Trade between {sell_offer.user.username} and {purchase_offer.user.username}"
+    )
+    assert trade.seller_offer == sell_offer
+    assert trade.buyer_offer == purchase_offer
+    assert buyer_balance == original_buyer_balance - (trade.unit_price * trade.quantity)
+    assert seller_balance == original_seller_balance + (
+        trade.unit_price * trade.quantity
+    )
+    assert buyer_inventory == 1000 - trade.quantity
+    assert seller_inventory == 1000 + trade.quantity
+
+
+def test_make_trades_with_greatest_purchase_stocks(offer_instances):
+    """
+    Ensure that function create right trade instances
+    Since purchase offer has more quantity of stocks than one sell offer
+    Function has to create 2 trade instances with different sell offer instances
+    And delete purchase offer and first sell offer
+    """
+
+    purchase_offer = offer_instances[0]
+    sell_offer_1 = offer_instances[3]
+    sell_offer_2 = offer_instances[5]
+
+    current_purchase_quantity = get_available_quantity_stocks(
+        offer_id=purchase_offer.id
+    )
+    current_sell_quantity_1 = get_available_quantity_stocks(offer_id=sell_offer_1.id)
+    current_sell_quantity_2 = get_available_quantity_stocks(offer_id=sell_offer_2.id)
+
+    correct_quantity_1 = current_sell_quantity_1
+    correct_quantity_2 = current_purchase_quantity - correct_quantity_1
+
+    _make_trades(offer_id=purchase_offer.id)
+
+    trade_1 = Trade.objects.first()
+    trade_2 = Trade.objects.last()
+
+    assert Trade.objects.count() == 2
+    assert Offer.objects.get(id=purchase_offer.id).is_active == False
+    assert Offer.objects.get(id=sell_offer_1.id).is_active == False
+    assert Offer.objects.get(id=sell_offer_2.id).is_active == True
+
+    assert trade_1.seller_offer == sell_offer_1
+    assert trade_1.buyer_offer == purchase_offer
+    assert trade_1.quantity == correct_quantity_1
+    assert trade_1.unit_price == sell_offer_1.price
+    assert get_available_quantity_stocks(offer_id=sell_offer_1.id) == 0
+
+    assert trade_2.seller_offer == sell_offer_2
+    assert trade_2.buyer_offer == purchase_offer
+    assert trade_2.quantity == correct_quantity_2
+    assert trade_2.unit_price == sell_offer_2.price
+    assert (
+        get_available_quantity_stocks(offer_id=sell_offer_2.id)
+        == current_sell_quantity_2 - trade_2.quantity
+    )
+    assert get_available_quantity_stocks(offer_id=purchase_offer.id) == 0
+
+
+def test_make_trades_with_equal_stocks(offer_instances):
+    """
+    Ensure that function create right trade instance
+    Since purchase offer and sell offer have equal quantity of stocks
+    Function has to create trade instance and delete both offers
+    """
+
+    purchase_offer = offer_instances[0]
+    sell_offer = offer_instances[3]
+    sell_offer.quantity = purchase_offer.quantity
+    sell_offer.entry_quantity = purchase_offer.entry_quantity
+    sell_offer.save()
+
+    correct_quantity = get_available_quantity_stocks(offer_id=purchase_offer.id)
+
+    _make_trades(offer_id=purchase_offer.id)
+
+    trade = Trade.objects.get()
+
+    assert Trade.objects.count() == 1
+    assert Offer.objects.get(id=purchase_offer.id).is_active == False
+    assert Offer.objects.get(id=sell_offer.id).is_active == False
+
+    assert trade.seller_offer == sell_offer
+    assert trade.buyer_offer == purchase_offer
+    assert trade.quantity == correct_quantity
+    assert trade.unit_price == sell_offer.price
+
+    assert get_available_quantity_stocks(offer_id=sell_offer.id) == 0
+    assert get_available_quantity_stocks(offer_id=purchase_offer.id) == 0
+
+
+def test_make_trades_with_greatest_sell_stocks(offer_instances):
+    """
+    Ensure that function create right trade instance
+    Since sell offer has more quantity of stocks than purchase offer
+    Function has to create trade instance and delete purchase offer
+    """
+
+    purchase_offer = offer_instances[0]
+    sell_offer = offer_instances[3]
+    sell_offer.quantity = purchase_offer.quantity
+    sell_offer.entry_quantity = purchase_offer.entry_quantity + 70
+    sell_offer.save()
+
+    correct_available_quantity = get_available_quantity_stocks(
+        offer_id=sell_offer.id
+    ) - get_available_quantity_stocks(offer_id=purchase_offer.id)
+    correct_quantity = get_available_quantity_stocks(offer_id=purchase_offer.id)
+
+    _make_trades(offer_id=purchase_offer.id)
+
+    trade = Trade.objects.get()
+
+    assert Trade.objects.count() == 1
+    assert Offer.objects.get(id=purchase_offer.id).is_active == False
+    assert Offer.objects.get(id=sell_offer.id).is_active == True
+
+    assert trade.seller_offer == sell_offer
+    assert trade.buyer_offer == purchase_offer
+    assert trade.quantity == correct_quantity
+    assert trade.unit_price == sell_offer.price
+
+    assert get_available_quantity_stocks(offer_id=purchase_offer.id) == 0
+    assert (
+        get_available_quantity_stocks(offer_id=sell_offer.id)
+        == correct_available_quantity
+    )

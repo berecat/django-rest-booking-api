@@ -84,10 +84,14 @@ def user_instances(default_currency_instance):
     """Return two users instances for making trade between them"""
 
     user_1 = mixer.blend(User)
-    mixer.blend(Balance, user=user_1, currency=default_currency_instance, quantity=230)
+    mixer.blend(
+        Balance, user=user_1, currency=default_currency_instance, quantity=10000000
+    )
 
     user_2 = mixer.blend(User)
-    mixer.blend(Balance, user=user_2, currency=default_currency_instance, quantity=433)
+    mixer.blend(
+        Balance, user=user_2, currency=default_currency_instance, quantity=10000000
+    )
 
     user_3 = mixer.blend(User)
     mixer.blend(
@@ -201,7 +205,7 @@ def offer_instances(user_instances, item_instances):
             user=buyer,
             item=item_1,
             price=50,
-            entry_quantity=1434,
+            entry_quantity=1424,
             quantity=60,
             is_active=True,
         ),

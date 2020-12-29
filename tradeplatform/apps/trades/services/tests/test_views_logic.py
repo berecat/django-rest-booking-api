@@ -158,7 +158,7 @@ def test_count_current_money_quantity_in_offers_with_greater_quantity(offer_inst
     result = check_user_balance(
         user_id=offer_purchase_instance.user.id,
         quantity=get_available_quantity_stocks(offer_id=offer_purchase_instance.id),
-        price=offer_purchase_instance.price,
+        price=10000,
     )
 
     assert result == False
