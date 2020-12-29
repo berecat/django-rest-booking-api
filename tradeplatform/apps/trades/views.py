@@ -1,6 +1,8 @@
 from rest_framework import mixins, status, viewsets
 from rest_framework.response import Response
 
+from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
+                                       OfferFilter, PriceFilter, TradeFilter)
 from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
                                 Price, Trade, WatchList)
 from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
@@ -26,16 +28,16 @@ class CurrencyViewSet(
     serializer_class = CurrencySerializer
 
     filter_fields = (
-        'name',
-        'code',
+        "name",
+        "code",
     )
     search_fields = (
-        '^name',
-        '^code',
+        "^name",
+        "^code",
     )
     ordering_fields = (
-        'name',
-        'code',
+        "name",
+        "code",
     )
 
 
@@ -46,16 +48,16 @@ class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
 
     filter_fields = (
-        'name',
-        'code',
+        "name",
+        "code",
     )
     search_fields = (
-        '^name',
-        '^code',
+        "^name",
+        "^code",
     )
     ordering_fields = (
-        'name',
-        'code',
+        "name",
+        "code",
     )
 
 
@@ -65,19 +67,13 @@ class PriceViewSet(viewsets.ModelViewSet):
     queryset = Price.objects.all()
     serializer_class = PriceSerializer
 
-    filter_fields = (
-        'item__code',
-        'currency__code',
-        'price',
-    )
-    search_fields = (
-        '^item__code',
-    )
+    filter_class = PriceFilter
+    search_fields = ("^item__code",)
     ordering_fields = (
-        'item__code',
-        'currency__code',
-        'price',
-        'date',
+        "item__code",
+        "currency__code",
+        "price",
+        "date",
     )
 
 
@@ -93,15 +89,9 @@ class WatchListViewSet(
     queryset = WatchList.objects.all()
     serializer_class = WatchListSerializer
 
-    filter_fields = (
-        'user__username',
-    )
-    search_fields = (
-        'user__username',
-    )
-    ordering_fields = (
-        'user__username',
-    )
+    filter_fields = ("user__username",)
+    search_fields = ("user__username",)
+    ordering_fields = ("user__username",)
 
 
 class OfferViewSet(viewsets.ModelViewSet):
@@ -110,22 +100,13 @@ class OfferViewSet(viewsets.ModelViewSet):
     queryset = Offer.objects.all()
     serializer_class = OfferSerializer
 
-    filter_fields = (
-        'status',
-        'user__username',
-        'entry_quantity',
-        'quantity',
-        'price',
-        'is_active',
-    )
-    search_fields = (
-        'user__username',
-    )
+    filter_class = OfferFilter
+    search_fields = ("user__username",)
     ordering_fields = (
-        'user__username',
-        'price',
-        'entry_quantity',
-        'quantity',
+        "user__username",
+        "price",
+        "entry_quantity",
+        "quantity",
     )
 
     def create(self, request, *args, **kwargs):
@@ -195,19 +176,15 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
 
-    filter_fields = (
-        'user__username',
-        'item__code',
-        'quantity',
-    )
+    filter_class = InventoryFilter
     search_fields = (
-        'user__username',
-        'item__code',
+        "user__username",
+        "item__code",
     )
     ordering_fields = (
-        'user__username',
-        'item__code',
-        'quantity',
+        "user__username",
+        "item__code",
+        "quantity",
     )
 
 
@@ -217,19 +194,15 @@ class BalanceViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Balance.objects.all()
     serializer_class = BalanceSerializer
 
-    filter_fields = (
-        'user__username',
-        'currency__code',
-        'quantity',
-    )
+    filter_class = BalanceFilter
     search_fields = (
-        'user__username',
-        'currency__code',
+        "user__username",
+        "currency__code",
     )
     ordering_fields = (
-        'user__username',
-        'currency__code',
-        'quantity',
+        "user__username",
+        "currency__code",
+        "quantity",
     )
 
 
@@ -239,13 +212,7 @@ class TradeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Trade.objects.all()
     serializer_class = TradeSerializer
 
-    filter_fields = (
-        "item__code",
-        "seller__username",
-        "buyer__username",
-        'unit_price',
-        'quantity',
-    )
+    filter_class = TradeFilter
     search_fields = (
         "item__code",
         "seller__username",
