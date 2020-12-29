@@ -5,7 +5,7 @@ from apps.trades.services.trader_logic import (
     _change_user_balance_by_offer_id, _change_user_inventory_by_offer_id,
     _check_offer_quantity, _confirm_trade, _create_trade, _delete_empty_offer,
     _make_trades, _prepare_for_trade,
-    _stocks_quantity_for_trade_by_given_offers)
+    _stocks_quantity_for_trade_by_given_offers, create_trades_between_users)
 
 
 def test_change_user_balance_by_offer_id(offer_sell_instance):
@@ -515,3 +515,85 @@ def test_make_trades_with_greatest_sell_stocks(offer_instances):
         get_available_quantity_stocks(offer_id=sell_offer.id)
         == correct_available_quantity
     )
+
+
+def test_create_trades_between_users(offer_instances):
+    """Ensure that function find suitable offers and create right trade instances between them"""
+
+    purchase_offer_1 = offer_instances[0]
+    purchase_offer_2 = offer_instances[7]
+
+    sell_offer_1 = offer_instances[3]
+    sell_offer_2 = offer_instances[5]
+    sell_offer_3 = offer_instances[8]
+
+    create_trades_between_users()
+
+    trades_purchase_1 = Trade.objects.all().filter(buyer_offer__id=purchase_offer_1.id)
+    trades_purchase_2 = Trade.objects.all().filter(buyer_offer__id=purchase_offer_2.id)
+
+    assert trades_purchase_1.count() == 2
+    assert trades_purchase_2.count() == 2
+
+    assert trades_purchase_1[0].seller_offer == sell_offer_1
+    assert trades_purchase_1[1].seller_offer == sell_offer_2
+    assert Offer.objects.get(id=sell_offer_1.id).is_active == False
+    assert Offer.objects.get(id=sell_offer_2.id).is_active == True
+    assert Offer.objects.get(id=purchase_offer_1.id).is_active == False
+
+    assert trades_purchase_2[0].seller_offer == sell_offer_3
+    assert trades_purchase_2[1].seller_offer == sell_offer_2
+    assert Offer.objects.get(id=sell_offer_3.id).is_active == False
+    assert Offer.objects.get(id=sell_offer_2.id).is_active == True
+    assert Offer.objects.get(id=purchase_offer_2.id).is_active == False
+
+
+def test_create_trades_between_users_with_greatest_purchase_quantity(
+    offer_purchase_instance, offer_sell_instance, user_instances
+):
+    """
+    Ensure that function create right trade instances and correctly delete offer instance
+    Since purchase offer has more quantity than sell offer
+    Function has to create 1 trade instance and delete sell offer instance
+    """
+
+    offer_sell_instance.user = user_instances[1]
+    offer_sell_instance.item = offer_purchase_instance.item
+    offer_sell_instance.price = offer_purchase_instance.price - 2
+    offer_sell_instance.save()
+
+    create_trades_between_users()
+
+    trade = Trade.objects.get()
+
+    assert Trade.objects.count() == 1
+    assert trade.buyer_offer == offer_purchase_instance
+    assert trade.seller_offer == offer_sell_instance
+    assert Offer.objects.get(id=offer_purchase_instance.id).is_active == True
+    assert Offer.objects.get(id=offer_sell_instance.id).is_active == False
+
+
+def test_create_trades_between_users_with_greatest_sell_quantity(
+    offer_purchase_instance, offer_sell_instance, user_instances
+):
+    """
+    Ensure that function create right trade instances and correctly delete offer instance
+    Since sell offer has more quantity than purchase offer
+    Function has to create 1 trade instance and delete purchase offer instance
+    """
+
+    offer_sell_instance.user = user_instances[1]
+    offer_sell_instance.entry_quantity = 150
+    offer_sell_instance.item = offer_purchase_instance.item
+    offer_sell_instance.price = offer_purchase_instance.price - 2
+    offer_sell_instance.save()
+
+    create_trades_between_users()
+
+    trade = Trade.objects.get()
+
+    assert Trade.objects.count() == 1
+    assert trade.buyer_offer == offer_purchase_instance
+    assert trade.seller_offer == offer_sell_instance
+    assert Offer.objects.get(id=offer_purchase_instance.id).is_active == False
+    assert Offer.objects.get(id=offer_sell_instance.id).is_active == True
