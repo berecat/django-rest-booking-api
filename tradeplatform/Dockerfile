@@ -16,3 +16,5 @@ RUN pipenv install --system --deploy --ignore-pipfile
 
 COPY . .
 RUN chmod +x ./entrypoint.sh
+
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

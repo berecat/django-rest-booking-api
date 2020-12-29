@@ -2,7 +2,6 @@ version: '3.7'
 services:
   web:
     build: .
-    entrypoint: "/usr/src/app/entrypoint.sh"
     volumes:
       - .:/usr/src/app/
     ports:
@@ -30,7 +29,7 @@ services:
     build: .
     volumes:
       - .:/usr/src/app/
-    command: celery -A core worker -l info
+    entrypoint: celery -A core worker -l info
     env_file:
       - ./env.dev
     depends_on:
@@ -42,7 +41,7 @@ services:
     build: .
     volumes:
       - .:/usr/src/app/
-    command: celery -A core beat -l info
+    entrypoint: celery -A core beat -l info
     env_file:
       - ./env.dev
     depends_on:
