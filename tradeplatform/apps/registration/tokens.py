@@ -3,6 +3,8 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 
 class TokenGenerator(PasswordResetTokenGenerator):
+    """Class for generate token for user's mail confirmation"""
+
     def _make_hash_value(self, user, timestamp):
         return (
             six.text_type(user.pk)

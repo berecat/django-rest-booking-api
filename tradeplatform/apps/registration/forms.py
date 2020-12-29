@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 
 
 class SignupForm(UserCreationForm):
+    """Form for user's registration"""
+
     email = forms.EmailField(max_length=200, help_text="Required")
 
     class Meta:

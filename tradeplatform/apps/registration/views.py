@@ -1,5 +1,8 @@
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
+from apps.registration.models import UserProfile
+from apps.registration.serializers import UserProfileSerializer, UserSerializer
+
+from django.contrib.auth import authenticate, login
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.http import HttpResponse
@@ -8,9 +11,6 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import viewsets
-
-from apps.registration.models import UserProfile
-from apps.registration.serializers import UserProfileSerializer, UserSerializer
 
 from .forms import SignupForm
 from .tokens import account_activation_token
@@ -31,6 +31,8 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 
 
 def signup(request):
+    """View for user's registration"""
+
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
@@ -59,14 +61,16 @@ def signup(request):
 
 
 def activate(request, uidb64, token):
+    """View for confirmation user's mail address"""
+
     try:
         uid = force_text(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
     if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.save()
+        user.profile.is_valid = True
+        user.profile.save()
         login(request, user)
         return HttpResponse(
             "Thank you for your email confirmation. Now you can login your account."
