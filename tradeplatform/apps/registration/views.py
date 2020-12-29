@@ -1,19 +1,18 @@
+from django.contrib.auth import login
+from django.http import HttpResponse
+from django.contrib.sites.shortcuts import get_current_site
+from django.shortcuts import render
+from django.utils.encoding import force_text
+from django.utils.http import urlsafe_base64_decode
+from rest_framework import viewsets
+
 from django.contrib.auth.models import User
 from apps.registration.models import UserProfile
 from apps.registration.serializers import UserProfileSerializer, UserSerializer
 
-from django.contrib.auth import authenticate, login
-from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMessage
-from django.http import HttpResponse
-from django.shortcuts import redirect, render
-from django.template.loader import render_to_string
-from django.utils.encoding import force_bytes, force_text
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from rest_framework import viewsets
-
-from .forms import SignupForm
-from .tokens import account_activation_token
+from apps.registration.forms import SignupForm
+from apps.registration.tokens import account_activation_token
+from apps.registration.tasks import send_confirmation_mail_message
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -38,20 +37,10 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             UserProfile.objects.create(user=user)
-            current_site = get_current_site(request)
-            mail_subject = "Activate your blog account."
-            message = render_to_string(
-                "acc_active_email.html",
-                {
-                    "user": user,
-                    "domain": current_site.domain,
-                    "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-                    "token": account_activation_token.make_token(user),
-                },
-            )
-            to_email = form.cleaned_data.get("email")
-            email = EmailMessage(mail_subject, message, to=[to_email])
-            email.send()
+            domain = get_current_site(request).domain
+
+            send_confirmation_mail_message.delay(user_id=user.id, domain=domain)
+
             return HttpResponse(
                 "Please confirm your email address to complete the registration"
             )
