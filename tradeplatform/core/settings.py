@@ -169,7 +169,7 @@ SIMPLE_JWT = {
 }
 
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'testapiuser961@gmail.com'
-EMAIL_HOST_PASSWORD = '1234554321test'
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = "testapiuser961@gmail.com"
+EMAIL_HOST_PASSWORD = "1234554321test"
 EMAIL_PORT = 587
