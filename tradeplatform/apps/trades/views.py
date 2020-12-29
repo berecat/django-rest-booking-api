@@ -93,6 +93,11 @@ class WatchListViewSet(
     search_fields = ("user__username",)
     ordering_fields = ("user__username",)
 
+    def perform_create(self, serializer):
+        """When receive post method, connect offer instance with current user"""
+
+        serializer.save(user=self.request.user)
+
 
 class OfferViewSet(viewsets.ModelViewSet):
     """ViewSet for Offer model"""
