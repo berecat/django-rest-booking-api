@@ -1,18 +1,19 @@
 from django.contrib.auth import login
-from django.http import HttpResponse
+from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import viewsets
 
-from django.contrib.auth.models import User
+from apps.registration.forms import SignupForm
 from apps.registration.models import UserProfile
 from apps.registration.serializers import UserProfileSerializer, UserSerializer
-
-from apps.registration.forms import SignupForm
-from apps.registration.tokens import account_activation_token
 from apps.registration.tasks import send_confirmation_mail_message
+from apps.registration.tokens import account_activation_token
+from apps.trades.services.db_interaction import (
+    change_user_profile_valid_by_id, get_user_by_id)
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -52,14 +53,13 @@ def signup(request):
 def activate(request, uidb64, token):
     """View for confirmation user's mail address"""
 
+    uid = force_text(urlsafe_base64_decode(uidb64))
     try:
-        uid = force_text(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
+        user = get_user_by_id(user_id=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
     if user is not None and account_activation_token.check_token(user, token):
-        user.profile.is_valid = True
-        user.profile.save()
+        change_user_profile_valid_by_id(user_id=uid)
         login(request, user)
         return HttpResponse(
             "Thank you for your email confirmation. Now you can login your account."
