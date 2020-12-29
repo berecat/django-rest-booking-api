@@ -9,8 +9,8 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import viewsets
 
-from apps.registration.serializers import UserProfileSerializer, UserSerializer
 from apps.registration.models import UserProfile
+from apps.registration.serializers import UserProfileSerializer, UserSerializer
 
 from .forms import SignupForm
 from .tokens import account_activation_token

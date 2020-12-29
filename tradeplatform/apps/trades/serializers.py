@@ -1,9 +1,9 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from apps.registration.serializers import UserSerializer
 from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
                                 Price, Trade, WatchList)
-from apps.registration.serializers import UserSerializer
 
 
 class StockBaseSerializer(serializers.ModelSerializer):
@@ -126,9 +126,7 @@ class InventorySerializer(BaseUserItemSerializer):
 class BalanceSerializer(serializers.ModelSerializer):
     """Serializer for Balance model"""
 
-    user = serializers.SlugRelatedField(
-        queryset=User.objects.all(), slug_field="username"
-    )
+    user = UserSerializer(read_only=True)
     currency = serializers.SlugRelatedField(
         queryset=Currency.objects.all(), slug_field="code"
     )
