@@ -61,7 +61,19 @@ class ItemSerializer(StockBaseSerializer):
         )
 
 
-class WatchListSerializer(serializers.ModelSerializer):
+class BaseUserItemSerializer(serializers.ModelSerializer):
+    """Serializer for BaseUserItem base model"""
+
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field="username"
+    )
+    item = ItemSerializer(read_only=True)
+    item_id = serializers.PrimaryKeyRelatedField(
+        queryset=Item.objects.all(), source="item", write_only=True
+    )
+
+
+class WatchListSerializer(BaseUserItemSerializer):
     """Serializer for WatchList model"""
 
     item = ItemSerializer(read_only=True, many=True)
@@ -77,18 +89,6 @@ class WatchListSerializer(serializers.ModelSerializer):
             "item",
             "item_id",
         )
-
-
-class BaseUserItemSerializer(serializers.ModelSerializer):
-    """Serializer for BaseUserItem base model"""
-
-    user = serializers.SlugRelatedField(
-        queryset=User.objects.all(), slug_field="username"
-    )
-    item = ItemSerializer(read_only=True)
-    item_id = serializers.PrimaryKeyRelatedField(
-        queryset=Item.objects.all(), source="item", write_only=True
-    )
 
 
 class OfferSerializer(BaseUserItemSerializer):
