@@ -7,8 +7,11 @@ from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
                                 Price, Trade, WatchList)
 from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      InventorySerializer, ItemSerializer,
-                                     OfferSerializer, PriceSerializer,
-                                     TradeSerializer, WatchListSerializer)
+                                     OfferCreateSerializer, OfferSerializer,
+                                     PriceCreateSerializer, PriceSerializer,
+                                     TradeSerializer,
+                                     WatchListCreateSerializer,
+                                     WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
 from apps.trades.services.views_validators import (
     check_user_balance, check_user_quantity_stocks_for_given_item,
@@ -65,7 +68,6 @@ class PriceViewSet(viewsets.ModelViewSet):
     """ViewSet for Price model"""
 
     queryset = Price.objects.all()
-    serializer_class = PriceSerializer
 
     filterset_class = PriceFilter
     search_fields = ("^item__code",)
@@ -75,6 +77,13 @@ class PriceViewSet(viewsets.ModelViewSet):
         "price",
         "date",
     )
+
+    def get_serializer_class(self):
+        """Function return serializer for the certain action"""
+
+        if self.action == "list" or self.action == "retrieve":
+            return PriceSerializer
+        return PriceCreateSerializer
 
 
 class WatchListViewSet(
@@ -87,7 +96,6 @@ class WatchListViewSet(
     """ViewSet for WatchList model"""
 
     queryset = WatchList.objects.all()
-    serializer_class = WatchListSerializer
 
     filterset_fields = ("user__username",)
     search_fields = ("user__username",)
@@ -97,6 +105,13 @@ class WatchListViewSet(
         """When receive post method, connect offer instance with current user"""
 
         serializer.save(user=self.request.user)
+
+    def get_serializer_class(self):
+        """Function return serializer for the certain action"""
+
+        if self.action == "list" or self.action == "retrieve":
+            return WatchListSerializer
+        return WatchListCreateSerializer
 
 
 class OfferViewSet(viewsets.ModelViewSet):
@@ -127,7 +142,7 @@ class OfferViewSet(viewsets.ModelViewSet):
 
             if check_user_quantity_stocks_for_given_item(
                 user_id=self.request.user.id,
-                item_id=self.request.data["item_id"],
+                item_id=self.request.data["item"],
                 quantity=self.request.data["entry_quantity"],
             ):
 
@@ -173,6 +188,13 @@ class OfferViewSet(viewsets.ModelViewSet):
         """
 
         delete_offer_by_id(offer_id=instance.id)
+
+    def get_serializer_class(self):
+        """Function return serializer for the certain action"""
+
+        if self.action == "list" or self.action == "retrieve":
+            return OfferSerializer
+        return OfferCreateSerializer
 
 
 class InventoryViewSet(viewsets.ReadOnlyModelViewSet):

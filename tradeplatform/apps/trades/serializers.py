@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from apps.registration.serializers import UserSerializer
@@ -31,9 +30,6 @@ class PriceSerializer(serializers.ModelSerializer):
     """Serializer for Price model"""
 
     currency = CurrencySerializer(read_only=True)
-    currency_id = serializers.PrimaryKeyRelatedField(
-        queryset=Currency.objects.all(), source="currency", write_only=True
-    )
     item = serializers.SlugRelatedField(queryset=Item.objects.all(), slug_field="code")
 
     class Meta:
@@ -41,7 +37,20 @@ class PriceSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "currency",
-            "currency_id",
+            "item",
+            "price",
+            "date",
+        )
+
+
+class PriceCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating Price instance"""
+
+    class Meta:
+        model = Price
+        fields = (
+            "id",
+            "currency",
             "item",
             "price",
             "date",
@@ -69,18 +78,12 @@ class BaseUserItemSerializer(serializers.ModelSerializer):
 
     user = UserSerializer(read_only=True)
     item = ItemSerializer(read_only=True)
-    item_id = serializers.PrimaryKeyRelatedField(
-        queryset=Item.objects.all(), source="item", write_only=True
-    )
 
 
 class WatchListSerializer(BaseUserItemSerializer):
     """Serializer for WatchList model"""
 
     item = ItemSerializer(read_only=True, many=True)
-    item_id = serializers.PrimaryKeyRelatedField(
-        queryset=Item.objects.all(), many=True, source="item", write_only=True
-    )
 
     class Meta:
         model = WatchList
@@ -88,7 +91,18 @@ class WatchListSerializer(BaseUserItemSerializer):
             "id",
             "user",
             "item",
-            "item_id",
+        )
+
+
+class WatchListCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating Watchlist instance"""
+
+    class Meta:
+        model = WatchList
+        fields = (
+            "id",
+            "user",
+            "item",
         )
 
 
@@ -101,7 +115,23 @@ class OfferSerializer(BaseUserItemSerializer):
             "id",
             "status",
             "user",
-            "item_id",
+            "item",
+            "entry_quantity",
+            "quantity",
+            "price",
+            "is_active",
+        )
+        read_only_fields = ("quantity", "is_active")
+
+
+class OfferCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating offer instance"""
+
+    class Meta:
+        model = Offer
+        fields = (
+            "id",
+            "status",
             "item",
             "entry_quantity",
             "quantity",
@@ -133,7 +163,6 @@ class InventorySerializer(BaseUserItemSerializer):
         fields = (
             "id",
             "user",
-            "item_id",
             "item",
             "quantity",
         )
@@ -143,9 +172,7 @@ class BalanceSerializer(serializers.ModelSerializer):
     """Serializer for Balance model"""
 
     user = UserSerializer(read_only=True)
-    currency = serializers.SlugRelatedField(
-        queryset=Currency.objects.all(), slug_field="code"
-    )
+    currency = CurrencySerializer(read_only=True)
 
     class Meta:
         model = Balance
