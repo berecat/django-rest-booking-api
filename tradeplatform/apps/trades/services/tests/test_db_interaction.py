@@ -119,7 +119,7 @@ def test_get_full_price_of_trade(offer_sell_instance):
 
     full_price = get_full_price(sell_offer_id=offer_sell_instance.id, quantity=80)
 
-    assert full_price == 8000
+    assert full_price == 880
 
 
 def test_change_user_balance_by_id(user_instance):
