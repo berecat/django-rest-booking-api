@@ -16,6 +16,7 @@ from apps.trades.services.db_interaction import delete_offer_by_id
 from apps.trades.services.views_validators import (
     check_user_balance, check_user_quantity_stocks_for_given_item,
     setup_user_attributes)
+from apps.trades.custompermission import IsOwnerOrReadOnly
 
 
 class CurrencyViewSet(
@@ -88,7 +89,6 @@ class PriceViewSet(viewsets.ModelViewSet):
 
 class WatchListViewSet(
     mixins.ListModelMixin,
-    mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
@@ -101,17 +101,14 @@ class WatchListViewSet(
     search_fields = ("user__username",)
     ordering_fields = ("user__username",)
 
-    def perform_create(self, serializer):
-        """When receive post method, connect offer instance with current user"""
-
-        serializer.save(user=self.request.user)
+    permission_classes = [IsOwnerOrReadOnly]
 
     def get_serializer_class(self):
         """Function return serializer for the certain action"""
 
-        if self.action == "list" or self.action == "retrieve":
-            return WatchListSerializer
-        return WatchListCreateSerializer
+        if self.action == "update":
+            return WatchListCreateSerializer
+        return WatchListSerializer
 
 
 class OfferViewSet(viewsets.ModelViewSet):
