@@ -6,7 +6,6 @@ from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import viewsets
 
-from apps.registration.forms import SignupForm
 from apps.registration.models import UserProfile
 from apps.registration.serializers import UserProfileSerializer, UserSerializer
 from apps.registration.tasks import send_confirmation_mail_message
@@ -35,24 +34,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 
     serializer_class = UserProfileSerializer
     queryset = UserProfile.objects.all()
-
-
-def signup(request):
-    """View for user's registration"""
-
-    if request.method == "POST":
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            UserProfile.objects.create(user=user)
-            domain = get_current_site(request).domain
-
-            send_confirmation_mail_message.delay(user_id=user.id, domain=domain)
-
-            return render(request, "registration/register_done.html")
-    else:
-        form = SignupForm()
-        return render(request, "registration/register.html", {"form": form})
 
 
 def activate(request, uidb64, token):
