@@ -101,7 +101,6 @@ class WatchListCreateSerializer(serializers.ModelSerializer):
         model = WatchList
         fields = (
             "id",
-            "user",
             "item",
         )
 

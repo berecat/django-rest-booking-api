@@ -532,7 +532,7 @@ class TestWatchlist(APITestCase):
         """
 
         data_watchlist_1 = {
-            "item_id": [
+            "item": [
                 self.item_1.id,
                 self.item_2.id,
             ],
@@ -547,8 +547,12 @@ class TestWatchlist(APITestCase):
 
         assert response.data["results"][0]["user"]["username"] == self.user_1.username
         assert len(response.data["results"][0]["item"]) == 2
-        assert response.data["results"][0]["item"][0]["code"] == self.item_1.code
-        assert response.data["results"][0]["item"][1]["code"] == self.item_2.code
+        assert (
+            response.data["results"][0]["item"][0]["id"] == data_watchlist_1["item"][0]
+        )
+        assert (
+            response.data["results"][0]["item"][1]["id"] == data_watchlist_1["item"][1]
+        )
 
     def test_watchlist_get(self):
         """
@@ -556,7 +560,7 @@ class TestWatchlist(APITestCase):
         """
 
         data = {
-            "item_id": [
+            "item": [
                 self.item_1.id,
                 self.item_2.id,
                 self.item_3.id,
@@ -571,9 +575,9 @@ class TestWatchlist(APITestCase):
         assert get_response.status_code == status.HTTP_200_OK
         assert get_response.data["user"]["username"] == self.user_1.username
         assert len(get_response.data["item"]) == 3
-        assert get_response.data["item"][0]["code"] == self.item_1.code
-        assert get_response.data["item"][1]["code"] == self.item_2.code
-        assert get_response.data["item"][2]["code"] == self.item_3.code
+        assert get_response.data["item"][0]["id"] == data["item"][0]
+        assert get_response.data["item"][1]["id"] == data["item"][1]
+        assert get_response.data["item"][2]["id"] == data["item"][2]
 
     def test_watchlist_patch_update(self):
         """
@@ -581,7 +585,7 @@ class TestWatchlist(APITestCase):
         """
 
         data = {
-            "item_id": [
+            "item": [
                 self.item_1.id,
                 self.item_2.id,
                 self.item_3.id,
@@ -591,16 +595,15 @@ class TestWatchlist(APITestCase):
 
         url = reverse("watchlist-detail", None, {response.data["id"]})
         new_data = {
-            "item_id": [
+            "item": [
                 self.item_2.id,
             ]
         }
         patch_response = self.client.patch(url, new_data, format="json")
 
         assert patch_response.status_code == status.HTTP_200_OK
-        assert patch_response.data["user"]["username"] == self.user_1.username
         assert len(patch_response.data["item"]) == 1
-        assert patch_response.data["item"][0]["code"] == self.item_2.code
+        assert patch_response.data["item"][0] == new_data["item"][0]
 
     def test_watchlist_put_update(self):
         """
@@ -608,7 +611,7 @@ class TestWatchlist(APITestCase):
         """
 
         data = {
-            "item_id": [
+            "item": [
                 self.item_1.id,
                 self.item_2.id,
                 self.item_3.id,
@@ -618,7 +621,7 @@ class TestWatchlist(APITestCase):
 
         url = reverse("watchlist-detail", None, {response.data["id"]})
         new_data = {
-            "item_id": [
+            "item": [
                 self.item_1.id,
                 self.item_2.id,
             ],
@@ -626,10 +629,9 @@ class TestWatchlist(APITestCase):
         put_response = self.client.put(url, new_data, format="json")
 
         assert put_response.status_code == status.HTTP_200_OK
-        assert put_response.data["user"]["username"] == self.user_1.username
         assert len(put_response.data["item"]) == 2
-        assert put_response.data["item"][0]["code"] == self.item_1.code
-        assert put_response.data["item"][1]["code"] == self.item_2.code
+        assert put_response.data["item"][0] == new_data["item"][0]
+        assert put_response.data["item"][1] == new_data["item"][1]
 
 
 class TestOffer(APITestCase):
@@ -777,15 +779,15 @@ class TestOffer(APITestCase):
         url = reverse("offer-detail", None, {response.data["id"]})
         new_data = {
             "item": self.item_1.id,
+            "entry_quantity": 701,
             "price": Decimal("3243.23"),
         }
         patch_response = self.client.patch(url, new_data, format="json")
 
         assert patch_response.status_code == status.HTTP_200_OK
-        assert patch_response.data["user"]["username"] == self.user_1.username
-        assert patch_response.data["item"]["id"] == new_data["item"]
+        assert patch_response.data["item"] == new_data["item"]
         assert patch_response.data["status"] == data["status"]
-        assert patch_response.data["entry_quantity"] == data["entry_quantity"]
+        assert patch_response.data["entry_quantity"] == new_data["entry_quantity"]
         assert patch_response.data["quantity"] == 0
         assert patch_response.data["price"] == new_data["price"].__str__()
         assert patch_response.data["is_active"] == data["is_active"]
@@ -814,11 +816,8 @@ class TestOffer(APITestCase):
         }
         put_response = self.client.patch(url, new_data, format="json")
 
-        print(put_response.data)
-
         assert put_response.status_code == status.HTTP_200_OK
-        assert put_response.data["user"]["username"] == self.user_1.username
-        assert put_response.data["item"]["id"] == new_data["item"]
+        assert put_response.data["item"] == new_data["item"]
         assert put_response.data["status"] == new_data["status"]
         assert put_response.data["entry_quantity"] == new_data["entry_quantity"]
         assert put_response.data["quantity"] == 0
