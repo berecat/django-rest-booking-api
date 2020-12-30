@@ -4,6 +4,8 @@ from rest_framework import serializers
 from apps.registration.serializers import UserSerializer
 from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
                                 Price, Trade, WatchList)
+from apps.trades.services.views_validators import (
+    check_user_balance, check_user_quantity_stocks_for_given_item)
 
 
 class StockBaseSerializer(serializers.ModelSerializer):
@@ -107,6 +109,20 @@ class OfferSerializer(BaseUserItemSerializer):
             "is_active",
         )
         read_only_fields = ("quantity", "is_active")
+
+    def validate(self, attrs):
+        """Check that new offer instance has correct values in offer's field"""
+
+        if attrs["entry_quantity"] <= 0:
+            raise serializers.ValidationError(
+                {"entry_quantity": "Entry quantity can't be less than or equal to zero"}
+            )
+        elif attrs["price"] < 0:
+            raise serializers.ValidationError(
+                {"price": "Price can't be less than zero"}
+            )
+
+        return attrs
 
 
 class InventorySerializer(BaseUserItemSerializer):

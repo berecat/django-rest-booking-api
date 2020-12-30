@@ -1,7 +1,7 @@
 from apps.trades.models import Balance, Currency
 from apps.trades.services.db_interaction import (get_available_quantity_stocks,
                                                  get_full_price)
-from apps.trades.services.views_logic import (
+from apps.trades.services.views_validators import (
     _count_current_money_quantity_in_offers, _count_current_quantity_in_offers,
     _return_id_default_currency, check_user_balance,
     check_user_quantity_stocks_for_given_item, setup_user_attributes)

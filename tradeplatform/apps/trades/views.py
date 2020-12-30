@@ -10,7 +10,7 @@ from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      OfferSerializer, PriceSerializer,
                                      TradeSerializer, WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
-from apps.trades.services.views_logic import (
+from apps.trades.services.views_validators import (
     check_user_balance, check_user_quantity_stocks_for_given_item,
     setup_user_attributes)
 

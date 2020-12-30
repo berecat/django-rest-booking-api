@@ -12,6 +12,16 @@ def setup_user_attributes(user_id: int) -> None:
     get_or_create_user_balance(user_id=user_id, currency_id=currency_id)
 
 
+def _return_id_default_currency() -> int:
+    """Return id of default currency instance (USD)"""
+
+    currency = Currency.objects.get_or_create(
+        code="USD",
+        defaults={"name": "American dollar"},
+    )
+    return currency[0].id
+
+
 def check_user_quantity_stocks_for_given_item(
     user_id: int, item_id: int, quantity: str
 ) -> bool:
@@ -74,13 +84,3 @@ def _count_current_quantity_in_offers(user_id: int, item_id: int) -> int:
         quantity_in_offers += quantity
 
     return quantity_in_offers
-
-
-def _return_id_default_currency() -> int:
-    """Return id of default currency instance (USD)"""
-
-    currency = Currency.objects.get_or_create(
-        code="USD",
-        defaults={"name": "American dollar"},
-    )
-    return currency[0].id
