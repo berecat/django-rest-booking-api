@@ -4,5 +4,5 @@ from django.dispatch import receiver
 
 
 @receiver(post_save, sender=User)
-def send_confirmation_mail_message(sender, instance, **kwargs):
+def send_confirmation_mail_message(sender, **kwargs):
     """Function send confirmation mail message for user, who has just registered"""
