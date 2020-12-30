@@ -968,13 +968,19 @@ class TestInventory(APITestCase):
         assert response.status_code == status.HTTP_200_OK
         assert response.data["count"] == 2
 
-        assert response.data["results"][0]["user"]["username"] == data_inventory_1["user"].username
+        assert (
+            response.data["results"][0]["user"]["username"]
+            == data_inventory_1["user"].username
+        )
         assert (
             response.data["results"][0]["item"]["code"] == data_inventory_1["item"].code
         )
         assert response.data["results"][0]["quantity"] == data_inventory_1["quantity"]
 
-        assert response.data["results"][1]["user"]["username"] == data_inventory_2["user"].username
+        assert (
+            response.data["results"][1]["user"]["username"]
+            == data_inventory_2["user"].username
+        )
         assert (
             response.data["results"][1]["item"]["code"] == data_inventory_2["item"].code
         )

@@ -13,7 +13,7 @@ def send_confirmation_mail_message(user_id: int, domain: str):
     user = get_user_by_id(user_id=user_id)
     mail_subject = "Activate your blog account."
     message = render_to_string(
-        "acc_active_email.html",
+        "registration/acc_active_email.html",
         {
             "user": user,
             "domain": domain,

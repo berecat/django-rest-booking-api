@@ -1,7 +1,6 @@
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
-from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
@@ -16,11 +15,19 @@ from apps.trades.services.db_interaction import (
     change_user_profile_valid_by_id, get_user_by_id)
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     """ViewSet for User model"""
 
     serializer_class = UserSerializer
     queryset = User.objects.all()
+
+    def perform_create(self, serializer):
+        """"""
+
+        send_confirmation_mail_message.delay(
+            user_id=self.request.user.id, domain=get_current_site(self.request).domain
+        )
+        serializer.save()
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
@@ -42,12 +49,10 @@ def signup(request):
 
             send_confirmation_mail_message.delay(user_id=user.id, domain=domain)
 
-            return HttpResponse(
-                "Please confirm your email address to complete the registration"
-            )
+            return render(request, "registration/register_done.html")
     else:
         form = SignupForm()
-    return render(request, "signup.html", {"form": form})
+        return render(request, "registration/register.html", {"form": form})
 
 
 def activate(request, uidb64, token):
@@ -58,11 +63,16 @@ def activate(request, uidb64, token):
         user = get_user_by_id(user_id=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
+
     if user is not None and account_activation_token.check_token(user, token):
         change_user_profile_valid_by_id(user_id=uid)
         login(request, user)
-        return HttpResponse(
-            "Thank you for your email confirmation. Now you can login your account."
-        )
+        success_status = True
     else:
-        return HttpResponse("Activation link is invalid!")
+        success_status = False
+
+    return render(
+        request,
+        "registration/register_confirm.html",
+        {"success_status": success_status},
+    )
