@@ -1,15 +1,18 @@
 from rest_framework import routers
 
-from apps.trades import views
+from apps.registration import views as reg_views
+from apps.trades import views as trades_views
 
 router = routers.DefaultRouter()
-router.register("currencies", views.CurrencyViewSet)
-router.register("items", views.ItemViewSet)
-router.register("prices", views.PriceViewSet)
-router.register("watchlists", views.WatchListViewSet)
-router.register("offers", views.OfferViewSet)
-router.register("inventories", views.InventoryViewSet)
-router.register("balances", views.BalanceViewSet)
-router.register("trades", views.TradeViewSet)
+router.register("currencies", trades_views.CurrencyViewSet)
+router.register("items", trades_views.ItemViewSet)
+router.register("prices", trades_views.PriceViewSet)
+router.register("watchlists", trades_views.WatchListViewSet)
+router.register("offers", trades_views.OfferViewSet)
+router.register("inventories", trades_views.InventoryViewSet)
+router.register("balances", trades_views.BalanceViewSet)
+router.register("trades", trades_views.TradeViewSet)
+router.register("users", reg_views.UserViewSet)
+router.register("userprofiles", reg_views.UserProfileViewSet)
 
 urlpatterns = router.urls

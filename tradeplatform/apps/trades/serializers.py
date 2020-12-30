@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from apps.registration.serializers import UserSerializer
 from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
                                 Price, Trade, WatchList)
 
@@ -64,9 +65,7 @@ class ItemSerializer(StockBaseSerializer):
 class BaseUserItemSerializer(serializers.ModelSerializer):
     """Serializer for BaseUserItem base model"""
 
-    user = serializers.SlugRelatedField(
-        queryset=User.objects.all(), slug_field="username"
-    )
+    user = UserSerializer(read_only=True)
     item = ItemSerializer(read_only=True)
     item_id = serializers.PrimaryKeyRelatedField(
         queryset=Item.objects.all(), source="item", write_only=True
@@ -93,8 +92,6 @@ class WatchListSerializer(BaseUserItemSerializer):
 
 class OfferSerializer(BaseUserItemSerializer):
     """Serializer for Offer model"""
-
-    user = serializers.SlugRelatedField(slug_field="username", read_only=True)
 
     class Meta:
         model = Offer
@@ -129,9 +126,7 @@ class InventorySerializer(BaseUserItemSerializer):
 class BalanceSerializer(serializers.ModelSerializer):
     """Serializer for Balance model"""
 
-    user = serializers.SlugRelatedField(
-        queryset=User.objects.all(), slug_field="username"
-    )
+    user = UserSerializer(read_only=True)
     currency = serializers.SlugRelatedField(
         queryset=Currency.objects.all(), slug_field="code"
     )

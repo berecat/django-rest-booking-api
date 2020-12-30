@@ -104,7 +104,7 @@ def test_count_current_quantity_in_offers(offer_instances):
         user_id=offer.user.id, item_id=offer.item.id
     )
 
-    assert quantity == 4374
+    assert quantity == 1474
 
 
 def test_check_user_quantity_stocks_for_given_item_with_greater_quantity(
@@ -158,7 +158,7 @@ def test_count_current_money_quantity_in_offers_with_greater_quantity(offer_inst
     result = check_user_balance(
         user_id=offer_purchase_instance.user.id,
         quantity=get_available_quantity_stocks(offer_id=offer_purchase_instance.id),
-        price=10000,
+        price=100000,
     )
 
     assert result == False

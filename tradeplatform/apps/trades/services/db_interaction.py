@@ -130,6 +130,16 @@ def change_user_inventory(user_id: int, item_id: int, quantity: int) -> None:
     inventory.save()
 
 
+def change_user_profile_valid_by_id(user_id: int) -> None:
+    """Change user profile is_valid attribute"""
+
+    user = get_user_by_id(user_id=user_id)
+    user_profile = user.profile
+
+    user_profile.is_valid = not user_profile.is_valid
+    user_profile.save()
+
+
 def change_offer_current_quantity(offer_id: int, quantity: int) -> None:
     """Change offer's current quantity by the specified amount"""
 
