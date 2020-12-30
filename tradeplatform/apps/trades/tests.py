@@ -4,8 +4,9 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from trades.models import (Balance, Currency, Inventory, Item, Offer, Price,
-                           Trade, WatchList)
+
+from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
+                                Price, Trade, WatchList)
 
 
 class TestCurrency(APITestCase):
@@ -61,11 +62,11 @@ class TestCurrency(APITestCase):
         response = self.client.get(url, format="json")
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 2
-        assert response.data[0]["name"] == data_currency_1["name"]
-        assert response.data[0]["code"] == data_currency_1["code"]
-        assert response.data[1]["name"] == data_currency_2["name"]
-        assert response.data[1]["code"] == data_currency_2["code"]
+        assert response.data["count"] == 2
+        assert response.data["results"][0]["name"] == data_currency_1["name"]
+        assert response.data["results"][0]["code"] == data_currency_1["code"]
+        assert response.data["results"][1]["name"] == data_currency_2["name"]
+        assert response.data["results"][1]["code"] == data_currency_2["code"]
 
     def test_currency_get(self):
         """
@@ -173,13 +174,13 @@ class TestItem(APITestCase):
         response = self.client.get(url, format="json")
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 2
-        assert response.data[0]["name"] == data_item_1["name"]
-        assert response.data[0]["code"] == data_item_1["code"]
-        assert response.data[0]["details"] == data_item_1["details"]
-        assert response.data[1]["name"] == data_item_2["name"]
-        assert response.data[1]["code"] == data_item_2["code"]
-        assert response.data[1]["details"] == data_item_2["details"]
+        assert response.data["count"] == 2
+        assert response.data["results"][0]["name"] == data_item_1["name"]
+        assert response.data["results"][0]["code"] == data_item_1["code"]
+        assert response.data["results"][0]["details"] == data_item_1["details"]
+        assert response.data["results"][1]["name"] == data_item_2["name"]
+        assert response.data["results"][1]["code"] == data_item_2["code"]
+        assert response.data["results"][1]["details"] == data_item_2["details"]
 
     def test_item_get(self):
         """
@@ -341,16 +342,20 @@ class TestPrice(APITestCase):
         response = self.client.get(url, format="json")
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 2
-        assert response.data[0]["currency"]["id"] == data_price_1["currency_id"]
-        assert response.data[0]["item"] == data_price_1["item"]
-        assert response.data[0]["price"] == data_price_1["price"].__str__()
-        assert response.data[0]["date"].__str__() == data_price_1["date"]
+        assert response.data["count"] == 2
+        assert (
+            response.data["results"][0]["currency"]["id"] == data_price_1["currency_id"]
+        )
+        assert response.data["results"][0]["item"] == data_price_1["item"]
+        assert response.data["results"][0]["price"] == data_price_1["price"].__str__()
+        assert response.data["results"][0]["date"].__str__() == data_price_1["date"]
 
-        assert response.data[1]["currency"]["id"] == data_price_2["currency_id"]
-        assert response.data[1]["item"] == data_price_2["item"]
-        assert response.data[1]["price"] == data_price_2["price"].__str__()
-        assert response.data[1]["date"].__str__() == data_price_2["date"]
+        assert (
+            response.data["results"][1]["currency"]["id"] == data_price_2["currency_id"]
+        )
+        assert response.data["results"][1]["item"] == data_price_2["item"]
+        assert response.data["results"][1]["price"] == data_price_2["price"].__str__()
+        assert response.data["results"][1]["date"].__str__() == data_price_2["date"]
 
     def test_price_get(self):
         """
@@ -549,17 +554,17 @@ class TestWatchlist(APITestCase):
 
         print(response.data)
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 2
+        assert response.data["count"] == 2
 
-        assert response.data[0]["user"] == data_watchlist_1["user"]
-        assert len(response.data[0]["item"]) == 2
-        assert response.data[0]["item"][0]["code"] == self.item_1.code
-        assert response.data[0]["item"][1]["code"] == self.item_2.code
+        assert response.data["results"][0]["user"] == data_watchlist_1["user"]
+        assert len(response.data["results"][0]["item"]) == 2
+        assert response.data["results"][0]["item"][0]["code"] == self.item_1.code
+        assert response.data["results"][0]["item"][1]["code"] == self.item_2.code
 
-        assert response.data[1]["user"] == data_watchlist_2["user"]
-        assert len(response.data[1]["item"]) == 2
-        assert response.data[1]["item"][0]["code"] == self.item_1.code
-        assert response.data[1]["item"][1]["code"] == self.item_3.code
+        assert response.data["results"][1]["user"] == data_watchlist_2["user"]
+        assert len(response.data["results"][1]["item"]) == 2
+        assert response.data["results"][1]["item"][0]["code"] == self.item_1.code
+        assert response.data["results"][1]["item"][1]["code"] == self.item_3.code
 
     def test_watchlist_get(self):
         """
@@ -654,8 +659,11 @@ class TestOffer(APITestCase):
         """Initialize necessary fields for testing and log in user to make requests"""
 
         self.user_1 = User.objects.create_user(username="test_user1", password="test1")
-        self.user_2 = User.objects.create_user(username="test_user2", password="test2")
         self.client.login(username="test_user1", password="test1")
+
+        self.currency = Currency.objects.get_or_create(
+            code="USD", defaults={"name": "American dollar"}
+        )
 
         self.item_1 = Item.objects.create(
             code="AAPL", name="Apple", details="Stocks of Apple Inc."
@@ -677,12 +685,10 @@ class TestOffer(APITestCase):
         """
 
         data = {
-            "user": self.user_1.username,
-            "item": self.item_1.code,
+            "item_id": self.item_1.id,
             "status": "PURCHASE",
-            "entry_quantity": 2131,
-            "quantity": 2400,
-            "price": Decimal("32212.23"),
+            "entry_quantity": 10,
+            "price": Decimal("100"),
             "is_active": True,
         }
         response = self.post_offer(data)
@@ -703,23 +709,19 @@ class TestOffer(APITestCase):
         """
 
         data_offer_1 = {
-            "user": self.user_1.username,
-            "item": self.item_1.code,
+            "item_id": self.item_1.id,
             "status": "PURCHASE",
-            "entry_quantity": 2131,
-            "quantity": 2400,
-            "price": Decimal("32212.23"),
+            "entry_quantity": 6,
+            "price": Decimal("100.00"),
             "is_active": True,
         }
         self.post_offer(data_offer_1)
 
         data_offer_2 = {
-            "user": self.user_2.username,
-            "item": self.item_2.code,
+            "item_id": self.item_2.id,
             "status": "SELL",
-            "entry_quantity": 700,
-            "quantity": 800,
-            "price": Decimal("3222.23"),
+            "entry_quantity": 7,
+            "price": Decimal("40.00"),
             "is_active": True,
         }
         self.post_offer(data_offer_2)
@@ -728,23 +730,29 @@ class TestOffer(APITestCase):
         response = self.client.get(url, format="json")
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 2
+        assert response.data["count"] == 2
 
-        assert response.data[0]["user"] == data_offer_1["user"]
-        assert response.data[0]["item"] == data_offer_1["item"]
-        assert response.data[0]["status"] == data_offer_1["status"]
-        assert response.data[0]["entry_quantity"] == data_offer_1["entry_quantity"]
-        assert response.data[0]["quantity"] == data_offer_1["quantity"]
-        assert response.data[0]["price"] == data_offer_1["price"].__str__()
-        assert response.data[0]["is_active"] == data_offer_1["is_active"]
+        assert response.data["results"][0]["user"] == self.user_1.username
+        assert response.data["results"][0]["item"]["id"] == data_offer_1["item_id"]
+        assert response.data["results"][0]["status"] == data_offer_1["status"]
+        assert (
+            response.data["results"][0]["entry_quantity"]
+            == data_offer_1["entry_quantity"]
+        )
+        assert response.data["results"][0]["quantity"] == 0
+        assert response.data["results"][0]["price"] == data_offer_1["price"].__str__()
+        assert response.data["results"][0]["is_active"] == data_offer_1["is_active"]
 
-        assert response.data[1]["user"] == data_offer_2["user"]
-        assert response.data[1]["item"] == data_offer_2["item"]
-        assert response.data[1]["status"] == data_offer_2["status"]
-        assert response.data[1]["entry_quantity"] == data_offer_2["entry_quantity"]
-        assert response.data[1]["quantity"] == data_offer_2["quantity"]
-        assert response.data[1]["price"] == data_offer_2["price"].__str__()
-        assert response.data[1]["is_active"] == data_offer_2["is_active"]
+        assert response.data["results"][1]["user"] == self.user_1.username
+        assert response.data["results"][1]["item"]["id"] == data_offer_2["item_id"]
+        assert response.data["results"][1]["status"] == data_offer_2["status"]
+        assert (
+            response.data["results"][1]["entry_quantity"]
+            == data_offer_2["entry_quantity"]
+        )
+        assert response.data["results"][1]["quantity"] == 0
+        assert response.data["results"][1]["price"] == data_offer_2["price"].__str__()
+        assert response.data["results"][1]["is_active"] == data_offer_2["is_active"]
 
     def test_offer_get(self):
         """
@@ -752,11 +760,9 @@ class TestOffer(APITestCase):
         """
 
         data = {
-            "user": self.user_2.username,
-            "item": self.item_2.code,
+            "item_id": self.item_2.id,
             "status": "SELL",
             "entry_quantity": 700,
-            "quantity": 800,
             "price": Decimal("3222.23"),
             "is_active": True,
         }
@@ -766,11 +772,11 @@ class TestOffer(APITestCase):
         get_response = self.client.get(url, format="json")
 
         assert get_response.status_code == status.HTTP_200_OK
-        assert get_response.data["user"] == data["user"]
-        assert get_response.data["item"] == data["item"]
+        assert get_response.data["user"] == self.user_1.username
+        assert get_response.data["item"]["id"] == data["item_id"]
         assert get_response.data["status"] == data["status"]
         assert get_response.data["entry_quantity"] == data["entry_quantity"]
-        assert get_response.data["quantity"] == data["quantity"]
+        assert get_response.data["quantity"] == 0
         assert get_response.data["price"] == data["price"].__str__()
         assert get_response.data["is_active"] == data["is_active"]
 
@@ -780,11 +786,9 @@ class TestOffer(APITestCase):
         """
 
         data = {
-            "user": self.user_2.username,
-            "item": self.item_2.code,
+            "item_id": self.item_2.id,
             "status": "SELL",
             "entry_quantity": 700,
-            "quantity": 800,
             "price": Decimal("3222.23"),
             "is_active": True,
         }
@@ -792,19 +796,17 @@ class TestOffer(APITestCase):
 
         url = reverse("offer-detail", None, {response.data["id"]})
         new_data = {
-            "user": self.user_1.username,
-            "item": self.item_1.code,
-            "quantity": 900,
+            "item_id": self.item_1.id,
             "price": Decimal("3243.23"),
         }
         patch_response = self.client.patch(url, new_data, format="json")
 
         assert patch_response.status_code == status.HTTP_200_OK
-        assert patch_response.data["user"] == new_data["user"]
-        assert patch_response.data["item"] == new_data["item"]
+        assert patch_response.data["user"] == self.user_1.username
+        assert patch_response.data["item"]["id"] == new_data["item_id"]
         assert patch_response.data["status"] == data["status"]
         assert patch_response.data["entry_quantity"] == data["entry_quantity"]
-        assert patch_response.data["quantity"] == new_data["quantity"]
+        assert patch_response.data["quantity"] == 0
         assert patch_response.data["price"] == new_data["price"].__str__()
         assert patch_response.data["is_active"] == data["is_active"]
 
@@ -814,11 +816,9 @@ class TestOffer(APITestCase):
         """
 
         data = {
-            "user": self.user_2.username,
-            "item": self.item_2.code,
+            "item_id": self.item_2.id,
             "status": "SELL",
             "entry_quantity": 700,
-            "quantity": 800,
             "price": Decimal("3222.23"),
             "is_active": True,
         }
@@ -826,22 +826,22 @@ class TestOffer(APITestCase):
 
         url = reverse("offer-detail", None, {response.data["id"]})
         new_data = {
-            "user": self.user_1.username,
-            "item": self.item_1.code,
+            "item_id": self.item_1.id,
             "status": "PURCHASE",
             "entry_quantity": 2131,
-            "quantity": 2400,
             "price": Decimal("32212.23"),
             "is_active": True,
         }
         put_response = self.client.patch(url, new_data, format="json")
 
+        print(put_response.data)
+
         assert put_response.status_code == status.HTTP_200_OK
-        assert put_response.data["user"] == new_data["user"]
-        assert put_response.data["item"] == new_data["item"]
+        assert put_response.data["user"] == self.user_1.username
+        assert put_response.data["item"]["id"] == new_data["item_id"]
         assert put_response.data["status"] == new_data["status"]
         assert put_response.data["entry_quantity"] == new_data["entry_quantity"]
-        assert put_response.data["quantity"] == new_data["quantity"]
+        assert put_response.data["quantity"] == 0
         assert put_response.data["price"] == new_data["price"].__str__()
         assert put_response.data["is_active"] == new_data["is_active"]
 
@@ -851,11 +851,9 @@ class TestOffer(APITestCase):
         """
 
         data = {
-            "user": self.user_2.username,
-            "item": self.item_2.code,
+            "item_id": self.item_2.id,
             "status": "SELL",
             "entry_quantity": 700,
-            "quantity": 800,
             "price": Decimal("3222.23"),
             "is_active": True,
         }
@@ -865,7 +863,8 @@ class TestOffer(APITestCase):
         delete_response = self.client.delete(url, format="json")
 
         assert delete_response.status_code == status.HTTP_204_NO_CONTENT
-        assert Offer.objects.count() == 0
+        assert Offer.objects.get().is_active == False
+        assert response.data["id"] == Offer.objects.get().id
 
 
 class TestBalance(APITestCase):
@@ -910,15 +909,19 @@ class TestBalance(APITestCase):
         response = self.client.get(url, format="json")
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 2
+        assert response.data["count"] == 2
 
-        assert response.data[0]["user"] == data_balance_1["user"].username
-        assert response.data[0]["currency"] == data_balance_1["currency"].code
-        assert response.data[0]["quantity"] == data_balance_1["quantity"]
+        assert response.data["results"][0]["user"] == data_balance_1["user"].username
+        assert (
+            response.data["results"][0]["currency"] == data_balance_1["currency"].code
+        )
+        assert response.data["results"][0]["quantity"] == data_balance_1["quantity"]
 
-        assert response.data[1]["user"] == data_balance_2["user"].username
-        assert response.data[1]["currency"] == data_balance_2["currency"].code
-        assert response.data[1]["quantity"] == data_balance_2["quantity"]
+        assert response.data["results"][1]["user"] == data_balance_2["user"].username
+        assert (
+            response.data["results"][1]["currency"] == data_balance_2["currency"].code
+        )
+        assert response.data["results"][1]["quantity"] == data_balance_2["quantity"]
 
     def test_balance_get(self):
         """
@@ -984,15 +987,19 @@ class TestInventory(APITestCase):
         response = self.client.get(url, format="json")
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 2
+        assert response.data["count"] == 2
 
-        assert response.data[0]["user"] == data_inventory_1["user"].username
-        assert response.data[0]["item"] == data_inventory_1["item"].code
-        assert response.data[0]["quantity"] == data_inventory_1["quantity"]
+        assert response.data["results"][0]["user"] == data_inventory_1["user"].username
+        assert (
+            response.data["results"][0]["item"]["code"] == data_inventory_1["item"].code
+        )
+        assert response.data["results"][0]["quantity"] == data_inventory_1["quantity"]
 
-        assert response.data[1]["user"] == data_inventory_2["user"].username
-        assert response.data[1]["item"] == data_inventory_2["item"].code
-        assert response.data[1]["quantity"] == data_inventory_2["quantity"]
+        assert response.data["results"][1]["user"] == data_inventory_2["user"].username
+        assert (
+            response.data["results"][1]["item"]["code"] == data_inventory_2["item"].code
+        )
+        assert response.data["results"][1]["quantity"] == data_inventory_2["quantity"]
 
     def test_inventory_get(self):
         """
@@ -1012,7 +1019,7 @@ class TestInventory(APITestCase):
         assert response.status_code == status.HTTP_200_OK
 
         assert response.data["user"] == data["user"].username
-        assert response.data["item"] == data["item"].code
+        assert response.data["item"]["code"] == data["item"].code
         assert response.data["quantity"] == data["quantity"]
 
 
@@ -1041,25 +1048,22 @@ class TestTrade(APITestCase):
             user=self.test_user_1,
             status="PURCHASE",
             entry_quantity=10,
-            quantity=15,
             price=123.12,
             is_active=True,
         )
         self.sell_offer_1 = Offer.objects.create(
+            user=self.test_user_1,
             item=self.item,
-            user=self.test_user_2,
             status="SELL",
             entry_quantity=10,
-            quantity=40,
             price=123.12,
             is_active=True,
         )
         self.sell_offer_2 = Offer.objects.create(
-            item=self.item,
             user=self.test_user_2,
+            item=self.item,
             status="SELL",
             entry_quantity=50,
-            quantity=40,
             price=123.12,
             is_active=True,
         )
@@ -1097,32 +1101,38 @@ class TestTrade(APITestCase):
         response = self.client.get(url, format="json")
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 2
+        assert response.data["count"] == 2
 
-        assert response.data[0]["item"]["id"] == data_trade_1["item"].id
-        assert response.data[0]["seller"] == data_trade_1["seller"].username
-        assert response.data[0]["buyer"] == data_trade_1["buyer"].username
-        assert response.data[0]["quantity"] == data_trade_1["quantity"]
-        assert response.data[0]["unit_price"] == data_trade_1["unit_price"].__str__()
-        assert response.data[0]["description"] == data_trade_1["description"]
+        assert response.data["results"][0]["item"]["id"] == data_trade_1["item"].id
+        assert response.data["results"][0]["seller"] == data_trade_1["seller"].username
+        assert response.data["results"][0]["buyer"] == data_trade_1["buyer"].username
+        assert response.data["results"][0]["quantity"] == data_trade_1["quantity"]
+        assert (
+            response.data["results"][0]["unit_price"]
+            == data_trade_1["unit_price"].__str__()
+        )
+        assert response.data["results"][0]["description"] == data_trade_1["description"]
 
-        offer_response = self.client.get(response.data[0]["buyer_offer"])
+        offer_response = self.client.get(response.data["results"][0]["buyer_offer"])
         assert offer_response.data["id"] == data_trade_1["buyer_offer"].id
 
-        offer_response = self.client.get(response.data[0]["seller_offer"])
+        offer_response = self.client.get(response.data["results"][0]["seller_offer"])
         assert offer_response.data["id"] == data_trade_1["seller_offer"].id
 
-        assert response.data[1]["item"]["id"] == data_trade_2["item"].id
-        assert response.data[1]["seller"] == data_trade_2["seller"].username
-        assert response.data[1]["buyer"] == data_trade_2["buyer"].username
-        assert response.data[1]["quantity"] == data_trade_2["quantity"]
-        assert response.data[1]["unit_price"] == data_trade_2["unit_price"].__str__()
-        assert response.data[1]["description"] == data_trade_2["description"]
+        assert response.data["results"][1]["item"]["id"] == data_trade_2["item"].id
+        assert response.data["results"][1]["seller"] == data_trade_2["seller"].username
+        assert response.data["results"][1]["buyer"] == data_trade_2["buyer"].username
+        assert response.data["results"][1]["quantity"] == data_trade_2["quantity"]
+        assert (
+            response.data["results"][1]["unit_price"]
+            == data_trade_2["unit_price"].__str__()
+        )
+        assert response.data["results"][1]["description"] == data_trade_2["description"]
 
-        offer_response = self.client.get(response.data[1]["buyer_offer"])
+        offer_response = self.client.get(response.data["results"][1]["buyer_offer"])
         assert offer_response.data["id"] == data_trade_2["buyer_offer"].id
 
-        offer_response = self.client.get(response.data[1]["seller_offer"])
+        offer_response = self.client.get(response.data["results"][1]["seller_offer"])
         assert offer_response.data["id"] == data_trade_2["seller_offer"].id
 
     def test_trade_get(self):

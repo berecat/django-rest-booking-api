@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from trades.models import (Balance, Currency, Inventory, Item, Offer, Price,
-                           Trade, WatchList)
+
+from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
+                                Price, Trade, WatchList)
 
 
 class StockBaseSerializer(serializers.ModelSerializer):
@@ -66,13 +67,16 @@ class BaseUserItemSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field="username"
     )
-    item = serializers.SlugRelatedField(queryset=Item.objects.all(), slug_field="code")
+    item = ItemSerializer(read_only=True)
+    item_id = serializers.PrimaryKeyRelatedField(
+        queryset=Item.objects.all(), source="item", write_only=True
+    )
 
 
-class WatchListSerializer(serializers.ModelSerializer):
+class WatchListSerializer(BaseUserItemSerializer):
     """Serializer for WatchList model"""
 
-    item = ItemSerializer(many=True, read_only=True)
+    item = ItemSerializer(read_only=True, many=True)
     item_id = serializers.PrimaryKeyRelatedField(
         queryset=Item.objects.all(), many=True, source="item", write_only=True
     )
@@ -90,18 +94,22 @@ class WatchListSerializer(serializers.ModelSerializer):
 class OfferSerializer(BaseUserItemSerializer):
     """Serializer for Offer model"""
 
+    user = serializers.SlugRelatedField(slug_field="username", read_only=True)
+
     class Meta:
         model = Offer
         fields = (
             "id",
             "status",
             "user",
+            "item_id",
             "item",
             "entry_quantity",
             "quantity",
             "price",
             "is_active",
         )
+        read_only_fields = ("quantity", "is_active")
 
 
 class InventorySerializer(BaseUserItemSerializer):
@@ -112,6 +120,7 @@ class InventorySerializer(BaseUserItemSerializer):
         fields = (
             "id",
             "user",
+            "item_id",
             "item",
             "quantity",
         )

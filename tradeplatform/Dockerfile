@@ -14,9 +14,7 @@ COPY Pipfile.lock .
 RUN pip install pipenv
 RUN pipenv install --system --deploy --ignore-pipfile
 
-COPY ./docker_files/entrypoint.sh ./docker_files/
-RUN chmod +x ./docker_files/entrypoint.sh
-
 COPY . .
+RUN chmod +x ./entrypoint.sh
 
-ENTRYPOINT ["/usr/src/app/docker_files/entrypoint.sh"]
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

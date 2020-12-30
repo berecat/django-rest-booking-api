@@ -125,7 +125,7 @@ class Offer(BaseUserItem):
     )
     status = models.CharField(max_length=8, choices=StatusChoices.choices())
     entry_quantity = models.IntegerField("Requested quantity")
-    quantity = models.IntegerField("Current quantity")
+    quantity = models.IntegerField("Current quantity", default=0)
     price = models.DecimalField(max_digits=7, decimal_places=2)
     is_active = models.BooleanField(default=True)
 
@@ -145,7 +145,7 @@ class Inventory(BaseUserItem):
         related_name="inventory",
         related_query_name="inventory",
     )
-    quantity = models.IntegerField("Stocks quantity", default=0)
+    quantity = models.PositiveIntegerField("Stocks quantity", default=1000)
 
     class Meta:
         verbose_name = "Inventory"
@@ -155,11 +155,12 @@ class Inventory(BaseUserItem):
 class Balance(models.Model):
     """The number of money in particular user has"""
 
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User,
         null=True,
         on_delete=models.SET_NULL,
         related_name="balance",
+        related_query_name="balance",
     )
     currency = models.ForeignKey(
         Currency,
@@ -167,7 +168,7 @@ class Balance(models.Model):
         on_delete=models.SET_NULL,
         related_name="+",
     )
-    quantity = models.PositiveIntegerField("Money quantity", default=0)
+    quantity = models.PositiveIntegerField("Money quantity", default=1000)
 
 
 class Trade(models.Model):
