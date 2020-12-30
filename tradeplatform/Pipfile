@@ -15,7 +15,6 @@ celery = "*"
 redis = "*"
 mixer = "*"
 django-filter = "*"
-six = "*"
 
 [requires]
 python_version = "3.8"
