@@ -11,6 +11,10 @@ djangorestframework = "*"
 psycopg2-binary = "*"
 pytest-django = "*"
 djangorestframework-simplejwt = "*"
+celery = "*"
+redis = "*"
+mixer = "*"
+django-filter = "*"
 
 [requires]
 python_version = "3.8"

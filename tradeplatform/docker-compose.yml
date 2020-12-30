@@ -1,0 +1,50 @@
+version: '3.7'
+services:
+  web:
+    build: .
+    volumes:
+      - .:/usr/src/app/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./env.dev
+    depends_on:
+      - db
+      - redis
+    restart: on-failure
+
+  db:
+    image: postgres:13.1-alpine
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data/
+    env_file:
+      - ./env.dev
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+
+  celery:
+    build: .
+    volumes:
+      - .:/usr/src/app/
+    entrypoint: celery -A core worker -l info
+    env_file:
+      - ./env.dev
+    depends_on:
+      - db
+      - redis
+    restart: on-failure
+
+  celery-beat:
+    build: .
+    volumes:
+      - .:/usr/src/app/
+    entrypoint: celery -A core beat -l info
+    env_file:
+      - ./env.dev
+    depends_on:
+      - db
+      - redis
+    restart: on-failure
