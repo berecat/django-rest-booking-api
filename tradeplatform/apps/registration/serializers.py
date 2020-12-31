@@ -79,14 +79,7 @@ class RequestResetPasswordSerializer(serializers.Serializer):
     def validate(self, attrs):
         """Check that user, which have the given email, exist"""
 
-        result = False
-
-        for user in User.objects.all():
-            if attrs["email"] == user.email:
-                result = True
-                break
-
-        if not result:
+        if not User.objects.all().filter(email=attrs["email"]):
             raise serializers.ValidationError(
                 {"email": "User with the given email address does not exist."}
             )

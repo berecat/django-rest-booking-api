@@ -40,4 +40,4 @@ def get_user_id_by_given_token(token: str) -> Optional[int]:
         user_id = AccessToken(token=token, verify=True).get("user_id")
         return user_id
     except TokenError:
-        return
+        return None
