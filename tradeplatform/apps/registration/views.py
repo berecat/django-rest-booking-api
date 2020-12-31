@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
-from rest_framework import generics, viewsets
+from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from rest_framework import mixins, viewsets
 
 from apps.registration.models import UserProfile
 from apps.registration.serializers import (ConfirmResetPasswordSerializer,
@@ -13,14 +15,21 @@ from apps.registration.tokens import confirm_user_email
 from apps.trades.custompermission import IsOwnerOrReadOnly
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(mixins.ListModelMixin,
+                  mixins.RetrieveModelMixin,
+                  mixins.UpdateModelMixin,
+                  mixins.DestroyModelMixin,
+                  viewsets.GenericViewSet):
     """ViewSet for User model"""
 
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
 
-class UserProfileViewSet(viewsets.ModelViewSet):
+class UserProfileViewSet(mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.UpdateModelMixin,
+                         viewsets.GenericViewSet):
     """ViewSet for User Profile model"""
 
     serializer_class = UserProfileSerializer
@@ -29,8 +38,36 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     permission_classes = [IsOwnerOrReadOnly]
 
 
+class SignUpView(generics.ListAPIView,
+                 generics.CreateAPIView):
+    """View for user's registration"""
+
+    serializer_class = UserSerializer
+
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        """Function for getting information about view"""
+
+        message = {"details": "Please write information below"}
+        return Response(data=message)
+
+    def create(self, request, *args, **kwargs):
+        """Function for creating a request to reset user's password"""
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        message = {"details": "You are successfully registered. "
+                              "Please confirm your email address to complete the registration."}
+        return Response(data=message)
+
+
 class ActivateUserEmailView(generics.ListAPIView):
     """View for confirmation user's mail address"""
+
+    permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         """Return response to user with information about email confirmation"""
@@ -47,6 +84,8 @@ class RequestResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
     """View to request a password change"""
 
     serializer_class = RequestResetPasswordSerializer
+
+    permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         """Function for creating a request to reset user's password"""
@@ -70,6 +109,8 @@ class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
     """View for confirmation of changing user's password"""
 
     serializer_class = ConfirmResetPasswordSerializer
+
+    permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         """Function for changing user's password"""

@@ -174,8 +174,6 @@ class OfferViewSet(viewsets.ModelViewSet):
         """
 
         user = self.request.user
-        setup_user_attributes(user_id=user.id)
-
         serializer.save(user=user)
 
     def perform_destroy(self, instance):
