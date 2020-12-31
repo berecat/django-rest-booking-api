@@ -1,19 +1,21 @@
 from typing import Optional
 
 from django.contrib.auth.models import User
-from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import AccessToken
 
-from apps.trades.services.db_interaction import get_user_by_id, change_user_profile_valid_by_id
+from apps.registration.services.db_interaction import \
+    change_user_profile_valid_by_id
+from apps.trades.services.db_interaction import get_user_by_id
 
 
-def check_token(token: str) -> bool:
+def confirm_user_email(token: str) -> bool:
     """
     Check that token is valid. If token is valid change
     user's profile attribute is valid to True
     """
 
-    user_id = _get_user_id_by_given_token(token=token)
+    user_id = get_user_id_by_given_token(token=token)
     user = User.objects.get(id=user_id)
 
     if user:
@@ -31,7 +33,7 @@ def get_user_token(user_id: int) -> str:
     return str(token)
 
 
-def _get_user_id_by_given_token(token: str) -> Optional[int]:
+def get_user_id_by_given_token(token: str) -> Optional[int]:
     """Get user id by the given token"""
 
     try:

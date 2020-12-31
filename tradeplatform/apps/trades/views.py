@@ -3,6 +3,7 @@ from rest_framework.response import Response
 
 from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
                                        OfferFilter, PriceFilter, TradeFilter)
+from apps.trades.custompermission import IsOwnerOrReadOnly
 from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
                                 Price, Trade, WatchList)
 from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
@@ -16,7 +17,6 @@ from apps.trades.services.db_interaction import delete_offer_by_id
 from apps.trades.services.views_validators import (
     check_user_balance, check_user_quantity_stocks_for_given_item,
     setup_user_attributes)
-from apps.trades.custompermission import IsOwnerOrReadOnly
 
 
 class CurrencyViewSet(

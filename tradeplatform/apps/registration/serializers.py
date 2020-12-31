@@ -16,6 +16,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = (
+            "id",
             "user",
             "is_valid",
             "date_joined",
@@ -38,6 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
+            "id",
             "username",
             "password",
             "password2",
@@ -67,3 +69,45 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+
+class RequestResetPasswordSerializer(serializers.Serializer):
+    """Serializer for creating a request to change user's password"""
+
+    email = serializers.EmailField(required=True)
+
+    def validate(self, attrs):
+        """Check that user, which have the given email, exist"""
+
+        result = False
+
+        for user in User.objects.all():
+            if attrs["email"] == user.email:
+                result = True
+                break
+
+        if not result:
+            raise serializers.ValidationError(
+                {"email": "User with the given email address does not exist."}
+            )
+
+        return attrs
+
+
+class ConfirmResetPasswordSerializer(serializers.Serializer):
+    """Serializer for confirmation changing user's password"""
+
+    password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password]
+    )
+    password2 = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, attrs):
+        """Check that password fields match"""
+
+        if attrs["password"] != attrs["password2"]:
+            raise serializers.ValidationError(
+                {"password": "Password fields didn't match."}
+            )
+
+        return attrs

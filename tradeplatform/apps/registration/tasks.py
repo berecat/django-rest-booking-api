@@ -1,25 +1,25 @@
 from celery import shared_task
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
 
-from apps.trades.services.db_interaction import get_user_by_id
-from apps.registration.tokens import get_user_token
+from apps.registration.services.mail_sender import send_mail_message
 
 
 @shared_task
 def send_confirmation_mail_message(user_id: int):
-    user = get_user_by_id(user_id=user_id)
-    mail_subject = "Activate your blog account."
-    message = render_to_string(
-        "registration/acc_active_email.html",
-        {
-            "user": user,
-            "domain": "0.0.0.0:8000",
-            "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-            "token": get_user_token(user_id=user_id),
-        },
+    """Send mail message to users for confirmation them email address"""
+
+    send_mail_message(
+        template="registration/acc_active_email.html",
+        mail_subject="Activate your API account",
+        user_id=user_id,
     )
-    email = EmailMessage(mail_subject, message, to=[user.email])
-    email.send()
+
+
+@shared_task
+def send_reset_password_mail(email: str):
+    """Send mail to users for changing their password"""
+
+    send_mail_message(
+        template="registration/reset_password.html",
+        mail_subject="Confirm your password change request",
+        user_email=email,
+    )

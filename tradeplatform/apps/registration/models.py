@@ -3,9 +3,9 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from apps.registration.tasks import send_confirmation_mail_message
 from apps.trades.models import Balance, WatchList
 from apps.trades.services.db_interaction import get_or_create_default_currency
-from apps.registration.tasks import send_confirmation_mail_message
 
 
 class UserProfile(models.Model):

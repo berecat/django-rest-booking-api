@@ -128,7 +128,9 @@ def get_or_create_default_currency() -> Optional[Currency]:
     If it doesn't exist create default currency instance
     """
 
-    default_currency = Currency.objects.get_or_create(code="USD", defaults={"name": "American dollar"})[0]
+    default_currency = Currency.objects.get_or_create(
+        code="USD", defaults={"name": "American dollar"}
+    )[0]
     return default_currency
 
 
@@ -138,16 +140,6 @@ def change_user_inventory(user_id: int, item_id: int, quantity: int) -> None:
     inventory = get_or_create_user_inventory(user_id=user_id, item_id=item_id)
     inventory.quantity += quantity
     inventory.save()
-
-
-def change_user_profile_valid_by_id(user_id: int) -> None:
-    """Change user profile is_valid attribute"""
-
-    user = get_user_by_id(user_id=user_id)
-    user_profile = user.profile
-
-    user_profile.is_valid = not user_profile.is_valid
-    user_profile.save()
 
 
 def change_offer_current_quantity(offer_id: int, quantity: int) -> None:

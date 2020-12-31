@@ -1,12 +1,16 @@
 from django.contrib.auth.models import User
-from rest_framework import viewsets
-from rest_framework.views import APIView
+from rest_framework import generics, viewsets
 from rest_framework.response import Response
 
 from apps.registration.models import UserProfile
-from apps.registration.serializers import UserProfileSerializer, UserSerializer
-from apps.trades.services.db_interaction import change_user_profile_valid_by_id
-from apps.registration.tokens import check_token
+from apps.registration.serializers import (ConfirmResetPasswordSerializer,
+                                           RequestResetPasswordSerializer,
+                                           UserProfileSerializer,
+                                           UserSerializer)
+from apps.registration.services.views_logic import reset_user_password
+from apps.registration.tasks import send_reset_password_mail
+from apps.registration.tokens import confirm_user_email
+from apps.trades.custompermission import IsOwnerOrReadOnly
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -22,18 +26,64 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     serializer_class = UserProfileSerializer
     queryset = UserProfile.objects.all()
 
+    permission_classes = [IsOwnerOrReadOnly]
 
-class ActivateUserEmail(APIView):
+
+class ActivateUserEmailView(generics.ListAPIView):
     """View for confirmation user's mail address"""
 
-    def get(self, request, token):
+    def get(self, request, *args, **kwargs):
+        """Return response to user with information about email confirmation"""
 
-        if check_token(token=token):
-            change_user_profile_valid_by_id(user_id=request.user)
-            message = {"details": "Thank you for your email confirmation. Now you can login your account."}
+        if confirm_user_email(token=kwargs["token"]):
+            message = {"details": "Thank you for your email confirmation."}
         else:
             message = {"details": "Invalid link!"}
 
         return Response(data=message)
 
 
+class RequestResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
+    """View to request a password change"""
+
+    serializer_class = RequestResetPasswordSerializer
+
+    def create(self, request, *args, **kwargs):
+        """Function for creating a request to reset user's password"""
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        send_reset_password_mail.delay(email=request.data["email"])
+
+        message = {"details": "We send you confirmation mail for reset your password"}
+        return Response(data=message)
+
+    def get(self, request, *args, **kwargs):
+        """Function for getting information about view"""
+
+        message = {"details": "Please write your email address to reset password"}
+        return Response(data=message)
+
+
+class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
+    """View for confirmation of changing user's password"""
+
+    serializer_class = ConfirmResetPasswordSerializer
+
+    def create(self, request, *args, **kwargs):
+        """Function for changing user's password"""
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        reset_user_password(token=kwargs["token"], password=request.data["password"])
+
+        message = {"details": "Password has been successfully changed"}
+        return Response(data=message)
+
+    def get(self, request, *args, **kwargs):
+        """Function for getting information about view"""
+
+        message = {"details": "Please write new password and confirm it"}
+        return Response(data=message)
