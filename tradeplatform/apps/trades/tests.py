@@ -33,13 +33,15 @@ class TestCurrency(APITestCase):
         Ensure we can post currency instance
         """
 
-        data = {"code": "USD", "name": "American Dollar"}
+        data = {"code": "BYN", "name": "Belarusian rubles"}
         response = self.post_currency(data)
 
+        currency = Currency.objects.get(code=data["code"])
+
         assert response.status_code == status.HTTP_201_CREATED
-        assert Currency.objects.count() == 1
-        assert Currency.objects.get().name == data["name"]
-        assert Currency.objects.get().code == data["code"]
+        assert Currency.objects.count() == 2
+        assert currency.name == data["name"]
+        assert currency.code == data["code"]
 
     def test_currencies_list(self):
         """
@@ -47,8 +49,8 @@ class TestCurrency(APITestCase):
         """
 
         data_currency_1 = {
-            "code": "USD",
-            "name": "American Dollar",
+            "code": "BYN",
+            "name": "Belarusian rubles",
         }
         self.post_currency(data_currency_1)
 
@@ -62,18 +64,19 @@ class TestCurrency(APITestCase):
         response = self.client.get(url, format="json")
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["count"] == 2
-        assert response.data["results"][0]["name"] == data_currency_1["name"]
-        assert response.data["results"][0]["code"] == data_currency_1["code"]
-        assert response.data["results"][1]["name"] == data_currency_2["name"]
-        assert response.data["results"][1]["code"] == data_currency_2["code"]
+        assert response.data["count"] == 3
+        assert response.data["results"][0]["code"] == "USD"
+        assert response.data["results"][1]["name"] == data_currency_1["name"]
+        assert response.data["results"][1]["code"] == data_currency_1["code"]
+        assert response.data["results"][2]["name"] == data_currency_2["name"]
+        assert response.data["results"][2]["code"] == data_currency_2["code"]
 
     def test_currency_get(self):
         """
         Ensure we can get a single currency by id
         """
 
-        data = {"code": "USD", "name": "American Dollar"}
+        data = {"code": "BYN", "name": "Belarusian rubles"}
         response = self.post_currency(data)
 
         url = reverse("currency-detail", None, {response.data["id"]})
@@ -88,12 +91,12 @@ class TestCurrency(APITestCase):
         Ensure we can update fields for a currency by patch method
         """
 
-        data = {"code": "BYN", "name": "American Dollar"}
+        data = {"code": "BYN", "name": "Euro"}
         response = self.post_currency(data)
 
         url = reverse("currency-detail", None, {response.data["id"]})
         new_data = {
-            "code": "USD",
+            "code": "EUR",
         }
         patch_response = self.client.patch(url, new_data, format="json")
 
@@ -106,13 +109,13 @@ class TestCurrency(APITestCase):
         Ensure we can update fields for a currency by put method
         """
 
-        data = {"code": "USD", "name": "American Dollar"}
+        data = {"code": "BYN", "name": "Belarusian rubles"}
         response = self.post_currency(data)
 
         url = reverse("currency-detail", None, {response.data["id"]})
         new_data = {
             "code": "EUR",
-            "name": "EURO",
+            "name": "Euro",
         }
         put_response = self.client.put(url, new_data, format="json")
 
@@ -279,7 +282,7 @@ class TestPrice(APITestCase):
         User.objects.create_user(username="test_user", password="test")
         self.client.login(username="test_user", password="test")
 
-        self.currency_1 = Currency.objects.create(code="USD", name="American Dollar")
+        self.currency_1 = Currency.objects.get(code="USD")
         self.currency_2 = Currency.objects.create(code="EUR", name="Euro")
 
         self.item_1 = Item.objects.create(

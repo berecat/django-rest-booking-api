@@ -4,9 +4,8 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import AccessToken
 
-from apps.registration.services.db_interaction import \
-    change_user_profile_valid_by_id
-from apps.trades.services.db_interaction import get_user_by_id
+from apps.registration.services.db_interaction import (
+    change_profile_valid_by_id, get_user_by_id)
 
 
 def confirm_user_email(token: str) -> bool:
@@ -19,7 +18,7 @@ def confirm_user_email(token: str) -> bool:
     user = User.objects.get(id=user_id)
 
     if user:
-        change_user_profile_valid_by_id(user_id=user_id)
+        change_profile_valid_by_id(user_id=user_id)
         return True
     return False
 

@@ -1,5 +1,5 @@
+from apps.registration.services.db_interaction import get_user_by_id
 from apps.registration.tokens import get_user_id_by_given_token
-from apps.trades.services.db_interaction import get_user_by_id
 
 
 def reset_user_password(token: str, password: str) -> None:

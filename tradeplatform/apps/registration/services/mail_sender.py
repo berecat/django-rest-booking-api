@@ -1,9 +1,9 @@
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
-from apps.registration.services.db_interaction import get_user_by_email
+from apps.registration.services.db_interaction import (get_user_by_email,
+                                                       get_user_by_id)
 from apps.registration.tokens import get_user_token
-from apps.trades.services.db_interaction import get_user_by_id
 
 
 def send_mail_message(

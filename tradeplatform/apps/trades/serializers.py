@@ -3,6 +3,8 @@ from rest_framework import serializers
 from apps.registration.serializers import UserSerializer
 from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
                                 Price, Trade, WatchList)
+from apps.trades.services.views_validators import (
+    check_user_balance, check_user_quantity_stocks_for_given_item)
 
 
 class StockBaseSerializer(serializers.ModelSerializer):
@@ -147,6 +149,28 @@ class OfferCreateSerializer(serializers.ModelSerializer):
         elif attrs["price"] < 0:
             raise serializers.ValidationError(
                 {"price": "Price can't be less than zero"}
+            )
+        elif attrs["status"] == "PURCHASE" and not check_user_balance(
+            user_id=self.context.get("request").user.id,
+            price=attrs["price"],
+            quantity=attrs["entry_quantity"],
+        ):
+            raise serializers.ValidationError(
+                {
+                    "user": "You don't have enough money to buy that many quantity of stocks"
+                }
+            )
+        elif attrs[
+            "status"
+        ] == "SELL" and not check_user_quantity_stocks_for_given_item(
+            user_id=self.context.get("request").user.id,
+            item_id=attrs["item"].id,
+            quantity=attrs["entry_quantity"],
+        ):
+            raise serializers.ValidationError(
+                {
+                    "user": "You don't have enough quantity of stocks of this item to sell"
+                }
             )
 
         return attrs

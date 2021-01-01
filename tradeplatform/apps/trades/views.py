@@ -1,5 +1,4 @@
-from rest_framework import mixins, status, viewsets
-from rest_framework.response import Response
+from rest_framework import mixins, viewsets
 
 from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
                                        OfferFilter, PriceFilter, TradeFilter)
@@ -14,9 +13,6 @@ from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      WatchListCreateSerializer,
                                      WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
-from apps.trades.services.views_validators import (
-    check_user_balance, check_user_quantity_stocks_for_given_item,
-    setup_user_attributes)
 
 
 class CurrencyViewSet(
@@ -126,46 +122,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         "quantity",
     )
 
-    def create(self, request, *args, **kwargs):
-        """
-        If the offer has SELL status, check that user have enough quantity of stocks to sell them
-        If the offer has PURCHASE status, check that user have enough money to buy that many stocks
-        """
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        if self.request.data["status"] == "SELL":
-
-            if check_user_quantity_stocks_for_given_item(
-                user_id=self.request.user.id,
-                item_id=self.request.data["item"],
-                quantity=self.request.data["entry_quantity"],
-            ):
-
-                self.perform_create(serializer)
-                headers = self.get_success_headers(serializer.data)
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED, headers=headers
-                )
-            else:
-                return Response("You don't have enough quantity of stocks to sell")
-
-        elif self.request.data["status"] == "PURCHASE":
-
-            if check_user_balance(
-                user_id=self.request.user.id,
-                quantity=self.request.data["entry_quantity"],
-                price=self.request.data["price"],
-            ):
-
-                self.perform_create(serializer)
-                headers = self.get_success_headers(serializer.data)
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED, headers=headers
-                )
-            else:
-                return Response("You don't have enough money to buy that many stocks")
+    permission_classes = [IsOwnerOrReadOnly]
 
     def perform_create(self, serializer):
         """

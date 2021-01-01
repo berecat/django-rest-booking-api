@@ -13,19 +13,10 @@ def enable_db_access_for_all_tests(db):
 
 
 @pytest.fixture()
-def default_user_instance():
+def user_instance():
     """User instance without balance"""
 
     return mixer.blend(User)
-
-
-@pytest.fixture()
-def user_instance(default_currency_instance):
-    """User instance with balance"""
-
-    user = mixer.blend(User)
-    mixer.blend(Balance, user=user, currency=default_currency_instance, quantity=1000)
-    return user
 
 
 @pytest.fixture()
@@ -33,13 +24,6 @@ def item_instance():
     """Item instance"""
 
     return mixer.blend(Item)
-
-
-@pytest.fixture()
-def default_currency_instance():
-    """Currency instance with USD code is default currency for tradeplatform"""
-
-    return mixer.blend(Currency, code="USD", name="American dollar")
 
 
 @pytest.fixture()
@@ -80,25 +64,10 @@ def offer_sell_instance(user_instance, item_instance):
 
 
 @pytest.fixture()
-def user_instances(default_currency_instance):
+def user_instances():
     """Return two users instances for making trade between them"""
 
-    user_1 = mixer.blend(User)
-    mixer.blend(
-        Balance, user=user_1, currency=default_currency_instance, quantity=10000000
-    )
-
-    user_2 = mixer.blend(User)
-    mixer.blend(
-        Balance, user=user_2, currency=default_currency_instance, quantity=10000000
-    )
-
-    user_3 = mixer.blend(User)
-    mixer.blend(
-        Balance, user=user_3, currency=default_currency_instance, quantity=10000000
-    )
-
-    return [user_1, user_2, user_3]
+    return [mixer.blend(User), mixer.blend(User), mixer.blend(User)]
 
 
 @pytest.fixture()

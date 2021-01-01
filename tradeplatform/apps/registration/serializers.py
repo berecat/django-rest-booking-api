@@ -9,9 +9,7 @@ from apps.registration.models import UserProfile
 class UserProfileSerializer(serializers.ModelSerializer):
     """Serializer for User Profile model"""
 
-    user = serializers.SlugRelatedField(
-        queryset=User.objects.all(), slug_field="username"
-    )
+    user = serializers.SlugRelatedField(read_only=True, slug_field="username")
 
     class Meta:
         model = UserProfile
@@ -21,6 +19,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "is_valid",
             "date_joined",
         )
+        read_only_fields = ("is_valid",)
 
 
 class UserSerializer(serializers.ModelSerializer):

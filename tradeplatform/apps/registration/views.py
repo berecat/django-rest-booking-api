@@ -1,9 +1,9 @@
 from django.contrib.auth.models import User
-from rest_framework import generics
-from rest_framework.response import Response
+from rest_framework import generics, mixins, status, viewsets
 from rest_framework.permissions import AllowAny
-from rest_framework import mixins, viewsets
+from rest_framework.response import Response
 
+from apps.registration.custompermission import IsOwnerOrReadOnly
 from apps.registration.models import UserProfile
 from apps.registration.serializers import (ConfirmResetPasswordSerializer,
                                            RequestResetPasswordSerializer,
@@ -12,24 +12,21 @@ from apps.registration.serializers import (ConfirmResetPasswordSerializer,
 from apps.registration.services.views_logic import reset_user_password
 from apps.registration.tasks import send_reset_password_mail
 from apps.registration.tokens import confirm_user_email
-from apps.trades.custompermission import IsOwnerOrReadOnly
 
 
-class UserViewSet(mixins.ListModelMixin,
-                  mixins.RetrieveModelMixin,
-                  mixins.UpdateModelMixin,
-                  mixins.DestroyModelMixin,
-                  viewsets.GenericViewSet):
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for User model"""
 
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
 
-class UserProfileViewSet(mixins.ListModelMixin,
-                         mixins.RetrieveModelMixin,
-                         mixins.UpdateModelMixin,
-                         viewsets.GenericViewSet):
+class UserProfileViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     """ViewSet for User Profile model"""
 
     serializer_class = UserProfileSerializer
@@ -38,8 +35,7 @@ class UserProfileViewSet(mixins.ListModelMixin,
     permission_classes = [IsOwnerOrReadOnly]
 
 
-class SignUpView(generics.ListAPIView,
-                 generics.CreateAPIView):
+class SignUpView(generics.ListAPIView, generics.CreateAPIView):
     """View for user's registration"""
 
     serializer_class = UserSerializer
@@ -50,7 +46,7 @@ class SignUpView(generics.ListAPIView,
         """Function for getting information about view"""
 
         message = {"details": "Please write information below"}
-        return Response(data=message)
+        return Response(data=message, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         """Function for creating a request to reset user's password"""
@@ -58,10 +54,13 @@ class SignUpView(generics.ListAPIView,
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
 
-        message = {"details": "You are successfully registered. "
-                              "Please confirm your email address to complete the registration."}
-        return Response(data=message)
+        message = {
+            "details": "You are successfully registered. "
+            "Please confirm your email address to complete the registration."
+        }
+        return Response(data=message, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class ActivateUserEmailView(generics.ListAPIView):
@@ -77,7 +76,7 @@ class ActivateUserEmailView(generics.ListAPIView):
         else:
             message = {"details": "Invalid link!"}
 
-        return Response(data=message)
+        return Response(data=message, status=status.HTTP_200_OK)
 
 
 class RequestResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
@@ -96,13 +95,13 @@ class RequestResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
         send_reset_password_mail.delay(email=request.data["email"])
 
         message = {"details": "We send you confirmation mail for reset your password"}
-        return Response(data=message)
+        return Response(data=message, status=status.HTTP_201_CREATED)
 
     def get(self, request, *args, **kwargs):
         """Function for getting information about view"""
 
         message = {"details": "Please write your email address to reset password"}
-        return Response(data=message)
+        return Response(data=message, status=status.HTTP_200_OK)
 
 
 class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
@@ -121,10 +120,10 @@ class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
         reset_user_password(token=kwargs["token"], password=request.data["password"])
 
         message = {"details": "Password has been successfully changed"}
-        return Response(data=message)
+        return Response(data=message, status=status.HTTP_201_CREATED)
 
     def get(self, request, *args, **kwargs):
         """Function for getting information about view"""
 
         message = {"details": "Please write new password and confirm it"}
-        return Response(data=message)
+        return Response(data=message, status=status.HTTP_200_OK)
