@@ -14,7 +14,7 @@ def test_count_current_quantity_in_offers(offer_instances):
         user_id=offer.user.id, item_id=offer.item.id
     )
 
-    assert quantity == 1474
+    assert quantity == 147
 
 
 def test_check_user_quantity_stocks_for_given_item_with_greater_quantity(

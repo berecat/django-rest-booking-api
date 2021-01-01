@@ -36,13 +36,13 @@ def test_get_user_by_id(user_instance):
     assert user == user_instance
 
 
-def test_get_currency_by_id(default_currency_instance):
+def test_get_currency_by_id(currency_instance):
     """Ensure that function return right currency instance"""
 
-    currency_id = default_currency_instance.id
+    currency_id = currency_instance.id
     currency = get_currency_by_id(currency_id=currency_id)
 
-    assert currency == default_currency_instance
+    assert currency == currency_instance
 
 
 def test_delete_offer_by_id(offer_purchase_instance):
@@ -132,7 +132,7 @@ def test_change_user_balance_by_id(user_instance):
 
 
 def test_get_or_create_user_inventory_with_not_exist_inventory(
-    default_user_instance, item_instance
+    user_instance, item_instance
 ):
     """
     Ensure that function return correct inventory instance, which belong to request user
@@ -140,16 +140,16 @@ def test_get_or_create_user_inventory_with_not_exist_inventory(
     """
 
     inventory = get_or_create_user_inventory(
-        user_id=default_user_instance.id, item_id=item_instance.id
+        user_id=user_instance.id, item_id=item_instance.id
     )
 
     assert inventory == Inventory.objects.get(
-        user_id=default_user_instance.id, item_id=item_instance.id
+        user_id=user_instance.id, item_id=item_instance.id
     )
 
 
 def test_get_or_create_user_inventory_with_exist_inventory(
-    default_user_instance, item_instance
+    user_instance, item_instance
 ):
     """
     Ensure that function return correct inventory instance, which belong to request user
@@ -157,17 +157,17 @@ def test_get_or_create_user_inventory_with_exist_inventory(
     """
 
     correct_inventory = Inventory.objects.create(
-        user=default_user_instance, item=item_instance, quantity=100
+        user=user_instance, item=item_instance, quantity=100
     )
     inventory = get_or_create_user_inventory(
-        user_id=default_user_instance.id, item_id=item_instance.id
+        user_id=user_instance.id, item_id=item_instance.id
     )
 
     assert inventory == correct_inventory
 
 
 def test_get_or_create_user_balance_with_not_exist_balance(
-    default_user_instance, default_currency_instance
+    user_instance, currency_instance
 ):
     """
     Ensure that function return correct balance instance, which belong to request user
@@ -175,40 +175,41 @@ def test_get_or_create_user_balance_with_not_exist_balance(
     """
 
     balance = get_or_create_user_balance(
-        user_id=default_user_instance.id, currency_id=default_currency_instance.id
+        user_id=user_instance.id, currency_id=currency_instance.id
     )
 
     assert balance == Balance.objects.get(
-        user_id=default_user_instance.id, currency_id=default_currency_instance.id
+        user_id=user_instance.id, currency_id=currency_instance.id
     )
 
 
 def test_get_or_create_user_balance_with_exist_balance(
-    user_instance, default_currency_instance
+    user_instance, currency_instance
 ):
     """
     Ensure that function return correct balance instance, which belong to request user
     With existing balance for received currency
     """
 
+    Balance.objects.create(user=user_instance, currency=currency_instance)
     balance = get_or_create_user_balance(
-        user_id=user_instance.id, currency_id=default_currency_instance.id
+        user_id=user_instance.id, currency_id=currency_instance.id
     )
 
-    assert balance == user_instance.balance.get(currency=default_currency_instance)
+    assert balance == user_instance.balance.get(currency=currency_instance)
 
 
-def test_change_user_inventory(default_user_instance, item_instance):
+def test_change_user_inventory(user_instance, item_instance):
     """Ensure that function correctly change user's inventory"""
 
     change_quantity = 120
     change_user_inventory(
-        user_id=default_user_instance.id,
+        user_id=user_instance.id,
         item_id=item_instance.id,
         quantity=change_quantity,
     )
 
-    user_balance = default_user_instance.inventory.get()
+    user_balance = user_instance.inventory.get()
 
     assert user_balance.quantity == 1000 + change_quantity
 

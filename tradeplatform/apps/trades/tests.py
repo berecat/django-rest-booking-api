@@ -311,7 +311,6 @@ class TestPrice(APITestCase):
             "date": "2020-12-23 10:05:00+00:00",
         }
         response = self.post_price(data)
-        print(response)
 
         assert response.status_code == status.HTTP_201_CREATED
         assert Price.objects.count() == 1
@@ -398,8 +397,6 @@ class TestPrice(APITestCase):
         }
         patch_response = self.client.patch(url, new_data, format="json")
 
-        print(patch_response.data)
-
         assert patch_response.status_code == status.HTTP_200_OK
         assert patch_response.data["currency"] == new_data["currency"]
         assert patch_response.data["item"] == new_data["item"]
@@ -477,8 +474,6 @@ class TestPrice(APITestCase):
         url = reverse("item-detail", None, {self.item_2.id})
         response = self.client.get(url, format="json")
 
-        print(response.data["price"][0])
-
         assert response.data["price"][0]["id"] == price_1["id"]
         assert response.data["price"][1]["id"] == price_2["id"]
 
@@ -490,151 +485,73 @@ class TestWatchlist(APITestCase):
         """Initialize necessary fields for testing and log in user to make requests"""
 
         self.user_1 = User.objects.create_user(username="test_user", password="test")
+        self.user_2 = User.objects.create_user(username="test_user2", password="test")
         self.client.login(username="test_user", password="test")
 
         self.item_1 = Item.objects.create(
-            name="Apple",
-            code="AAPL",
-        )
-        self.item_2 = Item.objects.create(
-            name="Tesla",
-            code="TSLA",
-        )
-        self.item_3 = Item.objects.create(
             name="Amazon",
             code="AMZN",
         )
+        self.item_2 = Item.objects.create(
+            name="Apple",
+            code="AAPL",
+        )
+        self.item_3 = Item.objects.create(
+            name="Tesla",
+            code="TSLA",
+        )
 
-    def post_watchlist(self, data):
-        """Post watchlist instance into database through web-api"""
-
-        url = reverse("watchlist-list")
-        response = self.client.post(url, data, format="json")
-        return response
-
-    def test_watchlist_post(self):
-        """
-        Ensure we can post watchlist instance
-        """
-
-        data = {"item": [self.item_1.id, self.item_2.id]}
-        response = self.post_watchlist(data)
-
-        print(response.data)
-
-        assert response.status_code == status.HTTP_201_CREATED
-        assert WatchList.objects.count() == 1
-        assert WatchList.objects.get().user == self.user_1
-        assert len(WatchList.objects.get().item.all()) == 2
-        assert WatchList.objects.get().item.all()[0] == self.item_1
-        assert WatchList.objects.get().item.all()[1] == self.item_2
-
-    def test_watchlists_list(self):
+    def test_watchlist_list(self):
         """
         Ensure we can retrieve the watchlists collection
         """
-
-        data_watchlist_1 = {
-            "item": [
-                self.item_1.id,
-                self.item_2.id,
-            ],
-        }
-        self.post_watchlist(data_watchlist_1)
 
         url = reverse("watchlist-list")
         response = self.client.get(url, format="json")
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["count"] == 1
+        assert response.data["count"] == 2
 
         assert response.data["results"][0]["user"]["username"] == self.user_1.username
-        assert len(response.data["results"][0]["item"]) == 2
-        assert (
-            response.data["results"][0]["item"][0]["id"] == data_watchlist_1["item"][0]
-        )
-        assert (
-            response.data["results"][0]["item"][1]["id"] == data_watchlist_1["item"][1]
-        )
+        assert response.data["results"][0]["item"] == []
+
+        assert response.data["results"][1]["user"]["username"] == self.user_2.username
+        assert response.data["results"][1]["item"] == []
+
 
     def test_watchlist_get(self):
         """
         Ensure we can get a single watchlist by id
         """
 
-        data = {
-            "item": [
-                self.item_1.id,
-                self.item_2.id,
-                self.item_3.id,
-            ],
-        }
-        response = self.post_watchlist(data)
+        url = reverse("watchlist-detail", None, {WatchList.objects.first().id})
+        response = self.client.get(url, format="json")
 
-        url = reverse("watchlist-detail", None, {response.data["id"]})
-        get_response = self.client.get(url, format="json")
-        print(get_response.data)
+        assert response.status_code == status.HTTP_200_OK
 
-        assert get_response.status_code == status.HTTP_200_OK
-        assert get_response.data["user"]["username"] == self.user_1.username
-        assert len(get_response.data["item"]) == 3
-        assert get_response.data["item"][0]["id"] == data["item"][0]
-        assert get_response.data["item"][1]["id"] == data["item"][1]
-        assert get_response.data["item"][2]["id"] == data["item"][2]
+        assert response.data["user"]["username"] == self.user_1.username
+        assert response.data["item"] == []
 
-    def test_watchlist_patch_update(self):
+
+    def test_watchlist_update(self):
         """
-        Ensure we can update fields for a watchlist by patch method
+        Ensure that we can update a single watchlist instance by its id
         """
 
-        data = {
-            "item": [
-                self.item_1.id,
-                self.item_2.id,
-                self.item_3.id,
-            ],
-        }
-        response = self.post_watchlist(data)
-
-        url = reverse("watchlist-detail", None, {response.data["id"]})
         new_data = {
-            "item": [
-                self.item_2.id,
-            ]
+            "item": [self.item_1.id,
+                     self.item_2.id,
+                     self.item_3.id,
+                     ]
         }
-        patch_response = self.client.patch(url, new_data, format="json")
+        url = reverse("watchlist-detail", None, {WatchList.objects.first().id})
+        response = self.client.put(url, new_data, format="json")
 
-        assert patch_response.status_code == status.HTTP_200_OK
-        assert len(patch_response.data["item"]) == 1
-        assert patch_response.data["item"][0] == new_data["item"][0]
+        assert response.status_code == status.HTTP_200_OK
 
-    def test_watchlist_put_update(self):
-        """
-        Ensure we can update fields for a watchlist by put method
-        """
-
-        data = {
-            "item": [
-                self.item_1.id,
-                self.item_2.id,
-                self.item_3.id,
-            ],
-        }
-        response = self.post_watchlist(data)
-
-        url = reverse("watchlist-detail", None, {response.data["id"]})
-        new_data = {
-            "item": [
-                self.item_1.id,
-                self.item_2.id,
-            ],
-        }
-        put_response = self.client.put(url, new_data, format="json")
-
-        assert put_response.status_code == status.HTTP_200_OK
-        assert len(put_response.data["item"]) == 2
-        assert put_response.data["item"][0] == new_data["item"][0]
-        assert put_response.data["item"][1] == new_data["item"][1]
+        assert response.data["item"][0] == new_data["item"][0]
+        assert response.data["item"][1] == new_data["item"][1]
+        assert response.data["item"][2] == new_data["item"][2]
 
 
 class TestOffer(APITestCase):
@@ -677,7 +594,6 @@ class TestOffer(APITestCase):
             "is_active": True,
         }
         response = self.post_offer(data)
-        print(response.data)
 
         assert response.status_code == status.HTTP_201_CREATED
         assert Offer.objects.count() == 1
@@ -781,6 +697,7 @@ class TestOffer(APITestCase):
 
         url = reverse("offer-detail", None, {response.data["id"]})
         new_data = {
+            "status": "SELL",
             "item": self.item_1.id,
             "entry_quantity": 701,
             "price": Decimal("3243.23"),
@@ -813,8 +730,8 @@ class TestOffer(APITestCase):
         new_data = {
             "item": self.item_1.id,
             "status": "PURCHASE",
-            "entry_quantity": 2131,
-            "price": Decimal("32212.23"),
+            "entry_quantity": 999,
+            "price": Decimal("1.00"),
             "is_active": True,
         }
         put_response = self.client.patch(url, new_data, format="json")
@@ -860,8 +777,8 @@ class TestBalance(APITestCase):
         self.client.login(username="test_user", password="test")
 
         self.currency_1 = Currency.objects.create(
-            name="American Dollar",
-            code="USD",
+            name="Belarusian rubles",
+            code="BYN",
         )
         self.currency_2 = Currency.objects.create(
             name="Euro",
@@ -891,21 +808,29 @@ class TestBalance(APITestCase):
         response = self.client.get(url, format="json")
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["count"] == 2
+        assert response.data["count"] == 4
 
         assert response.data["results"][0]["user"]["username"] == self.user_1.username
-        assert (
-            response.data["results"][0]["currency"]["code"]
-            == data_balance_1["currency"].code
-        )
-        assert response.data["results"][0]["quantity"] == data_balance_1["quantity"]
+        assert response.data["results"][0]["currency"]["code"] == "USD"
+        assert response.data["results"][0]["quantity"] == 1000
 
         assert response.data["results"][1]["user"]["username"] == self.user_2.username
+        assert response.data["results"][1]["currency"]["code"] == "USD"
+        assert response.data["results"][1]["quantity"] == 1000
+
+        assert response.data["results"][2]["user"]["username"] == self.user_1.username
         assert (
-            response.data["results"][1]["currency"]["code"]
+            response.data["results"][2]["currency"]["code"]
+            == data_balance_1["currency"].code
+        )
+        assert response.data["results"][2]["quantity"] == data_balance_1["quantity"]
+
+        assert response.data["results"][3]["user"]["username"] == self.user_2.username
+        assert (
+            response.data["results"][3]["currency"]["code"]
             == data_balance_2["currency"].code
         )
-        assert response.data["results"][1]["quantity"] == data_balance_2["quantity"]
+        assert response.data["results"][3]["quantity"] == data_balance_2["quantity"]
 
     def test_balance_get(self):
         """

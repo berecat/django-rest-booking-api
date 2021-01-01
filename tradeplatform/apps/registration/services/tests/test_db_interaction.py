@@ -1,3 +1,5 @@
+from django.contrib.auth.models import User
+
 from apps.registration.services.db_interaction import (
     change_profile_valid_by_id, get_user_by_email, get_user_by_id)
 
@@ -23,7 +25,6 @@ def test_get_user_by_email(user_instance):
 def test_change_profile_valid_by_id(user_instance):
     """Ensure that function confirm user's profile in the right way"""
 
-    print(user_instance.profile.is_valid)
     change_profile_valid_by_id(user_id=user_instance.id)
 
-    assert user_instance.profile.is_valid == True
+    assert User.objects.get().profile.is_valid == True
