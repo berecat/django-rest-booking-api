@@ -70,24 +70,8 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class RequestResetPasswordSerializer(serializers.Serializer):
-    """Serializer for creating a request to change user's password"""
-
-    email = serializers.EmailField(required=True)
-
-    def validate(self, attrs):
-        """Check that user, which have the given email, exist"""
-
-        if not User.objects.all().filter(email=attrs["email"]):
-            raise serializers.ValidationError(
-                {"email": "User with the given email address does not exist."}
-            )
-
-        return attrs
-
-
-class ConfirmationPasswordSerializer(serializers.Serializer):
-    """Serializer for confirmation changing user's password"""
+class BasePasswordSerializer(serializers.Serializer):
+    """"""
 
     password = serializers.CharField(
         write_only=True, required=True, validators=[validate_password]
@@ -105,17 +89,60 @@ class ConfirmationPasswordSerializer(serializers.Serializer):
         return attrs
 
 
-class ChangeUserEmailSerializer(serializers.Serializer):
-    """Serializer for change user's email address"""
+class BaseEmailSerializer(serializers.Serializer):
+    """"""
 
     email = serializers.EmailField(required=True)
 
-    # def validate(self, attrs):
-    #    """Check that user, which have the given email, exist"""
-    #
-    #    if User.objects.all().filter(email=attrs["email"]):
-    #        raise serializers.ValidationError(
-    #            {"email": "User with the given email address has already existed"}
-    #        )
+    def validate(self, attrs):
+        """Check that user, which have the given email, exist"""
 
-    #    return attrs
+        if User.objects.all().filter(email=attrs["email"]):
+            raise serializers.ValidationError(
+                {"email": "User with the given email address has already existed"}
+            )
+
+        return attrs
+
+
+class RequestResetPasswordSerializer(BaseEmailSerializer):
+    """Serializer for creating a request to change user's password"""
+
+    def validate(self, attrs):
+        """Check that user, which have the given email, exist"""
+
+        if not User.objects.all().filter(email=attrs["email"]):
+            raise serializers.ValidationError(
+                {"email": "User with the given email address does not exist."}
+            )
+
+        return attrs
+
+
+class ResetUserPasswordSerializer(BasePasswordSerializer):
+    """Serializer for confirmation changing user's password"""
+
+    pass
+
+
+class ChangeUserEmailAddressSerializer(BasePasswordSerializer):
+
+    def validate(self, attrs):
+        """Check that password fields match"""
+
+        if attrs["password"] != attrs["password2"]:
+            raise serializers.ValidationError(
+                {"password": "Password fields didn't match."}
+            )
+        elif not self.context.get("request").user.check_password(attrs["password"]):
+            raise serializers.ValidationError(
+                {"password": "You write wrong password!"}
+            )
+
+        return attrs
+
+
+class RequestUserEmailSerializer(BaseEmailSerializer):
+    """Serializer for change user's email address"""
+
+    pass

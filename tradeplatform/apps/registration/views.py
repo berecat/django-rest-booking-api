@@ -5,11 +5,12 @@ from rest_framework.response import Response
 
 from apps.registration.custompermission import IsOwnerOrReadOnly
 from apps.registration.models import UserProfile
-from apps.registration.serializers import (ChangeUserEmailSerializer,
-                                           ConfirmationPasswordSerializer,
+from apps.registration.serializers import (RequestUserEmailSerializer,
+                                           ResetUserPasswordSerializer,
                                            RequestResetPasswordSerializer,
                                            UserProfileSerializer,
-                                           UserSerializer)
+                                           UserSerializer,
+                                           ChangeUserEmailAddressSerializer)
 from apps.registration.services.views_logic import (update_user_email_address,
                                                     update_user_password)
 from apps.registration.tasks import (send_change_email_address_mail,
@@ -115,7 +116,7 @@ class RequestResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
 class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
     """View for confirmation of changing user's password"""
 
-    serializer_class = ConfirmationPasswordSerializer
+    serializer_class = ResetUserPasswordSerializer
 
     permission_classes = [AllowAny]
 
@@ -140,7 +141,7 @@ class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
 class RequestChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
     """View for make a request to change user's email address"""
 
-    serializer_class = ConfirmationPasswordSerializer
+    serializer_class = ChangeUserEmailAddressSerializer
 
     permission_classes = [IsAuthenticated]
 
@@ -162,7 +163,7 @@ class RequestChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView
         send_change_email_address_mail.delay(username=self.request.user.username)
 
         message = {
-            "details": "We send you confirmation mail for " "change your email address"
+            "details": "We send you confirmation mail for change your email address"
         }
         return Response(data=message, status=status.HTTP_201_CREATED)
 
@@ -170,7 +171,7 @@ class RequestChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView
 class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
     """View for write new user's email address"""
 
-    serializer_class = ChangeUserEmailSerializer
+    serializer_class = RequestUserEmailSerializer
 
     permission_classes = [IsAuthenticated]
 
