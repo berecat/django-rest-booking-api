@@ -3,7 +3,6 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from apps.registration.tasks import send_confirmation_mail_message
 from apps.trades.models import Balance, WatchList
 from apps.trades.services.db_interaction import get_or_create_default_currency
 
@@ -24,11 +23,3 @@ def create_user_default_attributes(sender, instance, created, **kwargs):
         UserProfile.objects.create(user=instance)
         Balance.objects.create(user=instance, currency=get_or_create_default_currency())
         WatchList.objects.create(user=instance)
-
-
-@receiver(post_save, sender=User)
-def send_confirmation_email_to_user(sender, instance, created, **kwargs):
-    """Function send confirmation mail message for user, who has just registered"""
-
-    if created:
-        send_confirmation_mail_message.delay(user_id=instance.id)

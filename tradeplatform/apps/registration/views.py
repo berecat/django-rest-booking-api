@@ -1,16 +1,21 @@
 from django.contrib.auth.models import User
 from rest_framework import generics, mixins, status, viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from apps.registration.custompermission import IsOwnerOrReadOnly
 from apps.registration.models import UserProfile
-from apps.registration.serializers import (ConfirmResetPasswordSerializer,
+from apps.registration.serializers import (ChangeUserEmailSerializer,
+                                           ConfirmationPasswordSerializer,
                                            RequestResetPasswordSerializer,
                                            UserProfileSerializer,
                                            UserSerializer)
-from apps.registration.services.views_logic import reset_user_password
-from apps.registration.tasks import send_reset_password_mail
+from apps.registration.services.views_logic import (update_user_email_address,
+                                                    update_user_password)
+from apps.registration.tasks import (send_change_email_address_mail,
+                                     send_confirm_change_email_address_mail,
+                                     send_confirmation_mail_message,
+                                     send_reset_password_mail)
 from apps.registration.tokens import confirm_user_email
 
 
@@ -54,6 +59,9 @@ class SignUpView(generics.ListAPIView, generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+
+        send_confirmation_mail_message.delay(username=request.data["username"])
+
         headers = self.get_success_headers(serializer.data)
 
         message = {
@@ -107,7 +115,7 @@ class RequestResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
 class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
     """View for confirmation of changing user's password"""
 
-    serializer_class = ConfirmResetPasswordSerializer
+    serializer_class = ConfirmationPasswordSerializer
 
     permission_classes = [AllowAny]
 
@@ -117,7 +125,7 @@ class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        reset_user_password(token=kwargs["token"], password=request.data["password"])
+        update_user_password(token=kwargs["token"], password=request.data["password"])
 
         message = {"details": "Password has been successfully changed"}
         return Response(data=message, status=status.HTTP_201_CREATED)
@@ -127,3 +135,64 @@ class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
 
         message = {"details": "Please write new password and confirm it"}
         return Response(data=message, status=status.HTTP_200_OK)
+
+
+class RequestChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
+    """View for make a request to change user's email address"""
+
+    serializer_class = ConfirmationPasswordSerializer
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """Function for getting information about view"""
+
+        message = {
+            "details": "You need to write password and confirm it "
+            "to change your account email address"
+        }
+        return Response(data=message, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        """Function for changing user's password"""
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        send_change_email_address_mail.delay(username=self.request.user.username)
+
+        message = {
+            "details": "We send you confirmation mail for " "change your email address"
+        }
+        return Response(data=message, status=status.HTTP_201_CREATED)
+
+
+class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
+    """View for write new user's email address"""
+
+    serializer_class = ChangeUserEmailSerializer
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """Function for getting information about view"""
+
+        message = {"details": "Write new email address below"}
+        return Response(data=message, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        """Function for changing user's password"""
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        update_user_email_address(token=kwargs["token"], email=request.data["email"])
+        send_confirm_change_email_address_mail(
+            username=self.request.user.username,
+            to_email=request.data["email"],
+        )
+
+        message = {
+            "details": "We send you confirmation mail for " "change your email address"
+        }
+        return Response(data=message, status=status.HTTP_201_CREATED)

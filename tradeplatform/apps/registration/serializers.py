@@ -86,7 +86,7 @@ class RequestResetPasswordSerializer(serializers.Serializer):
         return attrs
 
 
-class ConfirmResetPasswordSerializer(serializers.Serializer):
+class ConfirmationPasswordSerializer(serializers.Serializer):
     """Serializer for confirmation changing user's password"""
 
     password = serializers.CharField(
@@ -103,3 +103,19 @@ class ConfirmResetPasswordSerializer(serializers.Serializer):
             )
 
         return attrs
+
+
+class ChangeUserEmailSerializer(serializers.Serializer):
+    """Serializer for change user's email address"""
+
+    email = serializers.EmailField(required=True)
+
+    # def validate(self, attrs):
+    #    """Check that user, which have the given email, exist"""
+    #
+    #    if User.objects.all().filter(email=attrs["email"]):
+    #        raise serializers.ValidationError(
+    #            {"email": "User with the given email address has already existed"}
+    #        )
+
+    #    return attrs

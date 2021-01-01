@@ -518,7 +518,6 @@ class TestWatchlist(APITestCase):
         assert response.data["results"][1]["user"]["username"] == self.user_2.username
         assert response.data["results"][1]["item"] == []
 
-
     def test_watchlist_get(self):
         """
         Ensure we can get a single watchlist by id
@@ -532,17 +531,17 @@ class TestWatchlist(APITestCase):
         assert response.data["user"]["username"] == self.user_1.username
         assert response.data["item"] == []
 
-
     def test_watchlist_update(self):
         """
         Ensure that we can update a single watchlist instance by its id
         """
 
         new_data = {
-            "item": [self.item_1.id,
-                     self.item_2.id,
-                     self.item_3.id,
-                     ]
+            "item": [
+                self.item_1.id,
+                self.item_2.id,
+                self.item_3.id,
+            ]
         }
         url = reverse("watchlist-detail", None, {WatchList.objects.first().id})
         response = self.client.put(url, new_data, format="json")

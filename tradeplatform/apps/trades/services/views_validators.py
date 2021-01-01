@@ -1,9 +1,8 @@
 from apps.trades.models import Offer
-from apps.trades.services.db_interaction import (get_available_quantity_stocks,
-                                                 get_full_price,
-                                                 get_or_create_user_balance,
-                                                 get_or_create_user_inventory,
-                                                 get_or_create_default_currency,)
+from apps.trades.services.db_interaction import (
+    get_available_quantity_stocks, get_full_price,
+    get_or_create_default_currency, get_or_create_user_balance,
+    get_or_create_user_inventory)
 
 
 def check_user_quantity_stocks_for_given_item(

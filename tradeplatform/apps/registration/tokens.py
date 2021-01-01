@@ -18,7 +18,7 @@ def confirm_user_email(token: str) -> bool:
     user = User.objects.get(id=user_id)
 
     if user:
-        change_profile_valid_by_id(user_id=user_id)
+        change_profile_valid_by_id(user_id=user_id, value=True)
         return True
     return False
 
