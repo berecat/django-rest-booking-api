@@ -12,7 +12,7 @@ The program automatically creates a trade between two users at the best price.
 * #### Trades app
     Trades gives users the ability to perform trades. This app has script, which runs once a minute and finds suitable offers, then it makes trade between 
     the found offers. To make offers user has to sign up and confirm his email address. User can create offer with suitable currency for him. Each user has
-    their own watchlist, that he can update. Each user has their own balance and inventory. Inventory stores information about the number of certain shares 
+    their own watchlist, that he can update. Each user has their own balance and inventory. Inventory stores information about the number of certain stocks 
     that the user owns.
     
 ## The technology used
@@ -21,3 +21,4 @@ The program automatically creates a trade between two users at the best price.
 * Postgresql
 * Celery
 * Redis
+* Docker
