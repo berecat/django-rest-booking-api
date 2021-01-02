@@ -49,3 +49,13 @@ def change_user_email(user_id: int, email: str) -> None:
     user = get_user_by_id(user_id=user_id)
     user.email = email
     user.save()
+
+
+def check_email_user_exist(email: str) -> bool:
+    """Check that user with the given email exist"""
+
+    try:
+        User.objects.get(email=email)
+        return True
+    except User.DoesNotExist:
+        return False

@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 
-from apps.registration.services.views_logic import update_user_password, update_user_email_address
-from apps.registration.tokens import get_user_token
+from apps.registration.services.tokens import get_user_token
+from apps.registration.services.views_logic import (update_user_email_address,
+                                                    update_user_password)
 
 
 def test_update_user_password_with_right_token(user_instance):

@@ -1,6 +1,6 @@
 from apps.registration.services.db_interaction import (
     change_profile_valid_by_id, change_user_email, reset_user_password)
-from apps.registration.tokens import get_user_id_by_given_token
+from apps.registration.services.tokens import get_user_id_by_given_token
 
 
 def update_user_password(token: str, password: str) -> None:

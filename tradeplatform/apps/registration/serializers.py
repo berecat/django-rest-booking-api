@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from apps.registration.models import UserProfile
+from apps.registration.services.db_interaction import check_email_user_exist
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -97,7 +98,7 @@ class BaseEmailSerializer(serializers.Serializer):
     def validate(self, attrs):
         """Check that user, which have the given email, not exist"""
 
-        if User.objects.all().filter(email=attrs["email"]):
+        if check_email_user_exist(email=attrs["email"]):
             raise serializers.ValidationError(
                 {"email": "User with the given email address has already existed"}
             )
@@ -111,7 +112,7 @@ class RequestResetPasswordSerializer(BaseEmailSerializer):
     def validate(self, attrs):
         """Check that user, which have the given email, exist"""
 
-        if not User.objects.all().filter(email=attrs["email"]):
+        if not check_email_user_exist(email=attrs["email"]):
             raise serializers.ValidationError(
                 {"email": "User with the given email address does not exist."}
             )

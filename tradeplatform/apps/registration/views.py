@@ -11,14 +11,14 @@ from apps.registration.serializers import (ChangeUserEmailSerializer,
                                            ResetUserPasswordSerializer,
                                            UserProfileSerializer,
                                            UserSerializer)
+from apps.registration.services.tokens import (
+    confirm_user_email_by_given_token, validate_given_user_token)
 from apps.registration.services.views_logic import (update_user_email_address,
                                                     update_user_password)
 from apps.registration.tasks import (send_change_email_address_mail,
                                      send_confirm_change_email_address_mail,
                                      send_confirmation_mail_message,
                                      send_reset_password_mail)
-from apps.registration.tokens import (confirm_user_email_by_given_token,
-                                      validate_given_user_token)
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):

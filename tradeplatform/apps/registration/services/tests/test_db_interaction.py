@@ -1,12 +1,13 @@
 from django.contrib.auth.models import User
 
 from apps.registration.services.db_interaction import (
-    change_profile_valid_by_id, change_user_email, get_user_by_email,
-    get_user_by_id, reset_user_password)
+    change_profile_valid_by_id, change_user_email, check_email_user_exist,
+    get_user_by_email, get_user_by_id, get_user_by_username,
+    reset_user_password)
 
 
 def test_get_user_by_id(user_instance):
-    """Ensure that function return right user instance"""
+    """Ensure that function return right user instance by the given id"""
 
     user_id = user_instance.id
     user = get_user_by_id(user_id=user_id)
@@ -15,10 +16,19 @@ def test_get_user_by_id(user_instance):
 
 
 def test_get_user_by_email(user_instance):
-    """Ensure that function return right user instance"""
+    """Ensure that function return right user instance by the given email address"""
 
     email = user_instance.email
     user = get_user_by_email(email=email)
+
+    assert user == user_instance
+
+
+def test_get_user_by_username(user_instance):
+    """Ensure that function return right user instance by the given username"""
+
+    username = user_instance.username
+    user = get_user_by_username(username=username)
 
     assert user == user_instance
 
@@ -58,3 +68,19 @@ def test_change_user_email(user_instance):
     change_user_email(user_id=user_instance.id, email=email)
 
     assert User.objects.get().email == email
+
+
+def test_check_email_user_exist_with_exist_user(user_instance):
+    """Ensure that function return right response with the given email address"""
+
+    result = check_email_user_exist(email=user_instance.email)
+
+    assert result == True
+
+
+def test_check_email_user_exist_with_not_exist_user():
+    """Ensure that function return right response with the given email address"""
+
+    result = check_email_user_exist(email="fsdfsdfsdfsdf@email.com")
+
+    assert result == False
