@@ -4,7 +4,7 @@
 Project imulates simple stock market or trade platform. Users can make offers to buy or sell a particular stock from other users. 
 The program automatically creates a trade between two users at the best price.
 
-## Description of the program
+## Description of the project
 * #### Registration app
     Users can register on the platform and they has to confirm their email address to create offers. If user doesn't confirm his email address, he won't be able 
     to create offers. Also users can reset their password with the email confirmation, if they forgot their password. Besides, users can change their email address
@@ -15,7 +15,7 @@ The program automatically creates a trade between two users at the best price.
     their own watchlist, that he can update. Each user has their own balance and inventory. Inventory stores information about the number of certain stocks 
     that the user owns.
     
-## Functionality of project
+## Functionality of the project
 * List all currencies, get detail information about currency
 * List all items, get detail information about item
 * List all watchlists, get detail watchlist and update only watchlist, which belongs to requested user
