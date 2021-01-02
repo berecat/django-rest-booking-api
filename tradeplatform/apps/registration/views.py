@@ -1,3 +1,8 @@
+from django.contrib.auth.models import User
+from rest_framework import generics, mixins, status, viewsets
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+
 from apps.registration.custompermission import IsOwnerOrReadOnly
 from apps.registration.models import UserProfile
 from apps.registration.serializers import (ChangeUserEmailSerializer,
@@ -14,10 +19,6 @@ from apps.registration.tasks import (send_change_email_address_mail,
                                      send_confirm_change_email_address_mail,
                                      send_confirmation_mail_message,
                                      send_reset_password_mail)
-from django.contrib.auth.models import User
-from rest_framework import generics, mixins, status, viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):

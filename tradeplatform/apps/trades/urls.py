@@ -1,6 +1,7 @@
+from rest_framework import routers
+
 from apps.registration import views as reg_views
 from apps.trades import views as trades_views
-from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register("currencies", trades_views.CurrencyViewSet)

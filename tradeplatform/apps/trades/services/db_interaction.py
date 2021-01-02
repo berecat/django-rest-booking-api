@@ -1,8 +1,9 @@
 from typing import Optional
 
-from apps.trades.models import Balance, Currency, Inventory, Offer, Trade
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
+
+from apps.trades.models import Balance, Currency, Inventory, Offer, Trade
 
 
 def get_all_purchase_active_offers() -> QuerySet:

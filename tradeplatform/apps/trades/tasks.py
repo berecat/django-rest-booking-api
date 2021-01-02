@@ -1,5 +1,6 @@
-from apps.trades.services.trader_logic import create_trades_between_users
 from celery import shared_task
+
+from apps.trades.services.trader_logic import create_trades_between_users
 
 
 @shared_task()

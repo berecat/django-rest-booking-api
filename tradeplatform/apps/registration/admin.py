@@ -1,5 +1,6 @@
-from apps.registration.models import UserProfile
 from django.contrib import admin
+
+from apps.registration.models import UserProfile
 
 
 @admin.register(UserProfile)

@@ -1,5 +1,6 @@
-from apps.trades.models import Balance, Inventory, Offer, Price, Trade
 from django_filters import DateTimeFilter, FilterSet, NumberFilter
+
+from apps.trades.models import Balance, Inventory, Offer, Price, Trade
 
 
 class PriceFilter(FilterSet):

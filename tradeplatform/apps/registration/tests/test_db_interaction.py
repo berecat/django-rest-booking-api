@@ -1,8 +1,9 @@
+from django.contrib.auth.models import User
+
 from apps.registration.services.db_interaction import (
     change_profile_valid_by_id, change_user_email, check_email_user_exist,
     get_user_by_email, get_user_by_id, get_user_by_username,
     reset_user_password)
-from django.contrib.auth.models import User
 
 
 def test_get_user_by_id(user_instance):

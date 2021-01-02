@@ -1,9 +1,10 @@
-from apps.registration.models import UserProfile
-from apps.registration.services.db_interaction import check_email_user_exist
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+
+from apps.registration.models import UserProfile
+from apps.registration.services.db_interaction import check_email_user_exist
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
