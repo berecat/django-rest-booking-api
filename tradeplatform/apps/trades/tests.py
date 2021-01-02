@@ -590,7 +590,6 @@ class TestOffer(APITestCase):
             "status": "PURCHASE",
             "entry_quantity": 10,
             "price": Decimal("100"),
-            "is_active": True,
         }
         response = self.post_offer(data)
 
@@ -601,7 +600,7 @@ class TestOffer(APITestCase):
         assert Offer.objects.get().status == data["status"]
         assert Offer.objects.get().entry_quantity == data["entry_quantity"]
         assert Offer.objects.get().price == data["price"]
-        assert Offer.objects.get().is_active == data["is_active"]
+        assert Offer.objects.get().is_active == False
 
     def test_offers_list(self):
         """
@@ -613,7 +612,6 @@ class TestOffer(APITestCase):
             "status": "PURCHASE",
             "entry_quantity": 6,
             "price": Decimal("100.00"),
-            "is_active": True,
         }
         self.post_offer(data_offer_1)
 
@@ -622,7 +620,6 @@ class TestOffer(APITestCase):
             "status": "SELL",
             "entry_quantity": 7,
             "price": Decimal("40.00"),
-            "is_active": True,
         }
         self.post_offer(data_offer_2)
 
@@ -641,7 +638,7 @@ class TestOffer(APITestCase):
         )
         assert response.data["results"][0]["quantity"] == 0
         assert response.data["results"][0]["price"] == data_offer_1["price"].__str__()
-        assert response.data["results"][0]["is_active"] == data_offer_1["is_active"]
+        assert response.data["results"][0]["is_active"] == False
 
         assert response.data["results"][1]["user"]["username"] == self.user_1.username
         assert response.data["results"][1]["item"]["id"] == data_offer_2["item"]
@@ -652,7 +649,7 @@ class TestOffer(APITestCase):
         )
         assert response.data["results"][1]["quantity"] == 0
         assert response.data["results"][1]["price"] == data_offer_2["price"].__str__()
-        assert response.data["results"][1]["is_active"] == data_offer_2["is_active"]
+        assert response.data["results"][1]["is_active"] == False
 
     def test_offer_get(self):
         """
@@ -664,7 +661,6 @@ class TestOffer(APITestCase):
             "status": "SELL",
             "entry_quantity": 700,
             "price": Decimal("3222.23"),
-            "is_active": True,
         }
         response = self.post_offer(data)
 
@@ -678,7 +674,7 @@ class TestOffer(APITestCase):
         assert get_response.data["entry_quantity"] == data["entry_quantity"]
         assert get_response.data["quantity"] == 0
         assert get_response.data["price"] == data["price"].__str__()
-        assert get_response.data["is_active"] == data["is_active"]
+        assert get_response.data["is_active"] == False
 
     def test_offer_patch_update(self):
         """
@@ -690,7 +686,6 @@ class TestOffer(APITestCase):
             "status": "SELL",
             "entry_quantity": 700,
             "price": Decimal("3222.23"),
-            "is_active": True,
         }
         response = self.post_offer(data)
 
@@ -709,7 +704,7 @@ class TestOffer(APITestCase):
         assert patch_response.data["entry_quantity"] == new_data["entry_quantity"]
         assert patch_response.data["quantity"] == 0
         assert patch_response.data["price"] == new_data["price"].__str__()
-        assert patch_response.data["is_active"] == data["is_active"]
+        assert patch_response.data["is_active"] == False
 
     def test_offer_put_update(self):
         """
@@ -721,7 +716,6 @@ class TestOffer(APITestCase):
             "status": "SELL",
             "entry_quantity": 700,
             "price": Decimal("3222.23"),
-            "is_active": True,
         }
         response = self.post_offer(data)
 
@@ -731,7 +725,6 @@ class TestOffer(APITestCase):
             "status": "PURCHASE",
             "entry_quantity": 999,
             "price": Decimal("1.00"),
-            "is_active": True,
         }
         put_response = self.client.patch(url, new_data, format="json")
 
@@ -741,7 +734,7 @@ class TestOffer(APITestCase):
         assert put_response.data["entry_quantity"] == new_data["entry_quantity"]
         assert put_response.data["quantity"] == 0
         assert put_response.data["price"] == new_data["price"].__str__()
-        assert put_response.data["is_active"] == new_data["is_active"]
+        assert put_response.data["is_active"] == False
 
     def test_offer_delete(self):
         """
@@ -753,7 +746,6 @@ class TestOffer(APITestCase):
             "status": "SELL",
             "entry_quantity": 700,
             "price": Decimal("3222.23"),
-            "is_active": True,
         }
         response = self.post_offer(data)
 

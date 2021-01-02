@@ -135,7 +135,9 @@ class RequestChangeEmailAddressSerializer(BasePasswordSerializer):
             raise serializers.ValidationError(
                 {"password": "Password fields didn't match."}
             )
-        elif not self.context.get("request").user.check_password(attrs["password"]):
+        elif not self.context.get("request").user.check_password(
+            raw_password=attrs["password"]
+        ):
             raise serializers.ValidationError({"password": "You write wrong password!"})
 
         return attrs

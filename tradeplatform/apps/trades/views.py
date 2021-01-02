@@ -1,4 +1,5 @@
 from rest_framework import mixins, viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
                                        OfferFilter, PriceFilter, TradeFilter)
@@ -27,6 +28,8 @@ class CurrencyViewSet(
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
 
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     filterset_fields = (
         "name",
         "code",
@@ -46,6 +49,8 @@ class ItemViewSet(viewsets.ModelViewSet):
 
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     filterset_fields = (
         "name",
@@ -74,6 +79,8 @@ class PriceViewSet(viewsets.ModelViewSet):
         "price",
         "date",
     )
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
         """Function return serializer for the certain action"""

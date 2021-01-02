@@ -17,7 +17,8 @@ from apps.registration.tasks import (send_change_email_address_mail,
                                      send_confirm_change_email_address_mail,
                                      send_confirmation_mail_message,
                                      send_reset_password_mail)
-from apps.registration.tokens import confirm_user_email
+from apps.registration.tokens import (confirm_user_email_by_given_token,
+                                      validate_given_user_token)
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -80,7 +81,8 @@ class ActivateUserEmailView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         """Return response to user with information about email confirmation"""
 
-        if confirm_user_email(token=kwargs["token"]):
+        if validate_given_user_token(token=kwargs["token"]):
+            confirm_user_email_by_given_token(token=kwargs["token"])
             message = {"details": "Thank you for your email confirmation."}
         else:
             message = {"details": "Invalid link!"}
@@ -126,9 +128,14 @@ class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        update_user_password(token=kwargs["token"], password=request.data["password"])
+        if validate_given_user_token(token=kwargs["token"]):
+            update_user_password(
+                token=kwargs["token"], password=request.data["password"]
+            )
+            message = {"details": "Password has been successfully changed"}
+        else:
+            message = {"details": "Invalid link!"}
 
-        message = {"details": "Password has been successfully changed"}
         return Response(data=message, status=status.HTTP_201_CREATED)
 
     def get(self, request, *args, **kwargs):
@@ -187,13 +194,19 @@ class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        update_user_email_address(token=kwargs["token"], email=request.data["email"])
-        send_confirm_change_email_address_mail(
-            username=self.request.user.username,
-            to_email=request.data["email"],
-        )
+        if validate_given_user_token(token=kwargs["token"]):
+            update_user_email_address(
+                token=kwargs["token"], email=request.data["email"]
+            )
+            send_confirm_change_email_address_mail(
+                username=self.request.user.username,
+                to_email=request.data["email"],
+            )
+            message = {
+                "details": "We send you confirmation mail for "
+                "change your email address"
+            }
+        else:
+            message = {"details": "Invalid link!"}
 
-        message = {
-            "details": "We send you confirmation mail for " "change your email address"
-        }
         return Response(data=message, status=status.HTTP_201_CREATED)

@@ -8,17 +8,15 @@ from apps.registration.services.db_interaction import (
     change_profile_valid_by_id, get_user_by_id)
 
 
-def confirm_user_email(token: str) -> bool:
+def validate_given_user_token(token: str) -> bool:
     """
     Check that token is valid. If token is valid change
     user's profile attribute is valid to True
     """
 
     user_id = get_user_id_by_given_token(token=token)
-    user = User.objects.get(id=user_id)
 
-    if user:
-        change_profile_valid_by_id(user_id=user_id, value=True)
+    if User.objects.get(id=user_id):
         return True
     return False
 
@@ -40,3 +38,10 @@ def get_user_id_by_given_token(token: str) -> Optional[int]:
         return user_id
     except TokenError:
         return None
+
+
+def confirm_user_email_by_given_token(token: str) -> None:
+    """Change user profile is_valid by given token"""
+
+    user_id = get_user_id_by_given_token(token=token)
+    change_profile_valid_by_id(user_id=user_id, value=True)

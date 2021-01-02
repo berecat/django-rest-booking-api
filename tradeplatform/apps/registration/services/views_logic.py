@@ -4,7 +4,7 @@ from apps.registration.tokens import get_user_id_by_given_token
 
 
 def update_user_password(token: str, password: str) -> None:
-    """"""
+    """Function reset user password by the given token and password"""
 
     user_id = get_user_id_by_given_token(token=token)
 
@@ -12,7 +12,10 @@ def update_user_password(token: str, password: str) -> None:
 
 
 def update_user_email_address(token: str, email: str) -> None:
-    """"""
+    """
+    Function change user email address and reset is_valid attribute in profile to False
+    by the given token and email
+    """
 
     user_id = get_user_id_by_given_token(token=token)
 
