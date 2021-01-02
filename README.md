@@ -15,6 +15,28 @@ The program automatically creates a trade between two users at the best price.
     their own watchlist, that he can update. Each user has their own balance and inventory. Inventory stores information about the number of certain stocks 
     that the user owns.
     
+## Functionality of project
+* List all currencies, get detail information about currency
+* List all items, get detail information about item
+* List all watchlists, get detail watchlist and update only watchlist, which belongs to requested user
+* List all prices of items, get detail information about price
+* List all offers, create new offer, get detail information about offer, update offer, delete offer, which belongs to requested user
+* List all balances, get detail information about balance
+* List all inventories, get detail information about inventory
+* List all trades, get detail information about trade
+* List all users, get detail information about user
+* List all user's profiles, get detail information about user's profile, update user's profile, which belongs to requested user
+* Sign up to API
+* Email confirmation
+* Reset user's password
+* Change user's email address
+* Script, which runs once a minute and find suitable offers to create trade between them
+* Users, that didn't confirm they email address, can't create offers
+* User has to sign up to API or they have just read-only ability
+* Admin can post new currencies and items
+* User can search, filter the given result or choose ordering field to order result by it
+* All users has their own balance, watchlist and profile after registration
+    
 ## The technology used
 * Django
 * Django REST Framework
