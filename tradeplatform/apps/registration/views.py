@@ -84,10 +84,10 @@ class ActivateUserEmailView(generics.ListAPIView):
         if validate_given_user_token(token=kwargs["token"]):
             confirm_user_email_by_given_token(token=kwargs["token"])
             message = {"details": "Thank you for your email confirmation."}
-        else:
-            message = {"details": "Invalid link!"}
+            return Response(data=message, status=status.HTTP_200_OK)
 
-        return Response(data=message, status=status.HTTP_200_OK)
+        message = {"details": "Invalid link!"}
+        return Response(data=message, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RequestResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
@@ -133,16 +133,20 @@ class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
                 token=kwargs["token"], password=request.data["password"]
             )
             message = {"details": "Password has been successfully changed"}
-        else:
-            message = {"details": "Invalid link!"}
+            return Response(data=message, status=status.HTTP_201_CREATED)
 
-        return Response(data=message, status=status.HTTP_201_CREATED)
+        message = {"details": "Invalid link!"}
+        return Response(data=message, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, *args, **kwargs):
         """Function for getting information about view"""
 
-        message = {"details": "Please write new password and confirm it"}
-        return Response(data=message, status=status.HTTP_200_OK)
+        if validate_given_user_token(token=kwargs["token"]):
+            message = {"details": "Please write new password and confirm it"}
+            return Response(data=message, status=status.HTTP_200_OK)
+
+        message = {"details": "Invalid link!"}
+        return Response(data=message, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RequestChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
@@ -185,8 +189,12 @@ class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
     def get(self, request, *args, **kwargs):
         """Function for getting information about view"""
 
-        message = {"details": "Write new email address below"}
-        return Response(data=message, status=status.HTTP_200_OK)
+        if validate_given_user_token(token=kwargs["token"]):
+            message = {"details": "Write new email address below"}
+            return Response(data=message, status=status.HTTP_200_OK)
+
+        message = {"details": "Invalid link!"}
+        return Response(data=message, status=status.HTTP_400_BAD_REQUEST)
 
     def create(self, request, *args, **kwargs):
         """Function for changing user's password"""
@@ -206,7 +214,7 @@ class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
                 "details": "We send you confirmation mail for "
                 "change your email address"
             }
-        else:
-            message = {"details": "Invalid link!"}
+            return Response(data=message, status=status.HTTP_201_CREATED)
 
-        return Response(data=message, status=status.HTTP_201_CREATED)
+        message = {"details": "Invalid link!"}
+        return Response(data=message, status=status.HTTP_400_BAD_REQUEST)

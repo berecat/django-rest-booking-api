@@ -16,9 +16,11 @@ def validate_given_user_token(token: str) -> bool:
 
     user_id = get_user_id_by_given_token(token=token)
 
-    if User.objects.get(id=user_id):
+    try:
+        User.objects.get(id=user_id)
         return True
-    return False
+    except User.DoesNotExist:
+        return False
 
 
 def get_user_token(user_id: int) -> str:
