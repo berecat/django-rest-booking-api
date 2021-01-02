@@ -1,6 +1,5 @@
-from celery import shared_task
-
 from apps.registration.services.mail_sender import send_mail_message
+from celery import shared_task
 
 
 @shared_task

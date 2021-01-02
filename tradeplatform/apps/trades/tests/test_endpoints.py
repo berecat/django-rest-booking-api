@@ -1,12 +1,11 @@
 from decimal import Decimal
 
+from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
+                                Price, Trade, WatchList)
 from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-
-from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
-                                Price, Trade, WatchList)
 
 
 class TestCurrency(APITestCase):

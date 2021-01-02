@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     "django_filters",
     "apps.trades",
     "apps.registration",
-    "six",
 ]
 
 MIDDLEWARE = [

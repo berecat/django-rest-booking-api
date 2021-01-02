@@ -1,6 +1,3 @@
-from rest_framework import mixins, viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-
 from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
                                        OfferFilter, PriceFilter, TradeFilter)
 from apps.trades.custompermission import IsOwnerOrReadOnly
@@ -14,6 +11,8 @@ from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      WatchListCreateSerializer,
                                      WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
+from rest_framework import mixins, viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 
 class CurrencyViewSet(
