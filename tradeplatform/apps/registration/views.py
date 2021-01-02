@@ -5,12 +5,12 @@ from rest_framework.response import Response
 
 from apps.registration.custompermission import IsOwnerOrReadOnly
 from apps.registration.models import UserProfile
-from apps.registration.serializers import (RequestUserEmailSerializer,
-                                           ResetUserPasswordSerializer,
+from apps.registration.serializers import (ChangeUserEmailSerializer,
+                                           RequestChangeEmailAddressSerializer,
                                            RequestResetPasswordSerializer,
+                                           ResetUserPasswordSerializer,
                                            UserProfileSerializer,
-                                           UserSerializer,
-                                           ChangeUserEmailAddressSerializer)
+                                           UserSerializer)
 from apps.registration.services.views_logic import (update_user_email_address,
                                                     update_user_password)
 from apps.registration.tasks import (send_change_email_address_mail,
@@ -141,7 +141,7 @@ class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
 class RequestChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
     """View for make a request to change user's email address"""
 
-    serializer_class = ChangeUserEmailAddressSerializer
+    serializer_class = RequestChangeEmailAddressSerializer
 
     permission_classes = [IsAuthenticated]
 
@@ -171,7 +171,7 @@ class RequestChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView
 class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
     """View for write new user's email address"""
 
-    serializer_class = RequestUserEmailSerializer
+    serializer_class = ChangeUserEmailSerializer
 
     permission_classes = [IsAuthenticated]
 

@@ -71,7 +71,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class BasePasswordSerializer(serializers.Serializer):
-    """"""
+    """Base serializer with password fields and validation method for them"""
 
     password = serializers.CharField(
         write_only=True, required=True, validators=[validate_password]
@@ -90,12 +90,12 @@ class BasePasswordSerializer(serializers.Serializer):
 
 
 class BaseEmailSerializer(serializers.Serializer):
-    """"""
+    """Base email serializer with email fields and validation method for it"""
 
     email = serializers.EmailField(required=True)
 
     def validate(self, attrs):
-        """Check that user, which have the given email, exist"""
+        """Check that user, which have the given email, not exist"""
 
         if User.objects.all().filter(email=attrs["email"]):
             raise serializers.ValidationError(
@@ -125,7 +125,8 @@ class ResetUserPasswordSerializer(BasePasswordSerializer):
     pass
 
 
-class ChangeUserEmailAddressSerializer(BasePasswordSerializer):
+class RequestChangeEmailAddressSerializer(BasePasswordSerializer):
+    """Serializer for creating a request to change user's email address"""
 
     def validate(self, attrs):
         """Check that password fields match"""
@@ -135,14 +136,12 @@ class ChangeUserEmailAddressSerializer(BasePasswordSerializer):
                 {"password": "Password fields didn't match."}
             )
         elif not self.context.get("request").user.check_password(attrs["password"]):
-            raise serializers.ValidationError(
-                {"password": "You write wrong password!"}
-            )
+            raise serializers.ValidationError({"password": "You write wrong password!"})
 
         return attrs
 
 
-class RequestUserEmailSerializer(BaseEmailSerializer):
+class ChangeUserEmailSerializer(BaseEmailSerializer):
     """Serializer for change user's email address"""
 
     pass

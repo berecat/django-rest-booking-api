@@ -175,6 +175,14 @@ class OfferCreateSerializer(serializers.ModelSerializer):
 
         return attrs
 
+    def create(self, validated_data):
+        """If the user didn't confirm his email address, his will be inactive"""
+
+        if not validated_data["user"].profile.is_valid:
+            validated_data["is_active"] = False
+
+        return super(OfferCreateSerializer, self).create(validated_data=validated_data)
+
 
 class InventorySerializer(BaseUserItemSerializer):
     """Serializer for Inventory model"""
