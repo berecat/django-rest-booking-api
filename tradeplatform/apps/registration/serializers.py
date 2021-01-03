@@ -17,6 +17,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "user",
+            "information",
             "is_valid",
             "date_joined",
         )

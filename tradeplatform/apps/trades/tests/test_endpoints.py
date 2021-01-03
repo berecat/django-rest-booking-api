@@ -15,7 +15,7 @@ class TestCurrency(APITestCase):
     def setUp(self):
         """Initialize necessary fields for testing and log in user to make requests"""
 
-        User.objects.create_user(
+        User.objects.create_superuser(
             username="test_user",
             password="test",
         )
@@ -130,7 +130,7 @@ class TestItem(APITestCase):
     def setUp(self):
         """Initialize necessary fields for testing and log in user to make requests"""
 
-        User.objects.create_user(username="test_user", password="test")
+        User.objects.create_superuser(username="test_user", password="test")
         self.client.login(username="test_user", password="test")
 
     def post_item(self, data):
@@ -279,7 +279,7 @@ class TestPrice(APITestCase):
     def setUp(self):
         """Initialize necessary fields for testing and log in user to make requests"""
 
-        User.objects.create_user(username="test_user", password="test")
+        User.objects.create_superuser(username="test_user", password="test")
         self.client.login(username="test_user", password="test")
 
         self.currency_1 = Currency.objects.get(code="USD")

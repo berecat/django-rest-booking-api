@@ -12,6 +12,7 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     is_valid = models.BooleanField(default=False)
+    information = models.TextField(blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
 

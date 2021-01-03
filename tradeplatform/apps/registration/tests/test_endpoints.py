@@ -563,6 +563,23 @@ class TestUserProfile(APITestCase):
         assert response.data["user"] == self.user_1.username
         assert not response.data["is_valid"]
 
+    def test_userprofile_update(self):
+        """
+        Ensure we can update a single userprofile by id
+        """
+
+        user_profile = UserProfile.objects.first()
+
+        url = reverse("userprofile-detail", None, {user_profile.id})
+        new_data = {"information": "test information about user"}
+        response = self.client.put(url, new_data, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+
+        assert response.data["user"] == self.user_1.username
+        assert response.data["information"] == new_data["information"]
+        assert not response.data["is_valid"]
+
 
 class TestUser(APITestCase):
     """Test class for User model"""
