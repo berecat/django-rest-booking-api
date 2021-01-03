@@ -105,13 +105,13 @@ class RequestResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
 
         send_reset_password_mail.delay(email=request.data["email"])
 
-        message = {"details": "We send you confirmation mail for reset your password"}
+        message = {"details": "We send you confirmation mail for reset your password."}
         return Response(data=message, status=status.HTTP_201_CREATED)
 
     def get(self, request, *args, **kwargs):
         """Function for getting information about view"""
 
-        message = {"details": "Please write your email address to reset password"}
+        message = {"details": "Please write your email address to reset password."}
         return Response(data=message, status=status.HTTP_200_OK)
 
 
@@ -132,7 +132,7 @@ class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
             update_user_password(
                 token=kwargs["token"], password=request.data["password"]
             )
-            message = {"details": "Password has been successfully changed"}
+            message = {"details": "Password has been successfully changed."}
             return Response(data=message, status=status.HTTP_201_CREATED)
 
         message = {"details": "Invalid link!"}
@@ -142,7 +142,7 @@ class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
         """Function for getting information about view"""
 
         if validate_given_user_token(token=kwargs["token"]):
-            message = {"details": "Please write new password and confirm it"}
+            message = {"details": "Please write new password and confirm it."}
             return Response(data=message, status=status.HTTP_200_OK)
 
         message = {"details": "Invalid link!"}
@@ -174,7 +174,7 @@ class RequestChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView
         send_change_email_address_mail.delay(username=self.request.user.username)
 
         message = {
-            "details": "We send you confirmation mail for change your email address"
+            "details": "We send you confirmation mail for change your email address."
         }
         return Response(data=message, status=status.HTTP_201_CREATED)
 
@@ -190,7 +190,7 @@ class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
         """Function for getting information about view"""
 
         if validate_given_user_token(token=kwargs["token"]):
-            message = {"details": "Write new email address below"}
+            message = {"details": "Write new email address below."}
             return Response(data=message, status=status.HTTP_200_OK)
 
         message = {"details": "Invalid link!"}
@@ -212,7 +212,7 @@ class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
             )
             message = {
                 "details": "We send you confirmation mail for "
-                "change your email address"
+                "change your email address."
             }
             return Response(data=message, status=status.HTTP_201_CREATED)
 
