@@ -472,3 +472,49 @@ class TestChangeEmailAddress(APITestCase):
 
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data["details"] == details
+
+
+class TestActivateChangeEmail(APITestCase):
+    """Tests for ActivateChangeEmail view"""
+
+    def setUp(self):
+        """Initialize variables for testing"""
+
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="testuser@email.com",
+            password="testpassword12345",
+        )
+        self.client.login(username="testuser", password="testpassword12345")
+
+    def test_get_request_with_right_token(self):
+        """
+        Ensure that returns correct response after GET method
+        Since view received right user's token, function has to return 200 status code
+        And right details message
+        """
+
+        details = "Thank for your new email address confirmation."
+        token = get_user_token(user_id=User.objects.first().id)
+
+        url = reverse("confirm_change_email", None, {token})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["details"] == details
+
+    def test_get_request_with_wrong_token(self):
+        """
+        Ensure that returns correct response after GET method
+        Since view received wrong user's token, function has to return 400 status code
+        And right details message
+        """
+
+        details = "Invalid link!"
+        token = get_user_token(user_id=User.objects.first().id)[:-4]
+
+        url = reverse("confirm_change_email", None, {token})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["details"] == details

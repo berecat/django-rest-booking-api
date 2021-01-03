@@ -23,7 +23,7 @@ urlpatterns = [
     ),
     path(
         "change_email/confirm/<token>/",
-        views.ActivateUserEmailView.as_view(),
+        views.ActivateChangeEmail.as_view(),
         name="confirm_change_email",
     ),
 ]

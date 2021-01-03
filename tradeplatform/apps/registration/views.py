@@ -13,8 +13,8 @@ from apps.registration.serializers import (ChangeUserEmailSerializer,
                                            UserSerializer)
 from apps.registration.services.tokens import (
     confirm_user_email_by_given_token, validate_given_user_token)
-from apps.registration.services.views_logic import (update_user_email_address,
-                                                    update_user_password)
+from apps.registration.services.views_logic import (
+    change_user_offer_after_changing_email, update_user_password)
 from apps.registration.tasks import (change_email_address,
                                      send_change_email_address_mail,
                                      send_confirmation_mail_message,
@@ -213,6 +213,24 @@ class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
                 "change your email address."
             }
             return Response(data=message, status=status.HTTP_201_CREATED)
+
+        message = {"details": "Invalid link!"}
+        return Response(data=message, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ActivateChangeEmail(generics.ListAPIView):
+    """View for confirmation new user's mail address"""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """Return response to user with information about new user's email confirmation"""
+
+        if validate_given_user_token(token=kwargs["token"]):
+            confirm_user_email_by_given_token(token=kwargs["token"])
+            change_user_offer_after_changing_email(token=kwargs["token"], value=True)
+            message = {"details": "Thank for your new email address confirmation."}
+            return Response(data=message, status=status.HTTP_200_OK)
 
         message = {"details": "Invalid link!"}
         return Response(data=message, status=status.HTTP_400_BAD_REQUEST)
