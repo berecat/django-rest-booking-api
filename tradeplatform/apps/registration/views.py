@@ -3,6 +3,7 @@ from rest_framework import generics, mixins, status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from apps.registration.customfilters import UserProfileFilter
 from apps.registration.custompermission import IsOwnerOrReadOnly
 from apps.registration.models import UserProfile
 from apps.registration.serializers import (ChangeUserEmailSerializer,
@@ -29,6 +30,10 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
     permission_classes = [IsAuthenticated]
 
+    filterset_fields = ("username", "email", "is_active")
+    search_fields = ("username", "email")
+    ordering_fields = ("username", "email")
+
 
 class UserProfileViewSet(
     mixins.ListModelMixin,
@@ -42,6 +47,10 @@ class UserProfileViewSet(
     queryset = UserProfile.objects.all()
 
     permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
+
+    filterset_class = UserProfileFilter
+    search_fields = ("user__username", "user__email")
+    ordering_fields = ("user__username", "user__email")
 
 
 class SignUpView(generics.ListAPIView, generics.CreateAPIView):
