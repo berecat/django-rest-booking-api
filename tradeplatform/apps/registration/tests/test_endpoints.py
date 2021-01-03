@@ -4,6 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from apps.registration.models import UserProfile
 from apps.registration.services.tokens import get_user_token
 
 
@@ -518,3 +519,97 @@ class TestActivateChangeEmail(APITestCase):
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data["details"] == details
+
+
+class TestUserProfile(APITestCase):
+    """Test class for UserProfile model"""
+
+    def setUp(self):
+        """Initialize necessary fields for testing and log in user to make requests"""
+
+        self.user_1 = User.objects.create_user(username="test_user", password="test")
+        self.user_2 = User.objects.create_user(username="test_user2", password="test")
+        self.client.login(username="test_user", password="test")
+
+    def test_userprofile_list(self):
+        """
+        Ensure we can retrieve the userprofiles collection
+        """
+
+        url = reverse("userprofile-list")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["count"] == 2
+
+        assert response.data["results"][0]["user"] == self.user_1.username
+        assert not response.data["results"][0]["is_valid"]
+
+        assert response.data["results"][1]["user"] == self.user_2.username
+        assert not response.data["results"][1]["is_valid"]
+
+    def test_userprofile_get(self):
+        """
+        Ensure we can get a single userprofile by id
+        """
+
+        user_profile = UserProfile.objects.first()
+
+        url = reverse("userprofile-detail", None, {user_profile.id})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+
+        assert response.data["user"] == self.user_1.username
+        assert not response.data["is_valid"]
+
+
+class TestUser(APITestCase):
+    """Test class for User model"""
+
+    def setUp(self):
+        """Initialize necessary fields for testing and log in user to make requests"""
+
+        self.user_1 = User.objects.create_user(
+            username="test_user", password="test", email="test_email1@gmail.com"
+        )
+        self.user_2 = User.objects.create_user(
+            username="test_user2", password="test", email="test_email2@gmail.com"
+        )
+        self.client.login(username="test_user", password="test")
+
+    def test_user_list(self):
+        """
+        Ensure we can retrieve the users collection
+        """
+
+        url = reverse("user-list")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["count"] == 2
+
+        assert response.data["results"][0]["id"] == self.user_2.id
+        assert response.data["results"][0]["username"] == self.user_2.username
+        assert response.data["results"][0]["email"] == self.user_2.email
+        assert response.data["results"][0]["profile"]["id"] == self.user_2.profile.id
+
+        assert response.data["results"][1]["id"] == self.user_1.id
+        assert response.data["results"][1]["username"] == self.user_1.username
+        assert response.data["results"][1]["email"] == self.user_1.email
+        assert response.data["results"][1]["profile"]["id"] == self.user_1.profile.id
+
+    def test_user_get(self):
+        """
+        Ensure we can get a single user by id
+        """
+
+        url = reverse("user-detail", None, {self.user_1.id})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+
+        assert response.data["id"] == self.user_1.id
+        assert response.data["username"] == self.user_1.username
+        assert response.data["email"] == self.user_1.email
+        assert response.data["profile"]["id"] == self.user_1.profile.id
