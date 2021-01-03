@@ -373,6 +373,36 @@ class TestRequestChangeEmailAddress(APITestCase):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert str(response.data["password"][0]) == error_message
 
+    def test_permission_get(self):
+        """Check that unauthorized users can't make request to view"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("request_change_email")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_permission_post(self):
+        """Check that unauthorized users can't make request to post passwords"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "password": "testpassword12345",
+            "password2": "testpassword123456",
+        }
+
+        response = self.post(data)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
 
 class TestChangeEmailAddress(APITestCase):
     """Test for ChangeEmailAddress view"""
@@ -474,6 +504,35 @@ class TestChangeEmailAddress(APITestCase):
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data["details"] == details
 
+    def test_permission_get(self):
+        """Check that unauthorized users can't make request to view"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        token = get_user_token(user_id=User.objects.first().id)
+
+        url = reverse("change_email", None, {token})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_permission_post(self):
+        """Check that unauthorized users can't make request to post email address"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        token = get_user_token(user_id=User.objects.first().id)
+
+        response = self.post({"email": "fdsfsdf@email.com"}, token)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
 
 class TestActivateChangeEmail(APITestCase):
     """Tests for ActivateChangeEmail view"""
@@ -519,6 +578,21 @@ class TestActivateChangeEmail(APITestCase):
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data["details"] == details
+
+    def test_permission(self):
+        """Check that unauthorized users can't make request to view"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        token = get_user_token(user_id=User.objects.first().id)
+
+        url = reverse("confirm_change_email", None, {token})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
 
 
 class TestUserProfile(APITestCase):
@@ -580,6 +654,52 @@ class TestUserProfile(APITestCase):
         assert response.data["information"] == new_data["information"]
         assert not response.data["is_valid"]
 
+    def test_permission_list(self):
+        """Check that unauthorized users can't make request to view the collection of userprofiles"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("userprofile-list")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_permission_detail(self):
+        """Check that unauthorized users can't make request to view the detail information about userprofile"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        user_profile = UserProfile.objects.first()
+
+        url = reverse("userprofile-detail", None, {user_profile.id})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_permission_detail_update(self):
+        """Check that unauthorized users can't make request to update the detail information about userprofile"""
+
+        self.client.logout()
+        self.client.login(username="testuser2", password="test")
+
+        error_message = "Authentication credentials were not provided."
+
+        user_profile = UserProfile.objects.first()
+
+        url = reverse("userprofile-detail", None, {user_profile.id})
+        response = self.client.put(
+            url, {"information": "test_information"}, format="json"
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
 
 class TestUser(APITestCase):
     """Test class for User model"""
@@ -630,3 +750,29 @@ class TestUser(APITestCase):
         assert response.data["username"] == self.user_1.username
         assert response.data["email"] == self.user_1.email
         assert response.data["profile"]["id"] == self.user_1.profile.id
+
+    def test_permission_list(self):
+        """Check that unauthorized users can't make request to view the collection of users"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("user-list")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_permission_detail(self):
+        """Check that unauthorized users can't make request to view detail information about user"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("user-detail", None, {self.user_1.id})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
