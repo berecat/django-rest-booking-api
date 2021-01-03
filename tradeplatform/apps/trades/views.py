@@ -1,9 +1,9 @@
 from rest_framework import mixins, viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 
 from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
                                        OfferFilter, PriceFilter, TradeFilter)
-from apps.trades.custompermission import IsOwnerOrReadOnly
+from apps.trades.custompermission import IsAdminOrReadOnly, IsOwnerOrReadOnly
 from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
                                 Price, Trade, WatchList)
 from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
@@ -28,7 +28,7 @@ class CurrencyViewSet(
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
 
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly, IsAuthenticated]
 
     filterset_fields = (
         "name",
@@ -50,7 +50,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
 
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly, IsAuthenticated]
 
     filterset_fields = (
         "name",
@@ -80,7 +80,7 @@ class PriceViewSet(viewsets.ModelViewSet):
         "date",
     )
 
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly, IsAuthenticated]
 
     def get_serializer_class(self):
         """Function return serializer for the certain action"""
@@ -104,7 +104,7 @@ class WatchListViewSet(
     search_fields = ("user__username",)
     ordering_fields = ("user__username",)
 
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
 
     def get_serializer_class(self):
         """Function return serializer for the certain action"""
@@ -129,7 +129,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         "quantity",
     )
 
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
 
     def perform_create(self, serializer):
         """
@@ -173,6 +173,8 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
         "quantity",
     )
 
+    permission_classes = [IsAuthenticated]
+
 
 class BalanceViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for Balance model"""
@@ -190,6 +192,8 @@ class BalanceViewSet(viewsets.ReadOnlyModelViewSet):
         "currency__code",
         "quantity",
     )
+
+    permission_classes = [IsAuthenticated]
 
 
 class TradeViewSet(viewsets.ReadOnlyModelViewSet):
@@ -209,3 +213,5 @@ class TradeViewSet(viewsets.ReadOnlyModelViewSet):
         "unit_price",
         "quantity",
     )
+
+    permission_classes = [IsAuthenticated]

@@ -27,6 +27,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
+    permission_classes = [IsAuthenticated]
+
 
 class UserProfileViewSet(
     mixins.ListModelMixin,
@@ -39,7 +41,7 @@ class UserProfileViewSet(
     serializer_class = UserProfileSerializer
     queryset = UserProfile.objects.all()
 
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
 
 
 class SignUpView(generics.ListAPIView, generics.CreateAPIView):
