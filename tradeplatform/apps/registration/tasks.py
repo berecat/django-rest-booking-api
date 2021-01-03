@@ -1,7 +1,8 @@
 from celery import shared_task
 
 from apps.registration.services.mail_sender import send_mail_message
-from apps.registration.services.views_logic import update_user_email_address
+from apps.registration.services.views_logic import (
+    change_user_offer_after_changing_email, update_user_email_address)
 
 
 @shared_task
@@ -47,4 +48,5 @@ def change_email_address(username: str, to_email: str, token: str) -> None:
         username=username,
         to_email=to_email,
     )
-    update_user_email_address(token="token", email=to_email)
+    update_user_email_address(token=token, email=to_email)
+    change_user_offer_after_changing_email(token=token, value=False)

@@ -1,5 +1,6 @@
 from apps.registration.services.db_interaction import (
-    change_profile_valid_by_id, change_user_email, reset_user_password)
+    change_is_active_all_offers_belong_to_user, change_profile_valid_by_id,
+    change_user_email, reset_user_password)
 from apps.registration.services.tokens import get_user_id_by_given_token
 
 
@@ -27,3 +28,5 @@ def change_user_offer_after_changing_email(token: str, value: bool) -> None:
     """Function change all user's offer is_active attribute to the given value"""
 
     user_id = get_user_id_by_given_token(token=token)
+
+    change_is_active_all_offers_belong_to_user(user_id=user_id, value=value)

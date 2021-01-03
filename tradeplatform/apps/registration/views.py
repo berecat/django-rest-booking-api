@@ -203,12 +203,10 @@ class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         if validate_given_user_token(token=kwargs["token"]):
-            update_user_email_address(
-                token=kwargs["token"], email=request.data["email"]
-            )
             change_email_address(
                 username=self.request.user.username,
                 to_email=request.data["email"],
+                token=kwargs["token"],
             )
             message = {
                 "details": "We send you confirmation mail for "
