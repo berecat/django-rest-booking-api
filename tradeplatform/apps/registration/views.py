@@ -15,8 +15,8 @@ from apps.registration.services.tokens import (
     confirm_user_email_by_given_token, validate_given_user_token)
 from apps.registration.services.views_logic import (update_user_email_address,
                                                     update_user_password)
-from apps.registration.tasks import (send_change_email_address_mail,
-                                     send_confirm_change_email_address_mail,
+from apps.registration.tasks import (change_email_address,
+                                     send_change_email_address_mail,
                                      send_confirmation_mail_message,
                                      send_reset_password_mail)
 
@@ -206,7 +206,7 @@ class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
             update_user_email_address(
                 token=kwargs["token"], email=request.data["email"]
             )
-            send_confirm_change_email_address_mail(
+            change_email_address(
                 username=self.request.user.username,
                 to_email=request.data["email"],
             )

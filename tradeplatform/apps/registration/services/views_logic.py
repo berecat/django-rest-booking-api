@@ -21,3 +21,9 @@ def update_user_email_address(token: str, email: str) -> None:
 
     change_profile_valid_by_id(user_id=user_id, value=False)
     change_user_email(user_id=user_id, email=email)
+
+
+def change_user_offer_after_changing_email(token: str, value: bool) -> None:
+    """Function change all user's offer is_active attribute to the given value"""
+
+    user_id = get_user_id_by_given_token(token=token)

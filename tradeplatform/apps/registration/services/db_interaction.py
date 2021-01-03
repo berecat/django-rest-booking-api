@@ -2,6 +2,8 @@ from typing import Optional
 
 from django.contrib.auth.models import User
 
+from apps.trades.models import Offer
+
 
 def get_user_by_id(user_id: int) -> Optional[User]:
     """Return user by id"""
@@ -59,3 +61,25 @@ def check_email_user_exist(email: str) -> bool:
         return True
     except User.DoesNotExist:
         return False
+
+
+def get_offer_by_id(offer_id: int) -> Optional[Offer]:
+    """Return offer instance by the given id"""
+
+    offer = Offer.objects.get(id=offer_id)
+    return offer
+
+
+def change_offer_is_active(offer_id: int, value: bool) -> None:
+    """Change offer's is_active attribute to the given value"""
+
+    offer = get_offer_by_id(offer_id=offer_id)
+    offer.is_active = value
+    offer.save()
+
+
+def change_is_active_all_offers_belong_to_user(user_id: int, value: bool) -> None:
+    """Change all offer's is_active attribute, which belongs to the given user"""
+
+    for offer in Offer.objects.all().filter(user__id=user_id):
+        change_offer_is_active(offer_id=offer.id, value=value)

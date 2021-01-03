@@ -1,9 +1,11 @@
 from django.contrib.auth.models import User
 
 from apps.registration.services.db_interaction import (
+    change_is_active_all_offers_belong_to_user, change_offer_is_active,
     change_profile_valid_by_id, change_user_email, check_email_user_exist,
-    get_user_by_email, get_user_by_id, get_user_by_username,
+    get_offer_by_id, get_user_by_email, get_user_by_id, get_user_by_username,
     reset_user_password)
+from apps.trades.models import Offer
 
 
 def test_get_user_by_id(user_instance):
@@ -38,7 +40,7 @@ def test_change_profile_valid_with_true_by_id(user_instance):
 
     change_profile_valid_by_id(user_id=user_instance.id, value=True)
 
-    assert User.objects.get().profile.is_valid == True
+    assert User.objects.get().profile.is_valid
 
 
 def test_change_profile_valid_with_false_by_id(user_instance):
@@ -49,7 +51,7 @@ def test_change_profile_valid_with_false_by_id(user_instance):
 
     change_profile_valid_by_id(user_id=user_instance.id, value=False)
 
-    assert User.objects.get().profile.is_valid == False
+    assert not User.objects.get().profile.is_valid
 
 
 def test_reset_user_password(user_instance):
@@ -58,7 +60,7 @@ def test_reset_user_password(user_instance):
     password = "testuserpassword123456"
     reset_user_password(user_id=user_instance.id, password=password)
 
-    assert User.objects.get().check_password(raw_password=password) == True
+    assert User.objects.get().check_password(raw_password=password)
 
 
 def test_change_user_email(user_instance):
@@ -75,7 +77,7 @@ def test_check_email_user_exist_with_exist_user(user_instance):
 
     result = check_email_user_exist(email=user_instance.email)
 
-    assert result == True
+    assert result
 
 
 def test_check_email_user_exist_with_not_exist_user():
@@ -83,4 +85,60 @@ def test_check_email_user_exist_with_not_exist_user():
 
     result = check_email_user_exist(email="fsdfsdfsdfsdf@email.com")
 
-    assert result == False
+    assert not result
+
+
+def test_get_offer_by_id(offer_instance):
+    """Ensure that function return correct offer instance by the given offer id"""
+
+    offer = get_offer_by_id(offer_id=offer_instance.id)
+
+    assert offer == offer_instance
+
+
+def test_change_offer_is_active_to_false(offer_instance):
+    """
+    Ensure that function correctly change offer's is_active attribute
+    Since function received False as value, it has to change is_active to False
+    """
+
+    offer_instance.is_active = True
+    offer_instance.save()
+
+    change_offer_is_active(offer_id=offer_instance.id, value=False)
+
+    assert not Offer.objects.get().is_active
+
+
+def test_change_offer_is_active_to_true(offer_instance):
+    """
+    Ensure that function correctly change offer's is_active attribute
+    Since function received True as value, it has to change is_active to True
+    """
+
+    offer_instance.is_active = False
+    offer_instance.save()
+
+    change_offer_is_active(offer_id=offer_instance.id, value=True)
+
+    assert Offer.objects.get().is_active
+
+
+def test_change_is_active_all_offers_belong_to_user_to_false(offer_instances):
+    """Ensure that function correctly change offer's is_active attribute, belongs to the given user"""
+
+    user_id = offer_instances[0].user.id
+
+    change_is_active_all_offers_belong_to_user(user_id=user_id, value=False)
+
+    assert Offer.objects.active().count() == 0
+
+
+def test_change_is_active_all_offers_belong_to_user_to_true(offer_instances):
+    """Ensure that function correctly change offer's is_active attribute, belongs to the given user"""
+
+    user_id = offer_instances[0].user.id
+
+    change_is_active_all_offers_belong_to_user(user_id=user_id, value=True)
+
+    assert Offer.objects.active().count() == 4
