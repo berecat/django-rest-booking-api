@@ -56,6 +56,8 @@ class TestSignUp(APITestCase):
         And raise ValidationError for password field
         """
 
+        error_message = "Password fields didn't match."
+
         data = {
             "username": "Ivan",
             "email": "soldatenkoivan36@gmail.com",
@@ -65,7 +67,7 @@ class TestSignUp(APITestCase):
         response = self.post(data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert str(response.data["password"][0]) == "Password fields didn't match."
+        assert str(response.data["password"][0]) == error_message
 
     def test_post_request_with_exist_email(self):
         """
@@ -73,6 +75,8 @@ class TestSignUp(APITestCase):
         Since we write existed email address view has to return 400 status code
         And raise ValidationError for email field
         """
+
+        error_message = "This field must be unique."
 
         user = User.objects.first()
         data = {
@@ -84,7 +88,7 @@ class TestSignUp(APITestCase):
         response = self.post(data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert str(response.data["email"][0]) == "This field must be unique."
+        assert str(response.data["email"][0]) == error_message
 
 
 @pytest.mark.usefixtures("user_instance")
@@ -153,13 +157,12 @@ class TestRequestResetPassword(APITestCase):
         400 status code and right validation error
         """
 
+        error_message = "User with the given email address does not exist."
+
         response = self.post({"email": "sdfsfsfs@email.com"})
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert (
-            str(response.data["email"][0])
-            == "User with the given email address does not exist."
-        )
+        assert str(response.data["email"][0]) == error_message
 
     def test_right_post_request(self):
         """
@@ -178,8 +181,8 @@ class TestRequestResetPassword(APITestCase):
 
 
 @pytest.mark.usefixtures("user_instance")
-class TestActivate(APITestCase):
-    """Tests for Activate view"""
+class TestResetPassword(APITestCase):
+    """Tests for ResetPassword view"""
 
     def post(self, data, token):
         """Function make POST request to tested view"""
@@ -227,6 +230,8 @@ class TestActivate(APITestCase):
         400 status code and right validation error
         """
 
+        error_message = "Password fields didn't match."
+
         data = {
             "password": "testpassword12345",
             "password2": "testpassword123456",
@@ -236,7 +241,7 @@ class TestActivate(APITestCase):
         response = self.post(data, token)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert str(response.data["password"][0]) == "Password fields didn't match."
+        assert str(response.data["password"][0]) == error_message
 
     def test_post_request_with_wrong_token(self):
         """
@@ -260,7 +265,7 @@ class TestActivate(APITestCase):
     def test_right_post_request(self):
         """
         Ensure that returns correct response after POST method
-        Since view received passwords, which didn't matched, function has to return
+        Since view received passwords, which are matched, function has to return
         201 status code and right details information
         """
 
@@ -314,7 +319,7 @@ class TestRequestChangeEmailAddress(APITestCase):
     def test_right_post_request(self):
         """
         Ensure that returns correct response after POST method
-        Since view received passwords, which didn't matched, function has to return
+        Since view received passwords, which are matched, function has to return
         201 status code and right details information
         """
 
@@ -332,9 +337,11 @@ class TestRequestChangeEmailAddress(APITestCase):
     def test_post_request_with_wrong_password(self):
         """
         Ensure that returns correct response after POST method
-        Since view received passwords, which didn't matched, function has to return
-        400 status code and right validation error
+        Since view received passwords, which didn't matched with current user's password,
+        function has to return 400 status code and right validation error
         """
+
+        error_message = "You write wrong password!"
 
         data = {
             "password": "testpassword123456",
@@ -344,7 +351,7 @@ class TestRequestChangeEmailAddress(APITestCase):
         response = self.post(data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert str(response.data["password"][0]) == "You write wrong password!"
+        assert str(response.data["password"][0]) == error_message
 
     def test_wrong_post_request(self):
         """
@@ -352,6 +359,8 @@ class TestRequestChangeEmailAddress(APITestCase):
         Since view received passwords, which didn't matched, function has to return
         400 status code and right validation error
         """
+
+        error_message = "Password fields didn't match."
 
         data = {
             "password": "testpassword12345",
@@ -361,7 +370,7 @@ class TestRequestChangeEmailAddress(APITestCase):
         response = self.post(data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert str(response.data["password"][0]) == "Password fields didn't match."
+        assert str(response.data["password"][0]) == error_message
 
 
 class TestChangeEmailAddress(APITestCase):
@@ -419,19 +428,18 @@ class TestChangeEmailAddress(APITestCase):
     def test_wrong_post_request(self):
         """
         Ensure that returns correct response after POST method
-        Since view received passwords, which didn't matched, function has to return
+        Since view received email, which has already existed, function has to return
         400 status code and right validation error
         """
+
+        error_message = "User with the given email address has already existed"
 
         token = get_user_token(user_id=User.objects.first().id)
 
         response = self.post({"email": self.user.email}, token)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert (
-            str(response.data["email"][0])
-            == "User with the given email address has already existed"
-        )
+        assert str(response.data["email"][0]) == error_message
 
     def test_post_request_with_wrong_token(self):
         """
@@ -452,7 +460,7 @@ class TestChangeEmailAddress(APITestCase):
     def test_right_post_request(self):
         """
         Ensure that returns correct response after POST method
-        Since view received passwords, which didn't matched, function has to return
+        Since view received email, which hasn't already existed, function has to return
         201 status code and right details information
         """
 
