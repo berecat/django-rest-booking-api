@@ -28,7 +28,7 @@ class CurrencyViewSet(
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
 
-    permission_classes = [IsAdminOrReadOnly, IsAuthenticated]
+    permission_classes = {IsAdminOrReadOnly, IsAuthenticated}
 
     filterset_fields = (
         "name",
@@ -50,7 +50,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
 
-    permission_classes = [IsAdminOrReadOnly, IsAuthenticated]
+    permission_classes = {IsAdminOrReadOnly, IsAuthenticated}
 
     filterset_fields = (
         "name",
@@ -80,7 +80,7 @@ class PriceViewSet(viewsets.ModelViewSet):
         "date",
     )
 
-    permission_classes = [IsAdminOrReadOnly, IsAuthenticated]
+    permission_classes = {IsAdminOrReadOnly, IsAuthenticated}
 
     def get_serializer_class(self):
         """Function return serializer for the certain action"""
@@ -104,7 +104,7 @@ class WatchListViewSet(
     search_fields = ("user__username",)
     ordering_fields = ("user__username",)
 
-    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
+    permission_classes = {IsOwnerOrReadOnly, IsAuthenticated}
 
     def get_serializer_class(self):
         """Function return serializer for the certain action"""
@@ -129,7 +129,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         "quantity",
     )
 
-    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
+    permission_classes = {IsOwnerOrReadOnly, IsAuthenticated}
 
     def perform_create(self, serializer):
         """
@@ -173,7 +173,7 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
         "quantity",
     )
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = {IsAuthenticated}
 
 
 class BalanceViewSet(viewsets.ReadOnlyModelViewSet):
@@ -193,7 +193,7 @@ class BalanceViewSet(viewsets.ReadOnlyModelViewSet):
         "quantity",
     )
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = {IsAuthenticated}
 
 
 class TradeViewSet(viewsets.ReadOnlyModelViewSet):
@@ -214,4 +214,4 @@ class TradeViewSet(viewsets.ReadOnlyModelViewSet):
         "quantity",
     )
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = {IsAuthenticated}

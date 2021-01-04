@@ -28,7 +28,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = {IsAuthenticated}
 
     filterset_fields = ("username", "email", "is_active")
     search_fields = ("username", "email")
@@ -46,7 +46,7 @@ class UserProfileViewSet(
     serializer_class = UserProfileSerializer
     queryset = UserProfile.objects.all()
 
-    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
+    permission_classes = {IsOwnerOrReadOnly, IsAuthenticated}
 
     filterset_class = UserProfileFilter
     search_fields = ("user__username", "user__email")
@@ -58,7 +58,7 @@ class SignUpView(generics.ListAPIView, generics.CreateAPIView):
 
     serializer_class = UserSerializer
 
-    permission_classes = [AllowAny]
+    permission_classes = {AllowAny}
 
     def get(self, request, *args, **kwargs):
         """Function for getting information about view"""
@@ -87,7 +87,7 @@ class SignUpView(generics.ListAPIView, generics.CreateAPIView):
 class ActivateUserEmailView(generics.ListAPIView):
     """View for confirmation user's mail address"""
 
-    permission_classes = [AllowAny]
+    permission_classes = {AllowAny}
 
     def get(self, request, *args, **kwargs):
         """Return response to user with information about email confirmation"""
@@ -106,7 +106,7 @@ class RequestResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
 
     serializer_class = RequestResetPasswordSerializer
 
-    permission_classes = [AllowAny]
+    permission_classes = {AllowAny}
 
     def create(self, request, *args, **kwargs):
         """Function for creating a request to reset user's password"""
@@ -131,7 +131,7 @@ class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
 
     serializer_class = ResetUserPasswordSerializer
 
-    permission_classes = [AllowAny]
+    permission_classes = {AllowAny}
 
     def create(self, request, *args, **kwargs):
         """Function for changing user's password"""
@@ -165,7 +165,7 @@ class RequestChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView
 
     serializer_class = RequestChangeEmailAddressSerializer
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = {IsAuthenticated}
 
     def get(self, request, *args, **kwargs):
         """Function for getting information about view"""
@@ -195,7 +195,7 @@ class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
 
     serializer_class = ChangeUserEmailSerializer
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = {IsAuthenticated}
 
     def get(self, request, *args, **kwargs):
         """Function for getting information about view"""
@@ -232,7 +232,7 @@ class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
 class ActivateChangeEmail(generics.ListAPIView):
     """View for confirmation new user's mail address"""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = {IsAuthenticated}
 
     def get(self, request, *args, **kwargs):
         """Return response to user with information about new user's email confirmation"""
