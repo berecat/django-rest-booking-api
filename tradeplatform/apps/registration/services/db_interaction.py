@@ -82,4 +82,12 @@ def change_is_active_all_offers_belong_to_user(user_id: int, value: bool) -> Non
     """Change all offer's is_active attribute, which belongs to the given user"""
 
     for offer in Offer.objects.all().filter(user__id=user_id):
-        change_offer_is_active(offer_id=offer.id, value=value)
+        if _get_available_quantity_stocks(offer_id=offer.id):
+            change_offer_is_active(offer_id=offer.id, value=value)
+
+
+def _get_available_quantity_stocks(offer_id: int) -> int:
+    """Return the quantity of stocks in offer that are available for trading now"""
+
+    offer = get_offer_by_id(offer_id=offer_id)
+    return offer.entry_quantity - offer.quantity

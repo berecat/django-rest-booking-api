@@ -1,10 +1,10 @@
 from django.contrib.auth.models import User
 
 from apps.registration.services.db_interaction import (
-    change_is_active_all_offers_belong_to_user, change_offer_is_active,
-    change_profile_valid_by_id, change_user_email, check_email_user_exist,
-    get_offer_by_id, get_user_by_email, get_user_by_id, get_user_by_username,
-    reset_user_password)
+    _get_available_quantity_stocks, change_is_active_all_offers_belong_to_user,
+    change_offer_is_active, change_profile_valid_by_id, change_user_email,
+    check_email_user_exist, get_offer_by_id, get_user_by_email, get_user_by_id,
+    get_user_by_username, reset_user_password)
 from apps.trades.models import Offer
 
 
@@ -142,3 +142,27 @@ def test_change_is_active_all_offers_belong_to_user_to_true(offer_instances):
     change_is_active_all_offers_belong_to_user(user_id=user_id, value=True)
 
     assert Offer.objects.active().count() == 4
+
+
+def test_get_available_quantity_stocks(offer_purchase_instance):
+    """
+    Ensure that function return correct quantity of available stocks for now
+    In purchase offer instance without current quantity
+    """
+
+    available_stocks = _get_available_quantity_stocks(
+        offer_id=offer_purchase_instance.id
+    )
+
+    assert available_stocks == 60
+
+
+def test_get_available_quantity_stocks_with_current_quantity(offer_sell_instance):
+    """
+    Ensure that function return correct quantity of available stocks for now
+    In sell offer instance with current quantity
+    """
+
+    available_stocks = _get_available_quantity_stocks(offer_id=offer_sell_instance.id)
+
+    assert available_stocks == 36
