@@ -15,6 +15,12 @@ class UserProfile(models.Model):
     information = models.TextField(blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def count_all_trades(self):
+        """Count all trades, which user has made"""
+
+        return self.user.buyer_trade.count() + self.user.seller_trade.count()
+
 
 @receiver(post_save, sender=User)
 def create_user_default_attributes(sender, instance, created, **kwargs):

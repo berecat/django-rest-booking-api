@@ -11,6 +11,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     """Serializer for User Profile model"""
 
     user = serializers.SlugRelatedField(read_only=True, slug_field="username")
+    all_trades = serializers.IntegerField(source="count_all_trades", read_only=True)
 
     class Meta:
         model = UserProfile
@@ -20,6 +21,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "information",
             "is_valid",
             "date_joined",
+            "all_trades",
         )
         read_only_fields = ("is_valid",)
 

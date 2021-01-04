@@ -1,5 +1,6 @@
-from rest_framework import mixins, viewsets
+from rest_framework import generics, mixins, status, viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
                                        OfferFilter, PriceFilter, TradeFilter)
@@ -14,6 +15,9 @@ from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      WatchListCreateSerializer,
                                      WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
+from apps.trades.services.views_logic import (get_average_offer_price,
+                                              get_maximum_offer_price,
+                                              get_minimum_offer_price)
 
 
 class CurrencyViewSet(
@@ -215,3 +219,18 @@ class TradeViewSet(viewsets.ReadOnlyModelViewSet):
     )
 
     permission_classes = {IsAuthenticated}
+
+
+class StatisticView(generics.ListAPIView):
+    """View for statistic about offer's price"""
+
+    def get(self, request, *args, **kwargs):
+        """Get statistic about offer's price"""
+
+        data = {
+            "average_price": get_average_offer_price(),
+            "max_price": get_maximum_offer_price(),
+            "min_price": get_minimum_offer_price(),
+        }
+
+        return Response(data=data, status=status.HTTP_201_CREATED)
