@@ -1,0 +1,4 @@
+{% autoescape off %}
+Hi {{ user.username }}!!!
+Please click on the link to confirm change email request,http://{{ domain }}{% url 'change_email' token=token %}
+{% endautoescape %}

@@ -122,6 +122,18 @@ def get_or_create_user_balance(user_id: int, currency_id: int) -> Optional[Balan
     return balance
 
 
+def get_or_create_default_currency() -> Optional[Currency]:
+    """
+    Return currency instance with USD code
+    If it doesn't exist create default currency instance
+    """
+
+    default_currency = Currency.objects.get_or_create(
+        code="USD", defaults={"name": "American dollar"}
+    )[0]
+    return default_currency
+
+
 def change_user_inventory(user_id: int, item_id: int, quantity: int) -> None:
     """Change user's current quantity of stocks for the specified item"""
 

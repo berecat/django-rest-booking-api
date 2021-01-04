@@ -1,18 +1,19 @@
-from rest_framework import mixins, status, viewsets
-from rest_framework.response import Response
+from rest_framework import mixins, viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
                                        OfferFilter, PriceFilter, TradeFilter)
+from apps.trades.custompermission import IsAdminOrReadOnly, IsOwnerOrReadOnly
 from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
                                 Price, Trade, WatchList)
 from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      InventorySerializer, ItemSerializer,
-                                     OfferSerializer, PriceSerializer,
-                                     TradeSerializer, WatchListSerializer)
+                                     OfferCreateSerializer, OfferSerializer,
+                                     PriceCreateSerializer, PriceSerializer,
+                                     TradeSerializer,
+                                     WatchListCreateSerializer,
+                                     WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
-from apps.trades.services.views_logic import (
-    check_user_balance, check_user_quantity_stocks_for_given_item,
-    setup_user_attributes)
 
 
 class CurrencyViewSet(
@@ -27,7 +28,9 @@ class CurrencyViewSet(
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
 
-    filter_fields = (
+    permission_classes = {IsAdminOrReadOnly, IsAuthenticated}
+
+    filterset_fields = (
         "name",
         "code",
     )
@@ -47,7 +50,9 @@ class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
 
-    filter_fields = (
+    permission_classes = {IsAdminOrReadOnly, IsAuthenticated}
+
+    filterset_fields = (
         "name",
         "code",
     )
@@ -65,9 +70,8 @@ class PriceViewSet(viewsets.ModelViewSet):
     """ViewSet for Price model"""
 
     queryset = Price.objects.all()
-    serializer_class = PriceSerializer
 
-    filter_class = PriceFilter
+    filterset_class = PriceFilter
     search_fields = ("^item__code",)
     ordering_fields = (
         "item__code",
@@ -76,10 +80,18 @@ class PriceViewSet(viewsets.ModelViewSet):
         "date",
     )
 
+    permission_classes = {IsAdminOrReadOnly, IsAuthenticated}
+
+    def get_serializer_class(self):
+        """Function return serializer for the certain action"""
+
+        if self.action == "list" or self.action == "retrieve":
+            return PriceSerializer
+        return PriceCreateSerializer
+
 
 class WatchListViewSet(
     mixins.ListModelMixin,
-    mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
@@ -87,11 +99,19 @@ class WatchListViewSet(
     """ViewSet for WatchList model"""
 
     queryset = WatchList.objects.all()
-    serializer_class = WatchListSerializer
 
-    filter_fields = ("user__username",)
+    filterset_fields = ("user__username",)
     search_fields = ("user__username",)
     ordering_fields = ("user__username",)
+
+    permission_classes = {IsOwnerOrReadOnly, IsAuthenticated}
+
+    def get_serializer_class(self):
+        """Function return serializer for the certain action"""
+
+        if self.action == "update":
+            return WatchListCreateSerializer
+        return WatchListSerializer
 
 
 class OfferViewSet(viewsets.ModelViewSet):
@@ -100,7 +120,7 @@ class OfferViewSet(viewsets.ModelViewSet):
     queryset = Offer.objects.all()
     serializer_class = OfferSerializer
 
-    filter_class = OfferFilter
+    filterset_class = OfferFilter
     search_fields = ("user__username",)
     ordering_fields = (
         "user__username",
@@ -109,46 +129,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         "quantity",
     )
 
-    def create(self, request, *args, **kwargs):
-        """
-        If the offer has SELL status, check that user have enough quantity of stocks to sell them
-        If the offer has PURCHASE status, check that user have enough money to buy that many stocks
-        """
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        if self.request.data["status"] == "SELL":
-
-            if check_user_quantity_stocks_for_given_item(
-                user_id=self.request.user.id,
-                item_id=self.request.data["item_id"],
-                quantity=self.request.data["entry_quantity"],
-            ):
-
-                self.perform_create(serializer)
-                headers = self.get_success_headers(serializer.data)
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED, headers=headers
-                )
-            else:
-                return Response("You don't have enough quantity of stocks to sell")
-
-        elif self.request.data["status"] == "PURCHASE":
-
-            if check_user_balance(
-                user_id=self.request.user.id,
-                quantity=self.request.data["entry_quantity"],
-                price=self.request.data["price"],
-            ):
-
-                self.perform_create(serializer)
-                headers = self.get_success_headers(serializer.data)
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED, headers=headers
-                )
-            else:
-                return Response("You don't have enough money to buy that many stocks")
+    permission_classes = {IsOwnerOrReadOnly, IsAuthenticated}
 
     def perform_create(self, serializer):
         """
@@ -157,8 +138,6 @@ class OfferViewSet(viewsets.ModelViewSet):
         """
 
         user = self.request.user
-        setup_user_attributes(user_id=user.id)
-
         serializer.save(user=user)
 
     def perform_destroy(self, instance):
@@ -169,6 +148,13 @@ class OfferViewSet(viewsets.ModelViewSet):
 
         delete_offer_by_id(offer_id=instance.id)
 
+    def get_serializer_class(self):
+        """Function return serializer for the certain action"""
+
+        if self.action == "list" or self.action == "retrieve":
+            return OfferSerializer
+        return OfferCreateSerializer
+
 
 class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for Inventory model"""
@@ -176,7 +162,7 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
 
-    filter_class = InventoryFilter
+    filterset_class = InventoryFilter
     search_fields = (
         "user__username",
         "item__code",
@@ -186,6 +172,8 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
         "item__code",
         "quantity",
     )
+
+    permission_classes = {IsAuthenticated}
 
 
 class BalanceViewSet(viewsets.ReadOnlyModelViewSet):
@@ -194,7 +182,7 @@ class BalanceViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Balance.objects.all()
     serializer_class = BalanceSerializer
 
-    filter_class = BalanceFilter
+    filterset_class = BalanceFilter
     search_fields = (
         "user__username",
         "currency__code",
@@ -205,6 +193,8 @@ class BalanceViewSet(viewsets.ReadOnlyModelViewSet):
         "quantity",
     )
 
+    permission_classes = {IsAuthenticated}
+
 
 class TradeViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for Trade model"""
@@ -212,7 +202,7 @@ class TradeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Trade.objects.all()
     serializer_class = TradeSerializer
 
-    filter_class = TradeFilter
+    filterset_class = TradeFilter
     search_fields = (
         "item__code",
         "seller__username",
@@ -223,3 +213,5 @@ class TradeViewSet(viewsets.ReadOnlyModelViewSet):
         "unit_price",
         "quantity",
     )
+
+    permission_classes = {IsAuthenticated}

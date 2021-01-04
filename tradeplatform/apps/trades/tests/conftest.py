@@ -13,19 +13,10 @@ def enable_db_access_for_all_tests(db):
 
 
 @pytest.fixture()
-def default_user_instance():
+def user_instance():
     """User instance without balance"""
 
     return mixer.blend(User)
-
-
-@pytest.fixture()
-def user_instance(default_currency_instance):
-    """User instance with balance"""
-
-    user = mixer.blend(User)
-    mixer.blend(Balance, user=user, currency=default_currency_instance, quantity=1000)
-    return user
 
 
 @pytest.fixture()
@@ -33,13 +24,6 @@ def item_instance():
     """Item instance"""
 
     return mixer.blend(Item)
-
-
-@pytest.fixture()
-def default_currency_instance():
-    """Currency instance with USD code is default currency for tradeplatform"""
-
-    return mixer.blend(Currency, code="USD", name="American dollar")
 
 
 @pytest.fixture()
@@ -73,32 +57,17 @@ def offer_sell_instance(user_instance, item_instance):
         status="SELL",
         user=user_instance,
         item=item_instance,
-        price=100,
+        price=11,
         entry_quantity=70,
         quantity=34,
     )
 
 
 @pytest.fixture()
-def user_instances(default_currency_instance):
+def user_instances():
     """Return two users instances for making trade between them"""
 
-    user_1 = mixer.blend(User)
-    mixer.blend(
-        Balance, user=user_1, currency=default_currency_instance, quantity=10000000
-    )
-
-    user_2 = mixer.blend(User)
-    mixer.blend(
-        Balance, user=user_2, currency=default_currency_instance, quantity=10000000
-    )
-
-    user_3 = mixer.blend(User)
-    mixer.blend(
-        Balance, user=user_3, currency=default_currency_instance, quantity=10000000
-    )
-
-    return [user_1, user_2, user_3]
+    return [mixer.blend(User), mixer.blend(User), mixer.blend(User)]
 
 
 @pytest.fixture()
@@ -124,9 +93,9 @@ def offer_instances(user_instances, item_instances):
             status="PURCHASE",
             user=buyer,
             item=item_1,
-            price=100,
-            entry_quantity=1434,
-            quantity=60,
+            price=10,
+            entry_quantity=43,
+            quantity=6,
             is_active=True,
         ),
         mixer.blend(
@@ -144,9 +113,9 @@ def offer_instances(user_instances, item_instances):
             status="SELL",
             user=seller,
             item=item_1,
-            price=150,
-            entry_quantity=560,
-            quantity=60,
+            price=15,
+            entry_quantity=56,
+            quantity=6,
             is_active=True,
         ),
         mixer.blend(
@@ -154,9 +123,9 @@ def offer_instances(user_instances, item_instances):
             status="SELL",
             user=seller,
             item=item_1,
-            price=70,
-            entry_quantity=1000,
-            quantity=30,
+            price=7,
+            entry_quantity=10,
+            quantity=3,
             is_active=True,
         ),
         mixer.blend(
@@ -164,9 +133,9 @@ def offer_instances(user_instances, item_instances):
             status="SELL",
             user=seller,
             item=item_1,
-            price=99,
-            entry_quantity=1254,
-            quantity=50,
+            price=9,
+            entry_quantity=25,
+            quantity=5,
             is_active=False,
         ),
         mixer.blend(
@@ -174,9 +143,9 @@ def offer_instances(user_instances, item_instances):
             status="SELL",
             user=seller,
             item=item_1,
-            price=80,
-            entry_quantity=1600,
-            quantity=70,
+            price=8,
+            entry_quantity=60,
+            quantity=7,
             is_active=True,
         ),
         mixer.blend(
@@ -184,9 +153,9 @@ def offer_instances(user_instances, item_instances):
             status="SELL",
             user=seller,
             item=item_1,
-            price=80,
-            entry_quantity=1444,
-            quantity=70,
+            price=8,
+            entry_quantity=44,
+            quantity=7,
             is_active=True,
         ),
         mixer.blend(
@@ -194,9 +163,9 @@ def offer_instances(user_instances, item_instances):
             status="PURCHASE",
             user=user_instances[2],
             item=item_1,
-            price=100,
-            entry_quantity=1434,
-            quantity=60,
+            price=10,
+            entry_quantity=43,
+            quantity=6,
             is_active=True,
         ),
         mixer.blend(
@@ -204,9 +173,9 @@ def offer_instances(user_instances, item_instances):
             status="SELL",
             user=buyer,
             item=item_1,
-            price=50,
-            entry_quantity=1424,
-            quantity=60,
+            price=5,
+            entry_quantity=42,
+            quantity=6,
             is_active=True,
         ),
     ]
