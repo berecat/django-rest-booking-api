@@ -10,8 +10,10 @@ from apps.registration.services.db_interaction import check_email_user_exist
 class UserProfileSerializer(serializers.ModelSerializer):
     """Serializer for User Profile model"""
 
-    user = serializers.SlugRelatedField(read_only=True, slug_field="username")
+    user = serializers.SlugRelatedField(slug_field="username", read_only=True)
     all_trades = serializers.IntegerField(source="count_all_trades", read_only=True)
+    buy_money = serializers.IntegerField(source="count_buy_money", read_only=True)
+    sell_money = serializers.IntegerField(source="count_sell_money", read_only=True)
 
     class Meta:
         model = UserProfile
@@ -22,6 +24,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "is_valid",
             "date_joined",
             "all_trades",
+            "buy_money",
+            "sell_money",
         )
         read_only_fields = ("is_valid",)
 

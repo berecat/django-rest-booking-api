@@ -224,6 +224,8 @@ class TradeViewSet(viewsets.ReadOnlyModelViewSet):
 class StatisticView(generics.ListAPIView):
     """View for statistic about offer's price"""
 
+    permission_classes = {IsAuthenticated}
+
     def get(self, request, *args, **kwargs):
         """Get statistic about offer's price"""
 
