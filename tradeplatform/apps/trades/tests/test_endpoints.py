@@ -123,6 +123,117 @@ class TestCurrency(APITestCase):
         assert put_response.data["name"] == new_data["name"]
         assert put_response.data["code"] == new_data["code"]
 
+    def test_check_permission_list_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make GET request on currency list
+        """
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("currency-list")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_post_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make POST request
+        """
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {"code": "BYN", "name": "Belarusian rubles"}
+        response = self.post_currency(data)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_post_authenticated(self):
+        """
+        Ensure that authenticated users can't make POST request
+        """
+
+        self.client.logout()
+        User.objects.create(username="testuser3", password="testpassword")
+        self.client.login(username="testuser3", password="testpassword")
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {"code": "BYN", "name": "Belarusian rubles"}
+        response = self.post_currency(data)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_detail(self):
+        """
+        Ensure that unauthenticated users can't make GET request on currency-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {"code": "BYN", "name": "Belarusian rubles"}
+        response = self.post_currency(data)
+
+        self.client.logout()
+
+        url = reverse("currency-detail", None, {response.data["id"]})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_update_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make PUT request on currency-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {"code": "BYN", "name": "Belarusian rubles"}
+        response = self.post_currency(data)
+
+        self.client.logout()
+
+        url = reverse("currency-detail", None, {response.data["id"]})
+        new_data = {
+            "code": "EUR",
+            "name": "Euro",
+        }
+        put_response = self.client.put(url, new_data, format="json")
+
+        assert put_response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(put_response.data["detail"]) == error_message
+
+    def test_check_permission_update_authenticated(self):
+        """
+        Ensure that authenticated users can't make PUT request on currency-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {"code": "BYN", "name": "Belarusian rubles"}
+        response = self.post_currency(data)
+
+        self.client.logout()
+        User.objects.create(username="testuser3", password="testpassword")
+        self.client.login(username="testuser3", password="testpassword")
+
+        url = reverse("currency-detail", None, {response.data["id"]})
+        new_data = {
+            "code": "EUR",
+            "name": "Euro",
+        }
+        put_response = self.client.put(url, new_data, format="json")
+
+        assert put_response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(put_response.data["detail"]) == error_message
+
 
 class TestItem(APITestCase):
     """Test class for Item model"""
@@ -271,6 +382,139 @@ class TestItem(APITestCase):
 
         assert delete_response.status_code == status.HTTP_204_NO_CONTENT
         assert Item.objects.count() == 0
+
+    def test_check_permission_list_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make GET request on item list
+        """
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("item-list")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_post_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make POST request
+        """
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "code": "TSLA",
+            "name": "Tesla",
+            "details": "Stocks of Tesla Inc.",
+        }
+        response = self.post_item(data)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_post_authenticated(self):
+        """
+        Ensure that authenticated users can't make POST request
+        """
+
+        self.client.logout()
+        User.objects.create(username="testuser3", password="testpassword")
+        self.client.login(username="testuser3", password="testpassword")
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "code": "TSLA",
+            "name": "Tesla",
+            "details": "Stocks of Tesla Inc.",
+        }
+        response = self.post_item(data)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_detail(self):
+        """
+        Ensure that unauthenticated users can't make GET request on item-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "code": "TSLA",
+            "name": "Tesla",
+            "details": "Stocks of Tesla Inc.",
+        }
+        response = self.post_item(data)
+
+        self.client.logout()
+
+        url = reverse("item-detail", None, {response.data["id"]})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_update_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make PUT request on item-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "code": "AAPL",
+            "name": "Apple",
+            "details": "Stocks of Apple Inc.",
+        }
+        response = self.post_item(data)
+
+        self.client.logout()
+
+        url = reverse("item-detail", None, {response.data["id"]})
+        new_data = {
+            "code": "TSLA",
+            "name": "Tesla",
+            "details": "Stocks of Tesla Inc.",
+        }
+        put_response = self.client.put(url, new_data, format="json")
+
+        assert put_response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(put_response.data["detail"]) == error_message
+
+    def test_check_permission_update_authenticated(self):
+        """
+        Ensure that authenticated users can't make PUT request on item-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "code": "TSLA",
+            "name": "Tesla",
+            "details": "Stocks of Tesla Inc.",
+        }
+        response = self.post_item(data)
+
+        self.client.logout()
+        User.objects.create(username="testuser3", password="testpassword")
+        self.client.login(username="testuser3", password="testpassword")
+
+        url = reverse("item-detail", None, {response.data["id"]})
+        new_data = {
+            "code": "AAPL",
+            "name": "Apple",
+            "details": "Stocks of Apple Inc.",
+        }
+        put_response = self.client.put(url, new_data, format="json")
+
+        assert put_response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(put_response.data["detail"]) == error_message
 
 
 class TestPrice(APITestCase):
@@ -437,7 +681,7 @@ class TestPrice(APITestCase):
         """
 
         data = {
-            "currency_id": self.currency_2.id,
+            "currency": self.currency_2.id,
             "item": self.item_2.id,
             "price": Decimal("2123.01"),
             "date": "2020-12-23T10:05:00Z",
@@ -476,6 +720,146 @@ class TestPrice(APITestCase):
 
         assert response.data["price"][0]["id"] == price_1["id"]
         assert response.data["price"][1]["id"] == price_2["id"]
+
+    def test_check_permission_list_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make GET request on price list
+        """
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("price-list")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_post_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make POST request
+        """
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "currency": self.currency_2.id,
+            "item": self.item_2.id,
+            "price": Decimal("2123.01"),
+            "date": "2020-12-23T10:05:00Z",
+        }
+        response = self.post_price(data)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_post_authenticated(self):
+        """
+        Ensure that authenticated users can't make POST request
+        """
+
+        self.client.logout()
+        User.objects.create(username="testuser3", password="testpassword")
+        self.client.login(username="testuser3", password="testpassword")
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "currency": self.currency_2.id,
+            "item": self.item_2.id,
+            "price": Decimal("2123.01"),
+            "date": "2020-12-23T10:05:00Z",
+        }
+        response = self.post_price(data)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_detail(self):
+        """
+        Ensure that unauthenticated users can't make GET request on price-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "currency": self.currency_2.id,
+            "item": self.item_2.id,
+            "price": Decimal("2123.01"),
+            "date": "2020-12-23T10:05:00Z",
+        }
+        response = self.post_price(data)
+
+        self.client.logout()
+
+        url = reverse("price-detail", None, {response.data["id"]})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_update_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make PUT request on price-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "currency": self.currency_2.id,
+            "item": self.item_2.id,
+            "price": Decimal("2123.01"),
+            "date": "2020-12-23T10:05:00Z",
+        }
+        response = self.post_price(data)
+
+        self.client.logout()
+
+        url = reverse("price-detail", None, {response.data["id"]})
+        new_data = {
+            "currency": self.currency_1.id,
+            "item": self.item_1.id,
+            "price": Decimal("4234.01"),
+            "date": "2020-10-14T13:05:00Z",
+        }
+        put_response = self.client.put(url, new_data, format="json")
+
+        assert put_response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(put_response.data["detail"]) == error_message
+
+    def test_check_permission_update_authenticated(self):
+        """
+        Ensure that authenticated users can't make PUT request on price-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "currency": self.currency_2.id,
+            "item": self.item_2.id,
+            "price": Decimal("2123.01"),
+            "date": "2020-12-23T10:05:00Z",
+        }
+        response = self.post_price(data)
+
+        self.client.logout()
+        User.objects.create(username="testuser3", password="testpassword")
+        self.client.login(username="testuser3", password="testpassword")
+
+        url = reverse("price-detail", None, {response.data["id"]})
+        new_data = {
+            "currency": self.currency_1.id,
+            "item": self.item_1.id,
+            "price": Decimal("4234.01"),
+            "date": "2020-10-14T13:05:00Z",
+        }
+        put_response = self.client.put(url, new_data, format="json")
+
+        assert put_response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(put_response.data["detail"]) == error_message
 
 
 class TestWatchlist(APITestCase):
@@ -551,6 +935,78 @@ class TestWatchlist(APITestCase):
         assert response.data["item"][0] == new_data["item"][0]
         assert response.data["item"][1] == new_data["item"][1]
         assert response.data["item"][2] == new_data["item"][2]
+
+    def test_permission_list(self):
+        """Check that unauthorized users can't make request to view the collection of watchlists"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("watchlist-list")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_permission_detail(self):
+        """Check that unauthorized users can't make request to view detail information about watchlist"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("watchlist-detail", None, {WatchList.objects.first().id})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_update_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make PUT request on watchlist-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        self.client.logout()
+
+        new_data = {
+            "item": [
+                self.item_1.id,
+                self.item_2.id,
+                self.item_3.id,
+            ]
+        }
+        url = reverse("watchlist-detail", None, {WatchList.objects.first().id})
+        response = self.client.put(url, new_data, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_update_not_owner(self):
+        """
+        Ensure that users, which aren't owners of this watchlist, can't make PUT request on watchlist-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        self.client.logout()
+        User.objects.create(username="testuser3", password="testpassword")
+        self.client.login(username="testuser3", password="testpassword")
+
+        new_data = {
+            "item": [
+                self.item_1.id,
+                self.item_2.id,
+                self.item_3.id,
+            ]
+        }
+        url = reverse("watchlist-detail", None, {WatchList.objects.first().id})
+        response = self.client.put(url, new_data, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
 
 
 class TestOffer(APITestCase):
@@ -756,6 +1212,172 @@ class TestOffer(APITestCase):
         assert Offer.objects.get().is_active == False
         assert response.data["id"] == Offer.objects.get().id
 
+    def test_check_permission_list_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make GET request on offer list
+        """
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("offer-list")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_post_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make POST request
+        """
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "item": self.item_2.id,
+            "status": "SELL",
+            "entry_quantity": 700,
+            "price": Decimal("3222.23"),
+        }
+        response = self.post_offer(data)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_detail(self):
+        """
+        Ensure that unauthenticated users can't make GET request on offer-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "item": self.item_2.id,
+            "status": "SELL",
+            "entry_quantity": 700,
+            "price": Decimal("3222.23"),
+        }
+        response = self.post_offer(data)
+
+        self.client.logout()
+
+        url = reverse("price-detail", None, {response.data["id"]})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_check_permission_update_non_authenticated(self):
+        """
+        Ensure that unauthenticated users can't make PUT request on offer-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "item": self.item_2.id,
+            "status": "SELL",
+            "entry_quantity": 700,
+            "price": Decimal("3222.23"),
+        }
+        response = self.post_offer(data)
+
+        self.client.logout()
+
+        url = reverse("price-detail", None, {response.data["id"]})
+        new_data = {
+            "item": self.item_1.id,
+            "status": "PURCHASE",
+            "entry_quantity": 999,
+            "price": Decimal("1.00"),
+        }
+        put_response = self.client.put(url, new_data, format="json")
+
+        assert put_response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(put_response.data["detail"]) == error_message
+
+    def test_check_permission_update_not_owner(self):
+        """
+        Ensure that authenticated users can't make PUT request on offer-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "item": self.item_2.id,
+            "status": "SELL",
+            "entry_quantity": 700,
+            "price": Decimal("3222.23"),
+        }
+        response = self.post_offer(data)
+
+        self.client.logout()
+        User.objects.create(username="testuser3", password="testpassword")
+        self.client.login(username="testuser3", password="testpassword")
+
+        url = reverse("offer-detail", None, {response.data["id"]})
+        new_data = {
+            "item": self.item_1.id,
+            "status": "PURCHASE",
+            "entry_quantity": 999,
+            "price": Decimal("1.00"),
+        }
+        put_response = self.client.put(url, new_data, format="json")
+
+        assert put_response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(put_response.data["detail"]) == error_message
+
+    def test_check_permission_delete_non_authenticated(self):
+        """
+        Ensure that authenticated users can't make PUT request on offer-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "item": self.item_2.id,
+            "status": "SELL",
+            "entry_quantity": 700,
+            "price": Decimal("3222.23"),
+        }
+        response = self.post_offer(data)
+
+        self.client.logout()
+
+        url = reverse("offer-detail", None, {response.data["id"]})
+        delete_response = self.client.delete(url, format="json")
+
+        assert delete_response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(delete_response.data["detail"]) == error_message
+
+    def test_check_permission_delete_not_owner(self):
+        """
+        Ensure that authenticated users can't make PUT request on offer-detail
+        """
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "item": self.item_2.id,
+            "status": "SELL",
+            "entry_quantity": 700,
+            "price": Decimal("3222.23"),
+        }
+        response = self.post_offer(data)
+
+        self.client.logout()
+        User.objects.create(username="testuser3", password="testpassword")
+        self.client.login(username="testuser3", password="testpassword")
+
+        url = reverse("offer-detail", None, {response.data["id"]})
+        delete_response = self.client.delete(url, format="json")
+
+        assert delete_response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(delete_response.data["detail"]) == error_message
+
 
 class TestBalance(APITestCase):
     """Test class for Balance model"""
@@ -844,6 +1466,39 @@ class TestBalance(APITestCase):
         assert response.data["currency"]["code"] == data["currency"].code
         assert response.data["quantity"] == data["quantity"]
 
+    def test_permission_list(self):
+        """Check that unauthorized users can't make request to view the collection of balances"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("balance-list")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_permission_detail(self):
+        """Check that unauthorized users can't make request to view detail information about balance"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "user": self.user_2,
+            "currency": self.currency_2,
+            "quantity": 500,
+        }
+        balance = Balance.objects.create(**data)
+
+        url = reverse("balance-detail", None, {balance.id})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
 
 class TestInventory(APITestCase):
     """Test class for Inventory model"""
@@ -927,6 +1582,39 @@ class TestInventory(APITestCase):
         assert response.data["user"]["username"] == data["user"].username
         assert response.data["item"]["code"] == data["item"].code
         assert response.data["quantity"] == data["quantity"]
+
+    def test_permission_list(self):
+        """Check that unauthorized users can't make request to view the collection of inventories"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("inventory-list")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_permission_detail(self):
+        """Check that unauthorized users can't make request to view detail information about inventory"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "user": self.user_1,
+            "item": self.item_1,
+            "quantity": 90,
+        }
+        inventory = Inventory.objects.create(**data)
+
+        url = reverse("inventory-detail", None, {inventory.id})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
 
 
 class TestTrade(APITestCase):
@@ -1075,3 +1763,41 @@ class TestTrade(APITestCase):
 
         offer_response = self.client.get(response.data["seller_offer"])
         assert offer_response.data["id"] == data["seller_offer"].id
+
+    def test_permission_list(self):
+        """Check that unauthorized users can't make request to view the collection of trades"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        url = reverse("trade-list")
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
+
+    def test_permission_detail(self):
+        """Check that unauthorized users can't make request to view detail information about trade"""
+
+        self.client.logout()
+
+        error_message = "Authentication credentials were not provided."
+
+        data = {
+            "item": self.item,
+            "seller": self.test_user_1,
+            "buyer": self.test_user_2,
+            "quantity": 10,
+            "unit_price": Decimal("2303.00"),
+            "description": "Trade between two users",
+            "buyer_offer": self.purchase_offer,
+            "seller_offer": self.sell_offer_1,
+        }
+        trade = Trade.objects.create(**data)
+
+        url = reverse("trade-detail", None, {trade.id})
+        response = self.client.get(url, format="json")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert str(response.data["detail"]) == error_message
