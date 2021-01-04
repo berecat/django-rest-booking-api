@@ -4,3 +4,4 @@ __pycache__
 .pytest_cache
 pg_data
 tradeplatform/celerybeat-schedule
+static

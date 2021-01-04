@@ -4,8 +4,6 @@ services:
     build: .
     volumes:
       - .:/usr/src/app/
-    ports:
-      - 8000:8000
     env_file:
       - ./env.dev
     depends_on:
@@ -48,3 +46,13 @@ services:
       - db
       - redis
     restart: on-failure
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./static:/usr/src/app/static/
+    ports:
+      - 8000:80
+    depends_on:
+      - web

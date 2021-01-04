@@ -16,5 +16,6 @@ RUN pipenv install --system --deploy --ignore-pipfile
 
 COPY . .
 RUN chmod +x ./entrypoint.sh
+RUN chmod +x ./core/wsgi.py
 
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

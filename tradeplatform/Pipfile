@@ -6,7 +6,7 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-django = "*"
+Django = "*"
 djangorestframework = "*"
 psycopg2-binary = "*"
 pytest-django = "*"
@@ -16,6 +16,7 @@ redis = "*"
 mixer = "*"
 django-filter = "*"
 six = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.8"
