@@ -15,9 +15,7 @@ from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      WatchListCreateSerializer,
                                      WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
-from apps.trades.services.views_logic import (get_average_offer_price,
-                                              get_maximum_offer_price,
-                                              get_minimum_offer_price)
+from django.db.models import Avg, Max, Min
 
 
 class CurrencyViewSet(
@@ -229,10 +227,15 @@ class StatisticView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         """Get statistic about offer's price"""
 
-        data = {
-            "average_price": get_average_offer_price(),
-            "max_price": get_maximum_offer_price(),
-            "min_price": get_minimum_offer_price(),
-        }
+        offers = Offer.objects.active()
 
-        return Response(data=data, status=status.HTTP_201_CREATED)
+        data = {}
+
+        if offers.exists():
+            data = {
+                "average_price": offers.aggregate(Avg('price'))["price__avg"],
+                "max_price": offers.aggregate(Max('price'))["price__max"],
+                "min_price": offers.aggregate(Min('price'))["price__min"],
+            }
+
+        return Response(data=data, status=status.HTTP_200_OK)
