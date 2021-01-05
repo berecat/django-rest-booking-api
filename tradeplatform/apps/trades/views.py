@@ -2,6 +2,7 @@ from rest_framework import generics, mixins, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.trades.services.statistic_logic import get_statistics_attribute
 from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
                                        OfferFilter, PriceFilter, TradeFilter)
 from apps.trades.custompermission import IsAdminOrReadOnly, IsOwnerOrReadOnly
@@ -15,7 +16,6 @@ from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      WatchListCreateSerializer,
                                      WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
-from django.db.models import Avg, Max, Min
 
 
 class CurrencyViewSet(
@@ -227,15 +227,12 @@ class StatisticView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         """Get statistic about offer's price"""
 
-        offers = Offer.objects.active()
+        data = get_statistics_attribute()
 
-        data = {}
+        response_data = {
+            "average_price": data["price__avg"],
+            "max_price": data["price__max"],
+            "min_price": data["price__min"],
+        }
 
-        if offers.exists():
-            data = {
-                "average_price": offers.aggregate(Avg('price'))["price__avg"],
-                "max_price": offers.aggregate(Max('price'))["price__max"],
-                "min_price": offers.aggregate(Min('price'))["price__min"],
-            }
-
-        return Response(data=data, status=status.HTTP_200_OK)
+        return Response(data=response_data, status=status.HTTP_200_OK)
