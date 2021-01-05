@@ -11,7 +11,7 @@ from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      InventorySerializer, ItemSerializer,
                                      OfferCreateSerializer, OfferSerializer,
                                      PriceCreateSerializer, PriceSerializer,
-                                     TradeSerializer,
+                                     StatisticSerializer, TradeSerializer,
                                      WatchListCreateSerializer,
                                      WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
@@ -222,17 +222,35 @@ class TradeViewSet(viewsets.ReadOnlyModelViewSet):
 class StatisticView(viewsets.GenericViewSet):
     """View for statistic about offer's price"""
 
+    serializer_class = StatisticSerializer
     permission_classes = {IsAuthenticated}
 
-    def list(self, request, *args, **kwargs):
+    def retrieve(self, request, *args, **kwargs):
         """Get statistic about offer's price"""
 
-        data = get_statistics_attribute()
+        data = get_statistics_attribute(item_id=kwargs["pk"])
 
         response_data = {
             "average_price": data["price__avg"],
             "max_price": data["price__max"],
             "min_price": data["price__min"],
+            "sell_quantity_stocks": data["sell_quantity_stocks"],
         }
 
         return Response(data=response_data, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        """"""
+
+        data = get_statistics_attribute(
+            item_id=kwargs["pk"], to_date=self.request.data["to_date"]
+        )
+
+        response_data = {
+            "average_price": data["price__avg"],
+            "max_price": data["price__max"],
+            "min_price": data["price__min"],
+            "sell_quantity_stocks": data["sell_quantity_stocks"],
+        }
+
+        return Response(data=response_data, status=status.HTTP_201_CREATED)
