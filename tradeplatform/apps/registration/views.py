@@ -48,7 +48,7 @@ class UserProfileViewSet(
     serializer_class = UserProfileSerializer
     queryset = UserProfile.objects.all()
 
-    permission_classes = {IsOwnerOrReadOnly, IsAuthenticated}
+    permission_classes = {IsAuthenticated, IsOwnerOrReadOnly}
 
     filterset_class = UserProfileFilter
     search_fields = ("user__username", "user__email")
