@@ -2,7 +2,9 @@ from celery import shared_task
 
 from apps.registration.services.mail_sender import send_mail_message
 from apps.registration.services.views_logic import (
-    change_user_offer_after_changing_email, update_user_email_address)
+    change_user_offer_after_changing_email,
+    update_user_email_address,
+)
 
 
 @shared_task

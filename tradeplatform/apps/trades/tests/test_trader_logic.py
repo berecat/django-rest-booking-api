@@ -1,11 +1,20 @@
 from apps.trades.models import Inventory, Offer, Trade
-from apps.trades.services.db_interaction import (get_available_quantity_stocks,
-                                                 get_offer_by_id)
+from apps.trades.services.db_interaction import (
+    get_available_quantity_stocks,
+    get_offer_by_id,
+)
 from apps.trades.services.trader_logic import (
-    _change_user_balance_by_offer_id, _change_user_inventory_by_offer_id,
-    _check_offer_quantity, _confirm_trade, _create_trade, _delete_empty_offer,
-    _make_trades, _prepare_for_trade,
-    _stocks_quantity_for_trade_by_given_offers, create_trades_between_users)
+    _change_user_balance_by_offer_id,
+    _change_user_inventory_by_offer_id,
+    _check_offer_quantity,
+    _confirm_trade,
+    _create_trade,
+    _delete_empty_offer,
+    _make_trades,
+    _prepare_for_trade,
+    _stocks_quantity_for_trade_by_given_offers,
+    create_trades_between_users,
+)
 
 
 def test_change_user_balance_by_offer_id(offer_sell_instance):

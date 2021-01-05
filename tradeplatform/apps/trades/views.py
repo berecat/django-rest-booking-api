@@ -2,18 +2,38 @@ from rest_framework import generics, mixins, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
-                                       OfferFilter, PriceFilter, TradeFilter)
+from apps.trades.customfilters import (
+    BalanceFilter,
+    InventoryFilter,
+    OfferFilter,
+    PriceFilter,
+    TradeFilter,
+)
 from apps.trades.custompermission import IsAdminOrReadOnly, IsOwnerOrReadOnly
-from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
-                                Price, Trade, WatchList)
-from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
-                                     InventorySerializer, ItemSerializer,
-                                     OfferCreateSerializer, OfferSerializer,
-                                     PriceCreateSerializer, PriceSerializer,
-                                     StatisticSerializer, TradeSerializer,
-                                     WatchListCreateSerializer,
-                                     WatchListSerializer)
+from apps.trades.models import (
+    Balance,
+    Currency,
+    Inventory,
+    Item,
+    Offer,
+    Price,
+    Trade,
+    WatchList,
+)
+from apps.trades.serializers import (
+    BalanceSerializer,
+    CurrencySerializer,
+    InventorySerializer,
+    ItemSerializer,
+    OfferCreateSerializer,
+    OfferSerializer,
+    PriceCreateSerializer,
+    PriceSerializer,
+    StatisticSerializer,
+    TradeSerializer,
+    WatchListCreateSerializer,
+    WatchListSerializer,
+)
 from apps.trades.services.db_interaction import delete_offer_by_id
 from apps.trades.services.statistic_logic import get_statistics_attribute
 
@@ -228,29 +248,15 @@ class StatisticView(viewsets.GenericViewSet):
     def retrieve(self, request, *args, **kwargs):
         """Get statistic about offer's price"""
 
-        data = get_statistics_attribute(item_id=kwargs["pk"])
-
-        response_data = {
-            "average_price": data["price__avg"],
-            "max_price": data["price__max"],
-            "min_price": data["price__min"],
-            "sell_quantity_stocks": data["sell_quantity_stocks"],
-        }
+        response_data = get_statistics_attribute(item_id=kwargs["pk"])
 
         return Response(data=response_data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
-        """"""
+        """Get statistic by the given date"""
 
-        data = get_statistics_attribute(
+        response_data = get_statistics_attribute(
             item_id=kwargs["pk"], to_date=self.request.data["to_date"]
         )
-
-        response_data = {
-            "average_price": data["price__avg"],
-            "max_price": data["price__max"],
-            "min_price": data["price__min"],
-            "sell_quantity_stocks": data["sell_quantity_stocks"],
-        }
 
         return Response(data=response_data, status=status.HTTP_201_CREATED)

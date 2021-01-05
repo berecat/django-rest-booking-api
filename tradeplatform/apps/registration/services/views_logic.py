@@ -1,6 +1,9 @@
 from apps.registration.services.db_interaction import (
-    change_is_active_all_offers_belong_to_user, change_profile_valid_by_id,
-    change_user_email, reset_user_password)
+    change_is_active_all_offers_belong_to_user,
+    change_profile_valid_by_id,
+    change_user_email,
+    reset_user_password,
+)
 from apps.registration.services.tokens import get_user_id_by_given_token
 
 

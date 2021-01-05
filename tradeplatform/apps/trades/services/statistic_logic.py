@@ -5,7 +5,22 @@ from apps.trades.models import Offer, Trade
 
 
 def get_statistics_attribute(item_id: int, to_date=None) -> dict:
-    """Function return final dictionary. If dictionary contains None, it replaces to 0"""
+    """Function return final dictionary, which contains correct field name"""
+
+    data = _convert_statistics_attribute(item_id=item_id, to_date=to_date)
+
+    response_data = {
+        "average_price": data["price__avg"],
+        "max_price": data["price__max"],
+        "min_price": data["price__min"],
+        "sell_quantity_stocks": data["sell_quantity_stocks"],
+    }
+
+    return response_data
+
+
+def _convert_statistics_attribute(item_id: int, to_date=None) -> dict:
+    """Function convert dictionary. If dictionary contains None, it replaces to 0"""
 
     data = _get_statistic(item_id=item_id)
 
@@ -29,7 +44,7 @@ def _get_statistic(item_id: int) -> dict:
 
 
 def _get_stocks_data(item_id: int, to_date=None) -> int:
-    """Function return quantity of stocks sold for all time"""
+    """Function return quantity of stocks sold by the given date"""
 
     quantity_stock = 0
 

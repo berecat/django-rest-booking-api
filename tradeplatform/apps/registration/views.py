@@ -6,20 +6,28 @@ from rest_framework.response import Response
 from apps.registration.customfilters import UserProfileFilter
 from apps.registration.custompermission import IsOwnerOrReadOnly
 from apps.registration.models import UserProfile
-from apps.registration.serializers import (ChangeUserEmailSerializer,
-                                           RequestChangeEmailAddressSerializer,
-                                           RequestResetPasswordSerializer,
-                                           ResetUserPasswordSerializer,
-                                           UserProfileSerializer,
-                                           UserSerializer)
+from apps.registration.serializers import (
+    ChangeUserEmailSerializer,
+    RequestChangeEmailAddressSerializer,
+    RequestResetPasswordSerializer,
+    ResetUserPasswordSerializer,
+    UserProfileSerializer,
+    UserSerializer,
+)
 from apps.registration.services.tokens import (
-    confirm_user_email_by_given_token, validate_given_user_token)
+    confirm_user_email_by_given_token,
+    validate_given_user_token,
+)
 from apps.registration.services.views_logic import (
-    change_user_offer_after_changing_email, update_user_password)
-from apps.registration.tasks import (change_email_address,
-                                     send_change_email_address_mail,
-                                     send_confirmation_mail_message,
-                                     send_reset_password_mail)
+    change_user_offer_after_changing_email,
+    update_user_password,
+)
+from apps.registration.tasks import (
+    change_email_address,
+    send_change_email_address_mail,
+    send_confirmation_mail_message,
+    send_reset_password_mail,
+)
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):

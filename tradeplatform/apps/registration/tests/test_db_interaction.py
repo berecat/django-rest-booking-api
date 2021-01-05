@@ -1,10 +1,18 @@
 from django.contrib.auth.models import User
 
 from apps.registration.services.db_interaction import (
-    _get_available_quantity_stocks, change_is_active_all_offers_belong_to_user,
-    change_offer_is_active, change_profile_valid_by_id, change_user_email,
-    check_email_user_exist, get_offer_by_id, get_user_by_email, get_user_by_id,
-    get_user_by_username, reset_user_password)
+    _get_available_quantity_stocks,
+    change_is_active_all_offers_belong_to_user,
+    change_offer_is_active,
+    change_profile_valid_by_id,
+    change_user_email,
+    check_email_user_exist,
+    get_offer_by_id,
+    get_user_by_email,
+    get_user_by_id,
+    get_user_by_username,
+    reset_user_password,
+)
 from apps.trades.models import Offer
 
 

@@ -1,13 +1,22 @@
 from datetime import datetime
 
-from django.utils import timezone
 from rest_framework import serializers
 
 from apps.registration.serializers import UserSerializer
-from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
-                                Price, Trade, WatchList)
+from apps.trades.models import (
+    Balance,
+    Currency,
+    Inventory,
+    Item,
+    Offer,
+    Price,
+    Trade,
+    WatchList,
+)
 from apps.trades.services.views_validators import (
-    check_user_balance, check_user_quantity_stocks_for_given_item)
+    check_user_balance,
+    check_user_quantity_stocks_for_given_item,
+)
 
 
 class StockBaseSerializer(serializers.ModelSerializer):
@@ -250,6 +259,6 @@ class TradeSerializer(serializers.ModelSerializer):
 
 
 class StatisticSerializer(serializers.Serializer):
-    """"""
+    """Serializer for view, which represent item statistics"""
 
     to_date = serializers.DateTimeField(required=True)

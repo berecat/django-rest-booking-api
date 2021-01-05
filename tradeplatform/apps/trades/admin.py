@@ -1,7 +1,15 @@
 from django.contrib import admin
 
-from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
-                                Price, Trade, WatchList)
+from apps.trades.models import (
+    Balance,
+    Currency,
+    Inventory,
+    Item,
+    Offer,
+    Price,
+    Trade,
+    WatchList,
+)
 
 
 @admin.register(Currency)
