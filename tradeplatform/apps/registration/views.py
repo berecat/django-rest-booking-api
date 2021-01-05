@@ -44,13 +44,12 @@ class UserProfileViewSet(
     """ViewSet for User Profile model"""
 
     serializer_class = UserProfileSerializer
-    queryset = UserProfile.objects.all()
 
     permission_classes = {IsOwnerOrReadOnly, IsAuthenticated}
 
     filterset_class = UserProfileFilter
     search_fields = ("user__username", "user__email")
-    ordering_fields = ("user__username", "user__email")
+    ordering_fields = ("user__username", "user__email"
 
 
 class SignUpView(generics.ListAPIView, generics.CreateAPIView):
