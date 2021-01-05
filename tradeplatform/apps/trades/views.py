@@ -2,7 +2,6 @@ from rest_framework import generics, mixins, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.trades.services.statistic_logic import get_statistics_attribute
 from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
                                        OfferFilter, PriceFilter, TradeFilter)
 from apps.trades.custompermission import IsAdminOrReadOnly, IsOwnerOrReadOnly
@@ -16,6 +15,7 @@ from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      WatchListCreateSerializer,
                                      WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
+from apps.trades.services.statistic_logic import get_statistics_attribute
 
 
 class CurrencyViewSet(
@@ -219,12 +219,12 @@ class TradeViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = {IsAuthenticated}
 
 
-class StatisticView(generics.ListAPIView):
+class StatisticView(viewsets.GenericViewSet):
     """View for statistic about offer's price"""
 
     permission_classes = {IsAuthenticated}
 
-    def get(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """Get statistic about offer's price"""
 
         data = get_statistics_attribute()
