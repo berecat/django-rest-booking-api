@@ -34,6 +34,18 @@ class Item(StockBase):
         return f"{self.code} : {self.name}"
 
 
+class ItemStatistic(models.Model):
+    """Statistic for particular item"""
+
+    item = models.OneToOneField(
+        Item, on_delete=models.CASCADE, related_name="statistic"
+    )
+    max_price = models.DecimalField("Minimum price", max_digits=7, decimal_places=2)
+    min_price = models.DecimalField("Maximum price", max_digits=7, decimal_places=2)
+    avg_price = models.DecimalField("Average price", max_digits=7, decimal_places=2)
+    sell_stock_quantity = models.PositiveIntegerField("Sell stock quantity")
+
+
 class Price(models.Model):
     """Item prices"""
 
