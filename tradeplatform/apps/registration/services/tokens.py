@@ -5,9 +5,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import AccessToken
 
 from apps.registration.services.db_interaction import (
-    change_profile_valid_by_id,
-    get_user_by_id,
-)
+    change_profile_valid_by_id, get_user_by_id)
 
 
 def validate_given_user_token(token: str) -> bool:

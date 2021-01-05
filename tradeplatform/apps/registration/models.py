@@ -15,32 +15,6 @@ class UserProfile(models.Model):
     information = models.TextField(blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
-    @property
-    def count_all_trades(self):
-        """Count all trades, which user has made"""
-
-        return self.user.buyer_trade.count() + self.user.seller_trade.count()
-
-    @property
-    def count_buy_money(self):
-        """The amount of money that the user spent to trades"""
-
-        quantity_money = 0
-        for trade in self.user.buyer_trade.all():
-            quantity_money += trade.unit_price * trade.quantity
-
-        return quantity_money
-
-    @property
-    def count_sell_money(self):
-        """The amount of money that the user received from trades"""
-
-        quantity_money = 0
-        for trade in self.user.seller_trade.all():
-            quantity_money += trade.unit_price * trade.quantity
-
-        return quantity_money
-
 
 @receiver(post_save, sender=User)
 def create_user_default_attributes(sender, instance, created, **kwargs):

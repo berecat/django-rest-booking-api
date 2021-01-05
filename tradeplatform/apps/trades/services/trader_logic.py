@@ -1,16 +1,9 @@
 from apps.trades.services.db_interaction import (
-    change_offer_current_quantity,
-    change_user_balance_by_id,
-    change_user_inventory,
-    create_trade,
-    delete_offer_by_id,
-    get_active_sell_offer_with_suitable_item,
-    get_all_purchase_active_offers,
-    get_available_quantity_stocks,
-    get_full_price,
-    get_item_id_related_to_offer,
-    get_user_id_related_to_offer,
-)
+    change_offer_current_quantity, change_user_balance_by_id,
+    change_user_inventory, create_trade, delete_offer_by_id,
+    get_active_sell_offer_with_suitable_item, get_all_purchase_active_offers,
+    get_available_quantity_stocks, get_full_price,
+    get_item_id_related_to_offer, get_user_id_related_to_offer)
 
 
 def create_trades_between_users() -> None:

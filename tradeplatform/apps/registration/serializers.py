@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
@@ -11,9 +13,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     """Serializer for User Profile model"""
 
     user = serializers.SlugRelatedField(slug_field="username", read_only=True)
-    all_trades = serializers.IntegerField(source="count_all_trades", read_only=True)
-    buy_money = serializers.IntegerField(source="count_buy_money", read_only=True)
-    sell_money = serializers.IntegerField(source="count_sell_money", read_only=True)
+    to_date = serializers.DateTimeField(default=datetime.now(), write_only=True)
 
     class Meta:
         model = UserProfile
@@ -23,9 +23,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "information",
             "is_valid",
             "date_joined",
-            "all_trades",
-            "buy_money",
-            "sell_money",
+            "to_date",
         )
         read_only_fields = ("is_valid",)
 

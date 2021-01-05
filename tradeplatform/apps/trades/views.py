@@ -2,38 +2,18 @@ from rest_framework import generics, mixins, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.trades.customfilters import (
-    BalanceFilter,
-    InventoryFilter,
-    OfferFilter,
-    PriceFilter,
-    TradeFilter,
-)
+from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
+                                       OfferFilter, PriceFilter, TradeFilter)
 from apps.trades.custompermission import IsAdminOrReadOnly, IsOwnerOrReadOnly
-from apps.trades.models import (
-    Balance,
-    Currency,
-    Inventory,
-    Item,
-    Offer,
-    Price,
-    Trade,
-    WatchList,
-)
-from apps.trades.serializers import (
-    BalanceSerializer,
-    CurrencySerializer,
-    InventorySerializer,
-    ItemSerializer,
-    OfferCreateSerializer,
-    OfferSerializer,
-    PriceCreateSerializer,
-    PriceSerializer,
-    StatisticSerializer,
-    TradeSerializer,
-    WatchListCreateSerializer,
-    WatchListSerializer,
-)
+from apps.trades.models import (Balance, Currency, Inventory, Item, Offer,
+                                Price, Trade, WatchList)
+from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
+                                     InventorySerializer, ItemSerializer,
+                                     OfferCreateSerializer, OfferSerializer,
+                                     PriceCreateSerializer, PriceSerializer,
+                                     StatisticSerializer, TradeSerializer,
+                                     WatchListCreateSerializer,
+                                     WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
 from apps.trades.services.statistic_logic import get_statistics_attribute
 

@@ -6,28 +6,22 @@ from rest_framework.response import Response
 from apps.registration.customfilters import UserProfileFilter
 from apps.registration.custompermission import IsOwnerOrReadOnly
 from apps.registration.models import UserProfile
-from apps.registration.serializers import (
-    ChangeUserEmailSerializer,
-    RequestChangeEmailAddressSerializer,
-    RequestResetPasswordSerializer,
-    ResetUserPasswordSerializer,
-    UserProfileSerializer,
-    UserSerializer,
-)
+from apps.registration.serializers import (ChangeUserEmailSerializer,
+                                           RequestChangeEmailAddressSerializer,
+                                           RequestResetPasswordSerializer,
+                                           ResetUserPasswordSerializer,
+                                           UserProfileSerializer,
+                                           UserSerializer)
 from apps.registration.services.tokens import (
-    confirm_user_email_by_given_token,
-    validate_given_user_token,
-)
+    confirm_user_email_by_given_token, validate_given_user_token)
+from apps.registration.services.user_statistic_logic import \
+    get_statistics_attribute
 from apps.registration.services.views_logic import (
-    change_user_offer_after_changing_email,
-    update_user_password,
-)
-from apps.registration.tasks import (
-    change_email_address,
-    send_change_email_address_mail,
-    send_confirmation_mail_message,
-    send_reset_password_mail,
-)
+    change_user_offer_after_changing_email, update_user_password)
+from apps.registration.tasks import (change_email_address,
+                                     send_change_email_address_mail,
+                                     send_confirmation_mail_message,
+                                     send_reset_password_mail)
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -59,6 +53,36 @@ class UserProfileViewSet(
     filterset_class = UserProfileFilter
     search_fields = ("user__username", "user__email")
     ordering_fields = ("user__username", "user__email")
+
+    def retrieve(self, request, *args, **kwargs):
+        """Returns detail information about user's profile with his statistic"""
+
+        response_data = (
+            super(UserProfileViewSet, self).retrieve(request, *args, **kwargs).data
+        )
+
+        statistic_data = get_statistics_attribute(user_profile_id=kwargs["pk"])
+
+        return Response(
+            data=dict(list(response_data.items()) + list(statistic_data.items())),
+            status=status.HTTP_200_OK,
+        )
+
+    def update(self, request, *args, **kwargs):
+        """Returns detail information about user's profile with his statistic"""
+
+        response_data = (
+            super(UserProfileViewSet, self).retrieve(request, *args, **kwargs).data
+        )
+
+        statistic_data = get_statistics_attribute(
+            user_profile_id=kwargs["pk"], to_date=request.data["to_date"]
+        )
+
+        return Response(
+            data=dict(list(response_data.items()) + list(statistic_data.items())),
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class SignUpView(generics.ListAPIView, generics.CreateAPIView):

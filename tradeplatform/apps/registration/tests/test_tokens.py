@@ -1,11 +1,8 @@
 from django.contrib.auth.models import User
 
 from apps.registration.services.tokens import (
-    confirm_user_email_by_given_token,
-    get_user_id_by_given_token,
-    get_user_token,
-    validate_given_user_token,
-)
+    confirm_user_email_by_given_token, get_user_id_by_given_token,
+    get_user_token, validate_given_user_token)
 
 
 def test_validate_given_user_token_with_right_token(user_instance):
