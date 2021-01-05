@@ -69,10 +69,13 @@ class UserProfileViewSet(
         )
 
     def update(self, request, *args, **kwargs):
-        """Returns detail information about user's profile with his statistic"""
+        """Update user's profile fields and get detail information about user's statistic by the given date"""
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         response_data = (
-            super(UserProfileViewSet, self).retrieve(request, *args, **kwargs).data
+            super(UserProfileViewSet, self).update(request, *args, **kwargs).data
         )
 
         statistic_data = get_statistics_attribute(

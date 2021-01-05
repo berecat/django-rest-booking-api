@@ -235,6 +235,9 @@ class StatisticView(viewsets.GenericViewSet):
     def update(self, request, *args, **kwargs):
         """Get statistic by the given date"""
 
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         response_data = get_statistics_attribute(
             item_id=kwargs["pk"], to_date=self.request.data["to_date"]
         )

@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 
 from apps.registration.serializers import UserSerializer
@@ -250,3 +251,13 @@ class StatisticSerializer(serializers.Serializer):
     """Serializer for view, which represent item statistics"""
 
     to_date = serializers.DateTimeField(required=True)
+
+    def validate(self, attrs):
+        """Check that to_date attribute less than or equal to current date"""
+
+        if attrs["to_date"] > timezone.now():
+            raise serializers.ValidationError(
+                {"to_date": "field can't be greater than current date"}
+            )
+
+        return attrs

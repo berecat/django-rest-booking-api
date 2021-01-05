@@ -27,6 +27,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("is_valid",)
 
+    def validate(self, attrs):
+        """Check that to_date attribute less than or equal to current date"""
+
+        if attrs["to_date"] > datetime.now():
+            raise serializers.ValidationError(
+                {"to_date": "field can't be greater than current date"}
+            )
+
+        return attrs
+
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for User model"""
