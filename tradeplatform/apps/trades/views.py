@@ -1,5 +1,6 @@
-from rest_framework import mixins, viewsets
+from rest_framework import generics, mixins, status, viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from apps.trades.customfilters import (BalanceFilter, InventoryFilter,
                                        OfferFilter, PriceFilter, TradeFilter)
@@ -10,10 +11,11 @@ from apps.trades.serializers import (BalanceSerializer, CurrencySerializer,
                                      InventorySerializer, ItemSerializer,
                                      OfferCreateSerializer, OfferSerializer,
                                      PriceCreateSerializer, PriceSerializer,
-                                     TradeSerializer,
+                                     StatisticSerializer, TradeSerializer,
                                      WatchListCreateSerializer,
                                      WatchListSerializer)
 from apps.trades.services.db_interaction import delete_offer_by_id
+from apps.trades.services.statistic_logic import get_statistics_attribute
 
 
 class CurrencyViewSet(
@@ -28,7 +30,7 @@ class CurrencyViewSet(
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
 
-    permission_classes = {IsAdminOrReadOnly, IsAuthenticated}
+    permission_classes = (IsAdminOrReadOnly, IsAuthenticated)
 
     filterset_fields = (
         "name",
@@ -50,7 +52,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
 
-    permission_classes = {IsAdminOrReadOnly, IsAuthenticated}
+    permission_classes = (IsAdminOrReadOnly, IsAuthenticated)
 
     filterset_fields = (
         "name",
@@ -80,7 +82,7 @@ class PriceViewSet(viewsets.ModelViewSet):
         "date",
     )
 
-    permission_classes = {IsAdminOrReadOnly, IsAuthenticated}
+    permission_classes = (IsAdminOrReadOnly, IsAuthenticated)
 
     def get_serializer_class(self):
         """Function return serializer for the certain action"""
@@ -104,7 +106,7 @@ class WatchListViewSet(
     search_fields = ("user__username",)
     ordering_fields = ("user__username",)
 
-    permission_classes = {IsOwnerOrReadOnly, IsAuthenticated}
+    permission_classes = (IsOwnerOrReadOnly, IsAuthenticated)
 
     def get_serializer_class(self):
         """Function return serializer for the certain action"""
@@ -129,7 +131,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         "quantity",
     )
 
-    permission_classes = {IsOwnerOrReadOnly, IsAuthenticated}
+    permission_classes = (IsOwnerOrReadOnly, IsAuthenticated)
 
     def perform_create(self, serializer):
         """
@@ -173,7 +175,7 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
         "quantity",
     )
 
-    permission_classes = {IsAuthenticated}
+    permission_classes = (IsAuthenticated,)
 
 
 class BalanceViewSet(viewsets.ReadOnlyModelViewSet):
@@ -193,7 +195,7 @@ class BalanceViewSet(viewsets.ReadOnlyModelViewSet):
         "quantity",
     )
 
-    permission_classes = {IsAuthenticated}
+    permission_classes = (IsAuthenticated,)
 
 
 class TradeViewSet(viewsets.ReadOnlyModelViewSet):
@@ -214,4 +216,30 @@ class TradeViewSet(viewsets.ReadOnlyModelViewSet):
         "quantity",
     )
 
-    permission_classes = {IsAuthenticated}
+    permission_classes = (IsAuthenticated,)
+
+
+class StatisticView(viewsets.GenericViewSet):
+    """View for statistic about offer's price"""
+
+    serializer_class = StatisticSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Get statistic about offer's price"""
+
+        response_data = get_statistics_attribute(item_id=kwargs["pk"])
+
+        return Response(data=response_data, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        """Get statistic by the given date"""
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        response_data = get_statistics_attribute(
+            item_id=kwargs["pk"], to_date=self.request.data["to_date"]
+        )
+
+        return Response(data=response_data, status=status.HTTP_201_CREATED)

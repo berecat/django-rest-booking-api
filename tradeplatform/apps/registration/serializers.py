@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
@@ -10,7 +11,8 @@ from apps.registration.services.db_interaction import check_email_user_exist
 class UserProfileSerializer(serializers.ModelSerializer):
     """Serializer for User Profile model"""
 
-    user = serializers.SlugRelatedField(read_only=True, slug_field="username")
+    user = serializers.SlugRelatedField(slug_field="username", read_only=True)
+    to_date = serializers.DateTimeField(default=timezone.now(), write_only=True)
 
     class Meta:
         model = UserProfile
@@ -20,8 +22,19 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "information",
             "is_valid",
             "date_joined",
+            "to_date",
         )
         read_only_fields = ("is_valid",)
+
+    def validate(self, attrs):
+        """Check that to_date attribute less than or equal to current date"""
+
+        if attrs["to_date"] > timezone.now():
+            raise serializers.ValidationError(
+                {"to_date": "field can't be greater than current date"}
+            )
+
+        return attrs
 
 
 class UserSerializer(serializers.ModelSerializer):

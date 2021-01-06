@@ -1,11 +1,11 @@
 version: '3.7'
 services:
   web:
-    build: .
+    build: ./tradeplatform
     volumes:
-      - .:/usr/src/app/
+      - ./tradeplatform:/usr/src/app/
     env_file:
-      - ./env.dev
+      - ./tradeplatform/env.dev
     depends_on:
       - db
       - redis
@@ -14,9 +14,9 @@ services:
   db:
     image: postgres:13.1-alpine
     volumes:
-      - ./pg_data:/var/lib/postgresql/data/
+      - ./tradeplatform/pg_data:/var/lib/postgresql/data/
     env_file:
-      - ./env.dev
+      - ./tradeplatform/env.dev
 
   redis:
     image: redis
@@ -24,24 +24,24 @@ services:
       - 6379:6379
 
   celery:
-    build: .
+    build: ./tradeplatform
     volumes:
       - .:/usr/src/app/
-    entrypoint: celery -A core worker -l info
+    entrypoint: celery --workdir=tradeplatform -A core worker -l info
     env_file:
-      - ./env.dev
+      - ./tradeplatform/env.dev
     depends_on:
       - db
       - redis
     restart: on-failure
 
   celery-beat:
-    build: .
+    build: ./tradeplatform
     volumes:
-      - .:/usr/src/app/
+      - ./tradeplatform:/usr/src/app/
     entrypoint: celery -A core beat -l info
     env_file:
-      - ./env.dev
+      - ./tradeplatform/env.dev
     depends_on:
       - db
       - redis
@@ -50,8 +50,8 @@ services:
   nginx:
     image: nginx:latest
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./static:/usr/src/app/static/
+      - ./tradeplatform/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./tradeplatform/static:/usr/src/app/static/
     ports:
       - 8000:80
     depends_on:

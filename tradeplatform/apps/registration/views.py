@@ -14,6 +14,8 @@ from apps.registration.serializers import (ChangeUserEmailSerializer,
                                            UserSerializer)
 from apps.registration.services.tokens import (
     confirm_user_email_by_given_token, validate_given_user_token)
+from apps.registration.services.user_statistic_logic import \
+    get_statistics_attribute
 from apps.registration.services.views_logic import (
     change_user_offer_after_changing_email, update_user_password)
 from apps.registration.tasks import (change_email_address,
@@ -28,7 +30,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
-    permission_classes = {IsAuthenticated}
+    permission_classes = (IsAuthenticated,)
 
     filterset_fields = ("username", "email", "is_active")
     search_fields = ("username", "email")
@@ -46,11 +48,44 @@ class UserProfileViewSet(
     serializer_class = UserProfileSerializer
     queryset = UserProfile.objects.all()
 
-    permission_classes = {IsOwnerOrReadOnly, IsAuthenticated}
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
 
     filterset_class = UserProfileFilter
     search_fields = ("user__username", "user__email")
     ordering_fields = ("user__username", "user__email")
+
+    def retrieve(self, request, *args, **kwargs):
+        """Returns detail information about user's profile with his statistic"""
+
+        response_data = (
+            super(UserProfileViewSet, self).retrieve(request, *args, **kwargs).data
+        )
+
+        statistic_data = get_statistics_attribute(user_profile_id=kwargs["pk"])
+
+        return Response(
+            data=dict(list(response_data.items()) + list(statistic_data.items())),
+            status=status.HTTP_200_OK,
+        )
+
+    def update(self, request, *args, **kwargs):
+        """Update user's profile fields and get detail information about user's statistic by the given date"""
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        response_data = (
+            super(UserProfileViewSet, self).update(request, *args, **kwargs).data
+        )
+
+        statistic_data = get_statistics_attribute(
+            user_profile_id=kwargs["pk"], to_date=request.data["to_date"]
+        )
+
+        return Response(
+            data=dict(list(response_data.items()) + list(statistic_data.items())),
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class SignUpView(generics.ListAPIView, generics.CreateAPIView):
@@ -58,7 +93,7 @@ class SignUpView(generics.ListAPIView, generics.CreateAPIView):
 
     serializer_class = UserSerializer
 
-    permission_classes = {AllowAny}
+    permission_classes = (AllowAny,)
 
     def get(self, request, *args, **kwargs):
         """Function for getting information about view"""
@@ -87,7 +122,7 @@ class SignUpView(generics.ListAPIView, generics.CreateAPIView):
 class ActivateUserEmailView(generics.ListAPIView):
     """View for confirmation user's mail address"""
 
-    permission_classes = {AllowAny}
+    permission_classes = (AllowAny,)
 
     def get(self, request, *args, **kwargs):
         """Return response to user with information about email confirmation"""
@@ -106,7 +141,7 @@ class RequestResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
 
     serializer_class = RequestResetPasswordSerializer
 
-    permission_classes = {AllowAny}
+    permission_classes = (AllowAny,)
 
     def create(self, request, *args, **kwargs):
         """Function for creating a request to reset user's password"""
@@ -131,7 +166,7 @@ class ResetPasswordView(generics.ListAPIView, generics.CreateAPIView):
 
     serializer_class = ResetUserPasswordSerializer
 
-    permission_classes = {AllowAny}
+    permission_classes = (AllowAny,)
 
     def create(self, request, *args, **kwargs):
         """Function for changing user's password"""
@@ -165,7 +200,7 @@ class RequestChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView
 
     serializer_class = RequestChangeEmailAddressSerializer
 
-    permission_classes = {IsAuthenticated}
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         """Function for getting information about view"""
@@ -195,7 +230,7 @@ class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
 
     serializer_class = ChangeUserEmailSerializer
 
-    permission_classes = {IsAuthenticated}
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         """Function for getting information about view"""
@@ -232,7 +267,7 @@ class ChangeEmailAddressView(generics.ListAPIView, generics.CreateAPIView):
 class ActivateChangeEmail(generics.ListAPIView):
     """View for confirmation new user's mail address"""
 
-    permission_classes = {IsAuthenticated}
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         """Return response to user with information about new user's email confirmation"""

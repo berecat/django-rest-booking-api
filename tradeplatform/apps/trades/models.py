@@ -206,3 +206,4 @@ class Trade(models.Model):
         related_name="seller_trade",
         related_query_name="seller_trade",
     )
+    date = models.DateTimeField(auto_now_add=True)
