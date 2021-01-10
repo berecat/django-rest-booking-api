@@ -47,6 +47,7 @@ The program automatically creates a trade between two users at the best price.
 * Redis
 * Docker
 * Nginx
+* Tests using pytest
 
 ## Installing
 You need _Docker_ to be installed on your computer. 
