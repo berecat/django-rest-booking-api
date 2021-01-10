@@ -36,6 +36,8 @@ The program automatically creates a trade between two users at the best price.
 * Admin can post new currencies and items
 * User can search, filter the given result or choose ordering field to order result by it
 * All users has their own balance, watchlist and profile after registration
+* Users can check their own statistic, such quantity of trades, quantity of money that they spent
+* Users can check item's statistic, such min price, max price, avg price and etc.
     
 ## The technology used
 * Django
@@ -44,3 +46,4 @@ The program automatically creates a trade between two users at the best price.
 * Celery
 * Redis
 * Docker
+* Nginx
