@@ -1,4 +1,4 @@
-                                                                        # Tradeplatform
+# Tradeplatform
 
 ## About project
 Project imulates simple stock market or trade platform. Users can make offers to buy or sell a particular stock from other users. 
