@@ -47,3 +47,8 @@ The program automatically creates a trade between two users at the best price.
 * Redis
 * Docker
 * Nginx
+
+## Installing
+You need _Docker_ to be installed on your computer. 
+Then you simply go to project's root directory and run following command:
+* `docker-compose up --build`
